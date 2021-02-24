@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next'
 
 import styled from 'styled-components'
 
-import Logo from '../../assets/svg/logo.svg'
-import LogoDark from '../../assets/svg/logo_white.svg'
+import Logo from '../../assets/svg/viperswap/black.svg'
+import LogoDark from '../../assets/svg/viperswap/white.svg'
 import { useActiveWeb3React } from '../../hooks'
 import { useDarkModeManager } from '../../state/user/hooks'
 import { useETHBalances, useAggregateUniBalance } from '../../state/wallet/hooks'
@@ -30,6 +30,9 @@ import { Dots } from '../swap/styleds'
 import Modal from '../Modal'
 import UniBalanceContent from './UniBalanceContent'
 import usePrevious from '../../hooks/usePrevious'
+
+import { Blockchain } from '@viperswap/sdk'
+import { BLOCKCHAIN, BASE_CURRENCY } from '../../connectors'
 
 const HeaderFrame = styled.div`
   display: grid;
@@ -325,7 +328,7 @@ export default function Header() {
       <HeaderRow>
         <Title href=".">
           <UniIcon>
-            <img width={'24px'} src={darkMode ? LogoDark : Logo} alt="logo" />
+            <img width={'48px'} src={darkMode ? LogoDark : Logo} alt="logo" />
           </UniIcon>
         </Title>
         <HeaderLinks>
@@ -345,15 +348,17 @@ export default function Header() {
           >
             {t('pool')}
           </StyledNavLink>
-          <StyledNavLink id={`stake-nav-link`} to={'/uni'}>
-            UNI
+          <StyledNavLink id={`stake-nav-link`} to={'/viper'}>
+            VIPER
           </StyledNavLink>
           <StyledNavLink id={`stake-nav-link`} to={'/vote'}>
             Vote
           </StyledNavLink>
-          <StyledExternalLink id={`stake-nav-link`} href={'https://uniswap.info'}>
-            Charts <span style={{ fontSize: '11px' }}>↗</span>
-          </StyledExternalLink>
+          {BLOCKCHAIN === Blockchain.ETHEREUM && (
+            <StyledExternalLink id={`stake-nav-link`} href={'https://uniswap.info'}>
+              Charts <span style={{ fontSize: '11px' }}>↗</span>
+            </StyledExternalLink>
+          )}
         </HeaderLinks>
       </HeaderRow>
       <HeaderControls>
@@ -367,7 +372,7 @@ export default function Header() {
             <UNIWrapper onClick={toggleClaimModal}>
               <UNIAmount active={!!account && !availableClaim} style={{ pointerEvents: 'auto' }}>
                 <TYPE.white padding="0 2px">
-                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming UNI</Dots> : 'Claim UNI'}
+                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming UNI</Dots> : 'Claim VIPER'}
                 </TYPE.white>
               </UNIAmount>
               <CardNoise />
@@ -394,7 +399,7 @@ export default function Header() {
                     </TYPE.white>
                   </HideSmall>
                 )}
-                UNI
+                VIPER
               </UNIAmount>
               <CardNoise />
             </UNIWrapper>
@@ -402,7 +407,7 @@ export default function Header() {
           <AccountElement active={!!account} style={{ pointerEvents: 'auto' }}>
             {account && userEthBalance ? (
               <BalanceText style={{ flexShrink: 0 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
-                {userEthBalance?.toSignificant(4)} ETH
+                {userEthBalance?.toSignificant(4)} {BASE_CURRENCY.symbol}
               </BalanceText>
             ) : null}
             <Web3Status />
