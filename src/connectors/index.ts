@@ -7,6 +7,11 @@ import { PortisConnector } from '@web3-react/portis-connector'
 import { FortmaticConnector } from './Fortmatic'
 import { NetworkConnector } from './NetworkConnector'
 
+import { Blockchain, Currency } from '@viperswap/sdk'
+
+import baseCurrencies from '../utils/baseCurrencies'
+import getBlockchain from '../utils/getBlockchain'
+
 const NETWORK_URL = process.env.REACT_APP_NETWORK_URL
 const FORMATIC_KEY = process.env.REACT_APP_FORTMATIC_KEY
 const PORTIS_ID = process.env.REACT_APP_PORTIS_ID
@@ -21,13 +26,32 @@ export const network = new NetworkConnector({
   urls: { [NETWORK_CHAIN_ID]: NETWORK_URL }
 })
 
+const generatedBaseCurrencies = baseCurrencies(NETWORK_CHAIN_ID)
+export const BASE_CURRENCY: Currency = generatedBaseCurrencies[0]
+export const BASE_WRAPPED_CURRENCY: Currency = generatedBaseCurrencies[1]
+
+export const BLOCKCHAIN: Blockchain = getBlockchain(NETWORK_CHAIN_ID)
+
 let networkLibrary: Web3Provider | undefined
 export function getNetworkLibrary(): Web3Provider {
   return (networkLibrary = networkLibrary ?? new Web3Provider(network.provider as any))
 }
 
+let supportedChainIds: number[]
+switch (BLOCKCHAIN) {
+  case Blockchain.BINANCE_SMART_CHAIN:
+    supportedChainIds = [56, 97]
+    break
+  case Blockchain.HARMONY:
+    supportedChainIds = [1666600000, 1666700000]
+    break
+  default:
+    supportedChainIds = [1, 3, 4, 5, 42]
+    break
+}
+
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 3, 4, 5, 42]
+  supportedChainIds: supportedChainIds
 })
 
 // mainnet only

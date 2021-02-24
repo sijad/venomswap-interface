@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount, currencyEquals, ETHER, Token } from '@uniswap/sdk'
+import { Currency, CurrencyAmount, currencyEquals, Token } from '@viperswap/sdk'
 import React, { CSSProperties, MutableRefObject, useCallback, useMemo } from 'react'
 import { FixedSizeList } from 'react-window'
 import { Text } from 'rebass'
@@ -21,9 +21,12 @@ import { LightGreyCard } from 'components/Card'
 import TokenListLogo from '../../assets/svg/tokenlist.svg'
 import QuestionHelper from 'components/QuestionHelper'
 import useTheme from 'hooks/useTheme'
+import { BASE_CURRENCY } from '../../connectors'
+import baseCurrencies from '../../utils/baseCurrencies'
 
 function currencyKey(currency: Currency): string {
-  return currency instanceof Token ? currency.address : currency === ETHER ? 'ETHER' : ''
+  const name: string = BASE_CURRENCY && BASE_CURRENCY.name ? BASE_CURRENCY.name.toUpperCase() : 'ETH'
+  return currency instanceof Token ? currency.address : currency === BASE_CURRENCY ? name : ''
 }
 
 const StyledBalanceText = styled(Text)`
@@ -166,15 +169,17 @@ export default function CurrencyList({
   setImportToken: (token: Token) => void
   breakIndex: number | undefined
 }) {
+  const { chainId } = useActiveWeb3React()
+  const baseCurrency = baseCurrencies(chainId)[0]
+
   const itemData: (Currency | undefined)[] = useMemo(() => {
-    let formatted: (Currency | undefined)[] = showETH ? [Currency.ETHER, ...currencies] : currencies
+    let formatted: (Currency | undefined)[] = showETH ? [baseCurrency, ...currencies] : currencies
     if (breakIndex !== undefined) {
       formatted = [...formatted.slice(0, breakIndex), undefined, ...formatted.slice(breakIndex, formatted.length)]
     }
     return formatted
-  }, [breakIndex, currencies, showETH])
+  }, [breakIndex, baseCurrency, currencies, showETH])
 
-  const { chainId } = useActiveWeb3React()
   const theme = useTheme()
 
   const inactiveTokens: {
@@ -189,7 +194,6 @@ export default function CurrencyList({
       const handleSelect = () => onCurrencySelect(currency)
 
       const token = wrappedCurrency(currency, chainId)
-
       const showImport = inactiveTokens && token && Object.keys(inactiveTokens).includes(token.address)
 
       if (index === breakIndex || !data) {

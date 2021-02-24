@@ -4,7 +4,7 @@
  */
 export const UNSUPPORTED_LIST_URLS: string[] = []
 
-const COMPOUND_LIST = 'https://raw.githubusercontent.com/compound-finance/token-list/master/compound.tokenlist.json'
+/*const COMPOUND_LIST = 'https://raw.githubusercontent.com/compound-finance/token-list/master/compound.tokenlist.json'
 const UMA_LIST = 'https://umaproject.org/uma.tokenlist.json'
 const AAVE_LIST = 'tokenlist.aave.eth'
 const SYNTHETIX_LIST = 'synths.snx.eth'
@@ -16,11 +16,12 @@ const COINGECKO_LIST = 'https://tokens.coingecko.com/uniswap/all.json'
 const CMC_ALL_LIST = 'defi.cmc.eth'
 const CMC_STABLECOIN = 'stablecoin.cmc.eth'
 const KLEROS_LIST = 't2crtokens.eth'
-const GEMINI_LIST = 'https://www.gemini.com/uniswap/manifest.json'
+const GEMINI_LIST = 'https://www.gemini.com/uniswap/manifest.json'*/
+const VIPERSWAP_DEFAULT_LIST = 'https://raw.githubusercontent.com/ViperProtocol/viperswap-default-token-list/master/build/viperswap-default.tokenlist.json'
 
 // lower index == higher priority for token import
 export const DEFAULT_LIST_OF_LISTS: string[] = [
-  COMPOUND_LIST,
+  /*COMPOUND_LIST,
   AAVE_LIST,
   SYNTHETIX_LIST,
   UMA_LIST,
@@ -32,9 +33,10 @@ export const DEFAULT_LIST_OF_LISTS: string[] = [
   CMC_ALL_LIST,
   CMC_STABLECOIN,
   KLEROS_LIST,
-  GEMINI_LIST,
+  GEMINI_LIST,*/
+  VIPERSWAP_DEFAULT_LIST,
   ...UNSUPPORTED_LIST_URLS // need to load unsupported tokens as well
 ]
 
 // default lists to be 'active' aka searched across
-export const DEFAULT_ACTIVE_LIST_URLS: string[] = [GEMINI_LIST]
+export const DEFAULT_ACTIVE_LIST_URLS: string[] = [VIPERSWAP_DEFAULT_LIST]
