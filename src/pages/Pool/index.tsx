@@ -22,6 +22,9 @@ import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/
 import { useStakingInfo } from '../../state/stake/hooks'
 import { BIG_INT_ZERO } from '../../constants'
 
+import { Blockchain } from '@viperswap/sdk'
+import { BLOCKCHAIN } from '../../connectors'
+
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
   width: 100%;
@@ -140,13 +143,15 @@ export default function Pool() {
                   {`Liquidity providers earn a 0.3% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity.`}
                 </TYPE.white>
               </RowBetween>
-              <ExternalLink
-                style={{ color: 'white', textDecoration: 'underline' }}
-                target="_blank"
-                href="https://uniswap.org/docs/v2/core-concepts/pools/"
-              >
-                <TYPE.white fontSize={14}>Read more about providing liquidity</TYPE.white>
-              </ExternalLink>
+              {BLOCKCHAIN === Blockchain.ETHEREUM && (
+                <ExternalLink
+                  style={{ color: 'white', textDecoration: 'underline' }}
+                  target="_blank"
+                  href="https://uniswap.org/docs/v2/core-concepts/pools/"
+                >
+                  <TYPE.white fontSize={14}>Read more about providing liquidity</TYPE.white>
+                </ExternalLink>
+              )}
             </AutoColumn>
           </CardSection>
           <CardBGImage />
@@ -193,14 +198,16 @@ export default function Pool() {
               </EmptyProposals>
             ) : allV2PairsWithLiquidity?.length > 0 || stakingPairs?.length > 0 ? (
               <>
-                <ButtonSecondary>
-                  <RowBetween>
-                    <ExternalLink href={'https://uniswap.info/account/' + account}>
-                      Account analytics and accrued fees
-                    </ExternalLink>
-                    <span> ↗</span>
-                  </RowBetween>
-                </ButtonSecondary>
+                {BLOCKCHAIN === Blockchain.ETHEREUM && (
+                  <ButtonSecondary>
+                    <RowBetween>
+                      <ExternalLink href={'https://uniswap.info/account/' + account}>
+                        Account analytics and accrued fees
+                      </ExternalLink>
+                      <span> ↗</span>
+                    </RowBetween>
+                  </ButtonSecondary>
+                )}
                 {v2PairsWithoutStakedAmount.map(v2Pair => (
                   <FullPositionCard key={v2Pair.liquidityToken.address} pair={v2Pair} />
                 ))}
