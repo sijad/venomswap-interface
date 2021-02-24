@@ -3,10 +3,11 @@ import { getAddress } from '@ethersproject/address'
 import { AddressZero } from '@ethersproject/constants'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
-import { abi as IUniswapV2Router02ABI } from '@uniswap/v2-periphery/build/IUniswapV2Router02.json'
-import { ROUTER_ADDRESS } from '../constants'
-import { ChainId, JSBI, Percent, Token, CurrencyAmount, Currency, ETHER } from '@uniswap/sdk'
+import { abi as IUniswapV2Router02ABI } from '@viperswap/periphery/build/IUniswapV2Router02.json'
+import { ROUTER_ADDRESSES } from '../constants'
+import { ChainId, JSBI, Percent, Token, CurrencyAmount, Currency, DEFAULT_CURRENCIES } from '@viperswap/sdk'
 import { TokenAddressMap } from '../state/lists/hooks'
+import { useActiveWeb3React } from '../hooks/index'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -22,7 +23,11 @@ const ETHERSCAN_PREFIXES: { [chainId in ChainId]: string } = {
   3: 'ropsten.',
   4: 'rinkeby.',
   5: 'goerli.',
-  42: 'kovan.'
+  42: 'kovan.',
+  56: 'testnet.bscscan.com/',
+  97: 'bscscan.com/',
+  1666600000: 'explorer.harmony.one/#',
+  1666700000: 'explorer.pops.one/#'
 }
 
 export function getEtherscanLink(
@@ -30,7 +35,8 @@ export function getEtherscanLink(
   data: string,
   type: 'transaction' | 'token' | 'address' | 'block'
 ): string {
-  const prefix = `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]}etherscan.io`
+  let prefix = `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]}`
+  prefix = [56, 97, 1666600000, 1666700000].includes(chainId) ? prefix : `${prefix}etherscan.io`
 
   switch (type) {
     case 'transaction': {
@@ -98,8 +104,16 @@ export function getContract(address: string, ABI: any, library: Web3Provider, ac
 }
 
 // account is optional
-export function getRouterContract(_: number, library: Web3Provider, account?: string): Contract {
-  return getContract(ROUTER_ADDRESS, IUniswapV2Router02ABI, library, account)
+export function getRouterContract(chainId: number, library: Web3Provider, account?: string): Contract {
+  const convertedChainId = chainId as ChainId
+  const routerAddress = (chainId && ROUTER_ADDRESSES[convertedChainId]) as string
+  return getContract(routerAddress, IUniswapV2Router02ABI, library, account)
+}
+
+export function useRouterContractAddress(): string | undefined {
+  const { chainId } = useActiveWeb3React()
+  const routerAddress = (chainId && ROUTER_ADDRESSES[chainId]) as string
+  return routerAddress
 }
 
 export function escapeRegExp(string: string): string {
@@ -107,6 +121,6 @@ export function escapeRegExp(string: string): string {
 }
 
 export function isTokenOnList(defaultTokens: TokenAddressMap, currency?: Currency): boolean {
-  if (currency === ETHER) return true
+  if (currency && DEFAULT_CURRENCIES.includes(currency)) return true
   return Boolean(currency instanceof Token && defaultTokens[currency.chainId]?.[currency.address])
 }

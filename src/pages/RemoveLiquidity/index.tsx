@@ -1,7 +1,7 @@
 import { splitSignature } from '@ethersproject/bytes'
 import { Contract } from '@ethersproject/contracts'
 import { TransactionResponse } from '@ethersproject/providers'
-import { Currency, currencyEquals, ETHER, Percent, WETH } from '@uniswap/sdk'
+import { Blockchain, Currency, currencyEquals, Percent, WETH, DEFAULT_CURRENCIES } from '@viperswap/sdk'
 import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { ArrowDown, Plus } from 'react-feather'
 import ReactGA from 'react-ga'
@@ -20,7 +20,6 @@ import Row, { RowBetween, RowFixed } from '../../components/Row'
 
 import Slider from '../../components/Slider'
 import CurrencyLogo from '../../components/CurrencyLogo'
-import { ROUTER_ADDRESS } from '../../constants'
 import { useActiveWeb3React } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { usePairContract } from '../../hooks/useContract'
@@ -43,6 +42,10 @@ import { Field } from '../../state/burn/actions'
 import { useWalletModalToggle } from '../../state/application/hooks'
 import { useUserSlippageTolerance } from '../../state/user/hooks'
 import { BigNumber } from '@ethersproject/bignumber'
+
+import { BASE_CURRENCY, BASE_WRAPPED_CURRENCY } from '../../connectors'
+import { useRouterContractAddress } from '../../utils'
+import getBlockchain from '../../utils/getBlockchain'
 
 export default function RemoveLiquidity({
   history,
@@ -100,7 +103,8 @@ export default function RemoveLiquidity({
 
   // allowance handling
   const [signatureData, setSignatureData] = useState<{ v: number; r: string; s: string; deadline: number } | null>(null)
-  const [approval, approveCallback] = useApproveCallback(parsedAmounts[Field.LIQUIDITY], ROUTER_ADDRESS)
+  const v2RouterContractAddress = useRouterContractAddress()
+  const [approval, approveCallback] = useApproveCallback(parsedAmounts[Field.LIQUIDITY], v2RouterContractAddress)
 
   const isArgentWallet = useIsArgentWallet()
 
@@ -113,6 +117,10 @@ export default function RemoveLiquidity({
       return approveCallback()
     }
 
+    const blockchain = getBlockchain(chainId)
+    const signatureEnabled = [Blockchain.ETHEREUM, Blockchain.BINANCE_SMART_CHAIN].includes(blockchain)
+
+    if (signatureEnabled) {
     // try to gather a signature for permission
     const nonce = await pairContract.nonces(account)
 
@@ -123,7 +131,7 @@ export default function RemoveLiquidity({
       { name: 'verifyingContract', type: 'address' }
     ]
     const domain = {
-      name: 'Uniswap V2',
+      name: 'Viper LP Token',
       version: '1',
       chainId: chainId,
       verifyingContract: pair.liquidityToken.address
@@ -137,7 +145,7 @@ export default function RemoveLiquidity({
     ]
     const message = {
       owner: account,
-      spender: ROUTER_ADDRESS,
+      spender: v2RouterContractAddress,
       value: liquidityAmount.raw.toString(),
       nonce: nonce.toHexString(),
       deadline: deadline.toNumber()
@@ -169,6 +177,9 @@ export default function RemoveLiquidity({
           approveCallback()
         }
       })
+    } else {
+      return approveCallback()
+    }
   }
 
   // wrapped onUserInput to clear signatures
@@ -209,8 +220,8 @@ export default function RemoveLiquidity({
     const liquidityAmount = parsedAmounts[Field.LIQUIDITY]
     if (!liquidityAmount) throw new Error('missing liquidity amount')
 
-    const currencyBIsETH = currencyB === ETHER
-    const oneCurrencyIsETH = currencyA === ETHER || currencyBIsETH
+    const currencyBIsETH = currencyB && DEFAULT_CURRENCIES.includes(currencyB)
+    const oneCurrencyIsETH = (currencyA && DEFAULT_CURRENCIES.includes(currencyA)) || currencyBIsETH
 
     if (!tokenA || !tokenB) throw new Error('could not wrap')
 
@@ -428,7 +439,8 @@ export default function RemoveLiquidity({
     [onUserInput]
   )
 
-  const oneCurrencyIsETH = currencyA === ETHER || currencyB === ETHER
+  const oneCurrencyIsETH =
+    (currencyA && DEFAULT_CURRENCIES.includes(currencyA)) || (currencyB && DEFAULT_CURRENCIES.includes(currencyB))
   const oneCurrencyIsWETH = Boolean(
     chainId &&
       ((currencyA && currencyEquals(WETH[chainId], currencyA)) ||
@@ -572,19 +584,23 @@ export default function RemoveLiquidity({
                       <RowBetween style={{ justifyContent: 'flex-end' }}>
                         {oneCurrencyIsETH ? (
                           <StyledInternalLink
-                            to={`/remove/${currencyA === ETHER ? WETH[chainId].address : currencyIdA}/${
-                              currencyB === ETHER ? WETH[chainId].address : currencyIdB
+                            to={`/remove/${
+                              currencyA && DEFAULT_CURRENCIES.includes(currencyA) ? WETH[chainId].address : currencyIdA
+                            }/${
+                              currencyB && DEFAULT_CURRENCIES.includes(currencyB) ? WETH[chainId].address : currencyIdB
                             }`}
                           >
-                            Receive WETH
+                            Receive {BASE_WRAPPED_CURRENCY.symbol}
                           </StyledInternalLink>
                         ) : oneCurrencyIsWETH ? (
                           <StyledInternalLink
                             to={`/remove/${
-                              currencyA && currencyEquals(currencyA, WETH[chainId]) ? 'ETH' : currencyIdA
-                            }/${currencyB && currencyEquals(currencyB, WETH[chainId]) ? 'ETH' : currencyIdB}`}
+                              currencyA && currencyEquals(currencyA, WETH[chainId]) ? BASE_CURRENCY.symbol : currencyIdA
+                            }/${
+                              currencyB && currencyEquals(currencyB, WETH[chainId]) ? BASE_CURRENCY.symbol : currencyIdB
+                            }`}
                           >
-                            Receive ETH
+                            Receive {BASE_CURRENCY.symbol}
                           </StyledInternalLink>
                         ) : null}
                       </RowBetween>

@@ -1,9 +1,19 @@
-import { ChainId, JSBI, Percent, Token, WETH } from '@uniswap/sdk'
+import { ChainId, JSBI, Percent, Token, WETH } from '@viperswap/sdk'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 
 import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
 
-export const ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+export const ROUTER_ADDRESSES: { [chainId in ChainId]: string } = {
+  [ChainId.MAINNET]: '0x0000000000000000000000000000000000000001',
+  [ChainId.ROPSTEN]: '0x0000000000000000000000000000000000000001',
+  [ChainId.RINKEBY]: '0x0000000000000000000000000000000000000001',
+  [ChainId.GÖRLI]: '0x0000000000000000000000000000000000000001',
+  [ChainId.KOVAN]: '0x0000000000000000000000000000000000000001',
+  [ChainId.BSC_MAINNET]: '0x0000000000000000000000000000000000000001',
+  [ChainId.BSC_TESTNET]: '0x0000000000000000000000000000000000000001',
+  [ChainId.HARMONY_TESTNET]: '0x400d1219d9bA3C8Fe1CBDC5bE14342B50B035249',
+  [ChainId.HARMONY_MAINNET]: '0x0000000000000000000000000000000000000001'
+}
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -37,7 +47,11 @@ export const UNI: { [chainId in ChainId]: Token } = {
   [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
   [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
   [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, UNI_ADDRESS, 18, 'UNI', 'Uniswap')
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
+  [ChainId.BSC_MAINNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
+  [ChainId.BSC_TESTNET]: new Token(ChainId.HARMONY_MAINNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
+  [ChainId.HARMONY_MAINNET]: new Token(ChainId.HARMONY_MAINNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
+  [ChainId.HARMONY_TESTNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap')
 }
 
 export const COMMON_CONTRACT_NAMES: { [address: string]: string } = {
@@ -56,7 +70,11 @@ const WETH_ONLY: ChainTokenList = {
   [ChainId.ROPSTEN]: [WETH[ChainId.ROPSTEN]],
   [ChainId.RINKEBY]: [WETH[ChainId.RINKEBY]],
   [ChainId.GÖRLI]: [WETH[ChainId.GÖRLI]],
-  [ChainId.KOVAN]: [WETH[ChainId.KOVAN]]
+  [ChainId.KOVAN]: [WETH[ChainId.KOVAN]],
+  [ChainId.BSC_MAINNET]: [WETH[ChainId.BSC_MAINNET]],
+  [ChainId.BSC_TESTNET]: [WETH[ChainId.BSC_TESTNET]],
+  [ChainId.HARMONY_MAINNET]: [WETH[ChainId.HARMONY_MAINNET]],
+  [ChainId.HARMONY_TESTNET]: [WETH[ChainId.HARMONY_TESTNET]]
 }
 
 // used to construct intermediary pairs for trading

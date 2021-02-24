@@ -4,7 +4,7 @@ import { RowBetween } from '../Row'
 import styled from 'styled-components'
 import { TYPE, StyledInternalLink } from '../../theme'
 import DoubleCurrencyLogo from '../DoubleLogo'
-import { ETHER, JSBI, TokenAmount } from '@uniswap/sdk'
+import { JSBI, TokenAmount } from '@viperswap/sdk'
 import { ButtonPrimary } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
 import { useColor } from '../../hooks/useColor'
@@ -15,6 +15,7 @@ import { useTotalSupply } from '../../data/TotalSupply'
 import { usePair } from '../../data/Reserves'
 import useUSDCPrice from '../../utils/useUSDCPrice'
 import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
+import { DEFAULT_CURRENCIES } from '@viperswap/sdk'
 
 const StatContainer = styled.div`
   display: flex;
@@ -78,8 +79,8 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
   const isStaking = Boolean(stakingInfo.stakedAmount.greaterThan('0'))
 
   // get the color of the token
-  const token = currency0 === ETHER ? token1 : token0
-  const WETH = currency0 === ETHER ? token0 : token1
+  const token = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token1 : token0
+  const WETH = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token0 : token1
   const backgroundColor = useColor(token)
 
   const totalSupplyOfStakingToken = useTotalSupply(stakingInfo.stakedAmount.token)
