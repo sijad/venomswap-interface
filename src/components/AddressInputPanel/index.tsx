@@ -6,6 +6,8 @@ import { ExternalLink, TYPE } from '../../theme'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
 import { getEtherscanLink } from '../../utils'
+import useBlockchain from '../../hooks/useBlockchain'
+import getExplorerName from '../../utils/getExplorerName'
 
 const InputPanel = styled.div`
   ${({ theme }) => theme.flexColumnNoWrap}
@@ -78,6 +80,8 @@ export default function AddressInputPanel({
 }) {
   const { chainId } = useActiveWeb3React()
   const theme = useContext(ThemeContext)
+  const blockChain = useBlockchain()
+  const explorerName = getExplorerName(blockChain)
 
   const { address, loading, name } = useENS(value)
 
@@ -103,7 +107,7 @@ export default function AddressInputPanel({
               </TYPE.black>
               {address && chainId && (
                 <ExternalLink href={getEtherscanLink(chainId, name ?? address, 'address')} style={{ fontSize: '14px' }}>
-                  (View on Etherscan)
+                  (View on {explorerName})
                 </ExternalLink>
               )}
             </RowBetween>

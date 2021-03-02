@@ -7,6 +7,8 @@ import { ExternalLink } from '../../theme/components'
 import { getEtherscanLink } from '../../utils'
 import { AutoColumn } from '../Column'
 import { AutoRow } from '../Row'
+import useBlockchain from '../../hooks/useBlockchain'
+import getExplorerName from '../../utils/getExplorerName'
 
 const RowNoFlex = styled(AutoRow)`
   flex-wrap: nowrap;
@@ -22,8 +24,9 @@ export default function TransactionPopup({
   summary?: string
 }) {
   const { chainId } = useActiveWeb3React()
-
   const theme = useContext(ThemeContext)
+  const blockchain = useBlockchain()
+  const explorerName = getExplorerName(blockchain)
 
   return (
     <RowNoFlex>
@@ -33,7 +36,7 @@ export default function TransactionPopup({
       <AutoColumn gap="8px">
         <TYPE.body fontWeight={500}>{summary ?? 'Hash: ' + hash.slice(0, 8) + '...' + hash.slice(58, 65)}</TYPE.body>
         {chainId && (
-          <ExternalLink href={getEtherscanLink(chainId, hash, 'transaction')}>View on Etherscan</ExternalLink>
+          <ExternalLink href={getEtherscanLink(chainId, hash, 'transaction')}>View on {explorerName}</ExternalLink>
         )}
       </AutoColumn>
     </RowNoFlex>

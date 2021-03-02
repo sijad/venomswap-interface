@@ -23,7 +23,7 @@ import { useStakingInfo } from '../../state/stake/hooks'
 import { BIG_INT_ZERO } from '../../constants'
 
 import { Blockchain } from '@viperswap/sdk'
-import { BLOCKCHAIN } from '../../connectors'
+import useBlockchain from '../../hooks/useBlockchain'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -80,6 +80,7 @@ const EmptyProposals = styled.div`
 export default function Pool() {
   const theme = useContext(ThemeContext)
   const { account } = useActiveWeb3React()
+  const blockchain = useBlockchain()
 
   // fetch the user's balances of all tracked V2 LP tokens
   const trackedTokenPairs = useTrackedTokenPairs()
@@ -143,7 +144,7 @@ export default function Pool() {
                   {`Liquidity providers earn a 0.3% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity.`}
                 </TYPE.white>
               </RowBetween>
-              {BLOCKCHAIN === Blockchain.ETHEREUM && (
+              {blockchain === Blockchain.ETHEREUM && (
                 <ExternalLink
                   style={{ color: 'white', textDecoration: 'underline' }}
                   target="_blank"
@@ -198,7 +199,7 @@ export default function Pool() {
               </EmptyProposals>
             ) : allV2PairsWithLiquidity?.length > 0 || stakingPairs?.length > 0 ? (
               <>
-                {BLOCKCHAIN === Blockchain.ETHEREUM && (
+                {blockchain === Blockchain.ETHEREUM && (
                   <ButtonSecondary>
                     <RowBetween>
                       <ExternalLink href={'https://uniswap.info/account/' + account}>

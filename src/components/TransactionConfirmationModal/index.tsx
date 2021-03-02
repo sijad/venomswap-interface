@@ -14,6 +14,8 @@ import MetaMaskLogo from '../../assets/images/metamask.png'
 import { getEtherscanLink } from '../../utils'
 import { useActiveWeb3React } from '../../hooks'
 import useAddTokenToMetamask from 'hooks/useAddTokenToMetamask'
+import useBlockchain from '../../hooks/useBlockchain'
+import getExplorerName from '../../utils/getExplorerName'
 
 const Wrapper = styled.div`
   width: 100%;
@@ -79,10 +81,10 @@ function TransactionSubmittedContent({
   currencyToAdd?: Currency | undefined
 }) {
   const theme = useContext(ThemeContext)
-
   const { library } = useActiveWeb3React()
-
   const { addToken, success } = useAddTokenToMetamask(currencyToAdd)
+  const blockchain = useBlockchain()
+  const explorerName = getExplorerName(blockchain)
 
   return (
     <Wrapper>
@@ -101,7 +103,7 @@ function TransactionSubmittedContent({
           {chainId && hash && (
             <ExternalLink href={getEtherscanLink(chainId, hash, 'transaction')}>
               <Text fontWeight={500} fontSize={14} color={theme.primary1}>
-                View on Etherscan
+                View on {explorerName}
               </Text>
             </ExternalLink>
           )}
