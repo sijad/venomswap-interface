@@ -16,6 +16,7 @@ import useUSDCPrice from '../../utils/useUSDCPrice'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
 import { Break, CardBGImage, CardNoise, CardSection, DataCard } from '../earn/styled'
+import { VIPER_INTERFACE } from '../../constants/abis/viper'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -45,7 +46,24 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
   const viper = chainId ? VIPER[chainId] : undefined
 
   const total = useAggregateUniBalance()
-  const uniBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, viper)
+  const viperBalance: TokenAmount | undefined = useTokenBalance(
+    account ?? undefined,
+    viper,
+    'balanceOf',
+    VIPER_INTERFACE
+  )
+  const viperLockedBalance: TokenAmount | undefined = useTokenBalance(
+    account ?? undefined,
+    viper,
+    'lockOf',
+    VIPER_INTERFACE
+  )
+  const viperTotalBalance: TokenAmount | undefined = useTokenBalance(
+    account ?? undefined,
+    viper,
+    'totalBalanceOf',
+    VIPER_INTERFACE
+  )
   const uniToClaim: TokenAmount | undefined = useTotalUniEarned()
 
   const totalSupply: TokenAmount | undefined = useTotalSupply(viper)
@@ -84,7 +102,15 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
               <AutoColumn gap="md">
                 <RowBetween>
                   <TYPE.white color="white">Balance:</TYPE.white>
-                  <TYPE.white color="white">{uniBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">{viperBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                </RowBetween>
+                <RowBetween>
+                  <TYPE.white color="white">Locked Balance:</TYPE.white>
+                  <TYPE.white color="white">{viperLockedBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                </RowBetween>
+                <RowBetween>
+                  <TYPE.white color="white">Total Balance:</TYPE.white>
+                  <TYPE.white color="white">{viperTotalBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
                 {viper && viper.chainId === ChainId.MAINNET ? (
                   <RowBetween>

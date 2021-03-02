@@ -1,11 +1,14 @@
 import { ChainId, CurrencyAmount, JSBI, Token, TokenAmount, WETH, Pair } from '@viperswap/sdk'
 import { useMemo } from 'react'
 import { DAI, VIPER, USDC, USDT, WBTC } from '../../constants'
+//import { BUSD } from '../../constants/tokens'
 import { STAKING_REWARDS_INTERFACE } from '../../constants/abis/staking-rewards'
 import { useActiveWeb3React } from '../../hooks'
 import { NEVER_RELOAD, useMultipleContractSingleData } from '../multicall/hooks'
+//import { NEVER_RELOAD, useMultipleContractSingleData, useSingleCallResult } from '../multicall/hooks'
 import { tryParseAmount } from '../swap/hooks'
 import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
+//import { useMasterBreederContract } from '../../hooks/useContract'
 
 export const STAKING_GENESIS = 1600387200
 
@@ -38,6 +41,20 @@ export const STAKING_REWARDS_INFO: {
   ]
 }
 
+/*export const MASTER_STAKING_REWARDS_INFO: {
+  [chainId in ChainId]?: {
+    tokens: [Token, Token]
+    pid: number
+  }[]
+} = {
+  [ChainId.HARMONY_TESTNET]: [
+    {
+      tokens: [WETH[ChainId.HARMONY_TESTNET], BUSD[ChainId.HARMONY_TESTNET]],
+      pid: 0
+    }
+  ]
+}*/
+
 export interface StakingInfo {
   // the address of the reward contract
   stakingRewardAddress: string
@@ -66,9 +83,15 @@ export interface StakingInfo {
   ) => TokenAmount
 }
 
+export interface MasterStakingInfo {
+  // the pool id (pid) of the pool
+  pid: number
+}
+
 // gets the staking info from the network for the active chain id
 export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
   const { chainId, account } = useActiveWeb3React()
+  //const masterBreederContract = useMasterBreederContract()
 
   // detect if staking is ended
   const currentBlockTimestamp = useCurrentBlockTimestamp()
@@ -88,11 +111,35 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     [chainId, pairToFilterBy]
   )
 
+  /*const masterInfo = useMemo(
+    () =>
+      chainId
+        ? MASTER_STAKING_REWARDS_INFO[chainId]?.filter(stakingRewardInfo =>
+            pairToFilterBy === undefined
+              ? true
+              : pairToFilterBy === null
+              ? false
+              : pairToFilterBy.involvesToken(stakingRewardInfo.tokens[0]) &&
+                pairToFilterBy.involvesToken(stakingRewardInfo.tokens[1])
+          ) ?? []
+        : [],
+    [chainId, pairToFilterBy]
+  )*/
+
+  //console.log({ masterInfo })
+
   const uni = chainId ? VIPER[chainId] : undefined
 
   const rewardsAddresses = useMemo(() => info.map(({ stakingRewardAddress }) => stakingRewardAddress), [info])
 
   const accountArg = useMemo(() => [account ?? undefined], [account])
+
+  /*const poolLength = useSingleCallResult(masterBreederContract, 'poolLength')
+  console.log({ poolLength })
+
+  const poolId = 0
+  const pendingReward = useSingleCallResult(masterBreederContract, 'pendingReward', [poolId, String(account)])
+  console.log({ pendingReward })*/
 
   // get all the info from the staking rewards contracts
   const balances = useMultipleContractSingleData(rewardsAddresses, STAKING_REWARDS_INTERFACE, 'balanceOf', accountArg)

@@ -1,12 +1,14 @@
 import { Contract } from '@ethersproject/contracts'
 import { abi as GOVERNANCE_ABI } from '@uniswap/governance/build/GovernorAlpha.json'
 import { abi as UNI_ABI } from '@uniswap/governance/build/Uni.json'
+import { abi as VIPER_ABI } from '@viperswap/contracts/build/Viper.json'
 import { abi as STAKING_REWARDS_ABI } from '@uniswap/liquidity-staker/build/StakingRewards.json'
+import { abi as MASTER_BREEDER_ABI } from '@viperswap/contracts/build/MasterBreeder.json'
 import { abi as MERKLE_DISTRIBUTOR_ABI } from '@uniswap/merkle-distributor/build/MerkleDistributor.json'
 import { ChainId, WETH } from '@viperswap/sdk'
 import { abi as IUniswapV2PairABI } from '@viperswap/core/build/IUniswapV2Pair.json'
 import { useMemo } from 'react'
-import { GOVERNANCE_ADDRESS, MERKLE_DISTRIBUTOR_ADDRESS, VIPER } from '../constants'
+import { GOVERNANCE_ADDRESS, MERKLE_DISTRIBUTOR_ADDRESS, VIPER, MASTER_BREEDER } from '../constants'
 import {
   ARGENT_WALLET_DETECTOR_ABI,
   ARGENT_WALLET_DETECTOR_MAINNET_ADDRESS
@@ -116,8 +118,19 @@ export function useUniContract(): Contract | null {
   return useContract(chainId ? VIPER[chainId].address : undefined, UNI_ABI, true)
 }
 
+export function useViperContract(): Contract | null {
+  const { chainId } = useActiveWeb3React()
+  return useContract(chainId ? VIPER[chainId].address : undefined, VIPER_ABI, true)
+}
+
 export function useStakingContract(stakingAddress?: string, withSignerIfPossible?: boolean): Contract | null {
   return useContract(stakingAddress, STAKING_REWARDS_ABI, withSignerIfPossible)
+}
+
+export function useMasterBreederContract(withSignerIfPossible?: boolean): Contract | null {
+  const { chainId } = useActiveWeb3React()
+  const address = chainId && MASTER_BREEDER[chainId]
+  return useContract(address, MASTER_BREEDER_ABI, withSignerIfPossible)
 }
 
 export function useSocksController(): Contract | null {
