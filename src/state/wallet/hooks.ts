@@ -1,4 +1,4 @@
-import { UNI } from './../../constants/index'
+import { VIPER } from './../../constants/index'
 import { Currency, CurrencyAmount, JSBI, Token, TokenAmount, DEFAULT_CURRENCIES } from '@viperswap/sdk'
 import { useMemo } from 'react'
 import ERC20_INTERFACE from '../../constants/abis/erc20'
@@ -141,7 +141,7 @@ export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | u
 export function useAggregateUniBalance(): TokenAmount | undefined {
   const { account, chainId } = useActiveWeb3React()
 
-  const uni = chainId ? UNI[chainId] : undefined
+  const uni = chainId ? VIPER[chainId] : undefined
 
   const uniBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, uni)
   const uniUnclaimed: TokenAmount | undefined = useUserUnclaimedAmount(account)

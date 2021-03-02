@@ -14,7 +14,7 @@ export const ROUTER_ADDRESSES: { [chainId in ChainId]: string } = {
   [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
-  [ChainId.HARMONY_TESTNET]: '0x8fB81927345321FA0d0C7Cc066f56c069f1ADe3c',
+  [ChainId.HARMONY_TESTNET]: '0x187c3E92Da0e3F1C6B07a2334D5ccDAB4Ad3f986',
   [ChainId.HARMONY_MAINNET]: ZERO_ONE_ADDRESS
 }
 
@@ -42,21 +42,27 @@ export const GOVERNANCE_ADDRESS = '0x5e4be8Bc9637f0EAA1A755019e06A68ce081D58F'
 
 export const TIMELOCK_ADDRESS = '0x1a9C8182C09F50C8318d769245beA52c32BE35BC'
 
-const UNI_ADDRESS = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
-export const UNI: { [chainId in ChainId]: Token } = {
-  [ChainId.MAINNET]: new Token(ChainId.MAINNET, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.BSC_MAINNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.BSC_TESTNET]: new Token(ChainId.HARMONY_MAINNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.HARMONY_MAINNET]: new Token(ChainId.HARMONY_MAINNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.HARMONY_TESTNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap')
+const VIPER_ADDRESS = '0x1fbb9069a45088011EfD72d669879712F5f6EEbf'
+export const VIPER: { [chainId in ChainId]: Token } = {
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.HARMONY_MAINNET]: new Token(ChainId.HARMONY_MAINNET, ZERO_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.HARMONY_TESTNET]: new Token(
+    ChainId.HARMONY_TESTNET,
+    '0x1fbb9069a45088011EfD72d669879712F5f6EEbf',
+    18,
+    'VIPER',
+    'Viper'
+  )
 }
 
 export const COMMON_CONTRACT_NAMES: { [address: string]: string } = {
-  [UNI_ADDRESS]: 'UNI',
+  [VIPER_ADDRESS]: 'VIPER',
   [GOVERNANCE_ADDRESS]: 'Governance',
   [TIMELOCK_ADDRESS]: 'Timelock'
 }

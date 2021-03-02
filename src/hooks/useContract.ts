@@ -6,7 +6,7 @@ import { abi as MERKLE_DISTRIBUTOR_ABI } from '@uniswap/merkle-distributor/build
 import { ChainId, WETH } from '@viperswap/sdk'
 import { abi as IUniswapV2PairABI } from '@viperswap/core/build/IUniswapV2Pair.json'
 import { useMemo } from 'react'
-import { GOVERNANCE_ADDRESS, MERKLE_DISTRIBUTOR_ADDRESS, UNI } from '../constants'
+import { GOVERNANCE_ADDRESS, MERKLE_DISTRIBUTOR_ADDRESS, VIPER } from '../constants'
 import {
   ARGENT_WALLET_DETECTOR_ABI,
   ARGENT_WALLET_DETECTOR_MAINNET_ADDRESS
@@ -113,7 +113,7 @@ export function useGovernanceContract(): Contract | null {
 
 export function useUniContract(): Contract | null {
   const { chainId } = useActiveWeb3React()
-  return useContract(chainId ? UNI[chainId].address : undefined, UNI_ABI, true)
+  return useContract(chainId ? VIPER[chainId].address : undefined, UNI_ABI, true)
 }
 
 export function useStakingContract(stakingAddress?: string, withSignerIfPossible?: boolean): Contract | null {

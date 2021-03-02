@@ -15,7 +15,7 @@ import ReactMarkdown from 'react-markdown'
 import VoteModal from '../../components/vote/VoteModal'
 import { TokenAmount, JSBI } from '@viperswap/sdk'
 import { useActiveWeb3React } from '../../hooks'
-import { AVERAGE_BLOCK_TIME_IN_SECS, COMMON_CONTRACT_NAMES, UNI, ZERO_ADDRESS } from '../../constants'
+import { AVERAGE_BLOCK_TIME_IN_SECS, COMMON_CONTRACT_NAMES, VIPER, ZERO_ADDRESS } from '../../constants'
 import { isAddress, getEtherscanLink } from '../../utils'
 import { ApplicationModal } from '../../state/application/actions'
 import { useModalOpen, useToggleDelegateModal, useToggleVoteModal, useBlockNumber } from '../../state/application/hooks'
@@ -154,7 +154,7 @@ export default function VotePage({
     proposalData &&
     proposalData.status === 'active'
 
-  const uniBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, chainId ? UNI[chainId] : undefined)
+  const uniBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, chainId ? VIPER[chainId] : undefined)
   const userDelegatee: string | undefined = useUserDelegatee()
 
   // in blurb link to home page if they are able to unlock
