@@ -14,6 +14,9 @@ import baseCurrencies from '../../utils/baseCurrencies'
 export const getTokenLogoURL = (address: string) =>
   `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`
 
+export const getTokenFallbackLogoURL = (currency: Currency) =>
+  `https://viper-protocol.s3-eu-central-1.amazonaws.com/viperswap/tokens/${currency.symbol}.png`
+
 const StyledEthereumLogo = styled.img<{ size: string }>`
   width: ${({ size }) => size};
   height: ${({ size }) => size};
@@ -46,7 +49,7 @@ export default function CurrencyLogo({
       if (currency instanceof WrappedTokenInfo) {
         return [...uriLocations, getTokenLogoURL(currency.address)]
       }
-      return [getTokenLogoURL(currency.address)]
+      return [getTokenFallbackLogoURL(currency), getTokenLogoURL(currency.address)]
     }
     return []
   }, [currency, uriLocations])

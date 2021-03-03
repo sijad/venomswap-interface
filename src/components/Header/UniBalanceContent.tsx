@@ -1,17 +1,18 @@
 import { ChainId, TokenAmount } from '@viperswap/sdk'
-import React, { useMemo } from 'react'
+import React from 'react'
+//import React, { useMemo } from 'react'
 import { X } from 'react-feather'
 import styled from 'styled-components'
 import tokenLogo from '../../assets/images/token-logo.png'
 import { VIPER } from '../../constants'
-import { useTotalSupply } from '../../data/TotalSupply'
+import { useViperSupply } from '../../data/TotalSupply'
 import { useActiveWeb3React } from '../../hooks'
-import { useMerkleDistributorContract } from '../../hooks/useContract'
-import useCurrentBlockTimestamp from '../../hooks/useCurrentBlockTimestamp'
+//import { useMerkleDistributorContract } from '../../hooks/useContract'
+//import useCurrentBlockTimestamp from '../../hooks/useCurrentBlockTimestamp'
 import { useTotalUniEarned } from '../../state/stake/hooks'
 import { useAggregateUniBalance, useTokenBalance } from '../../state/wallet/hooks'
 import { ExternalLink, StyledInternalLink, TYPE, UniTokenAnimated } from '../../theme'
-import { computeUniCirculation } from '../../utils/computeUniCirculation'
+//import { computeUniCirculation } from '../../utils/computeUniCirculation'
 import useUSDCPrice from '../../utils/useUSDCPrice'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
@@ -24,7 +25,7 @@ const ContentWrapper = styled(AutoColumn)`
 
 const ModalUpper = styled(DataCard)`
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #ff007a 0%, #021d43 100%);
+  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #000 100%);
   padding: 0.5rem;
 `
 
@@ -65,10 +66,10 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
     VIPER_INTERFACE
   )
   const uniToClaim: TokenAmount | undefined = useTotalUniEarned()
-
-  const totalSupply: TokenAmount | undefined = useTotalSupply(viper)
+  const totalSupply: TokenAmount | undefined = useViperSupply()
+  const totalUnlockedSupply: TokenAmount | undefined = useViperSupply('unlockedSupply')
   const viperPrice = useUSDCPrice(viper)
-  const blockTimestamp = useCurrentBlockTimestamp()
+  /*const blockTimestamp = useCurrentBlockTimestamp()
   const unclaimedUni = useTokenBalance(useMerkleDistributorContract()?.address, viper)
   const circulation: TokenAmount | undefined = useMemo(
     () =>
@@ -76,7 +77,7 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
         ? computeUniCirculation(viper, blockTimestamp, unclaimedUni)
         : totalSupply,
     [blockTimestamp, chainId, totalSupply, unclaimedUni, viper]
-  )
+  )*/
 
   return (
     <ContentWrapper gap="lg">
@@ -105,6 +106,17 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
                   <TYPE.white color="white">{viperBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
                 <RowBetween>
+                  <TYPE.white color="white">Rewards:</TYPE.white>
+                  <TYPE.white color="white">
+                    {uniToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
+                    {uniToClaim && uniToClaim.greaterThan('0') && (
+                      <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/staking">
+                        (claim)
+                      </StyledInternalLink>
+                    )}
+                  </TYPE.white>
+                </RowBetween>
+                <RowBetween>
                   <TYPE.white color="white">Locked Balance:</TYPE.white>
                   <TYPE.white color="white">{viperLockedBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
@@ -112,19 +124,6 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
                   <TYPE.white color="white">Total Balance:</TYPE.white>
                   <TYPE.white color="white">{viperTotalBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
-                {viper && viper.chainId === ChainId.MAINNET ? (
-                  <RowBetween>
-                    <TYPE.white color="white">Unclaimed:</TYPE.white>
-                    <TYPE.white color="white">
-                      {uniToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
-                      {uniToClaim && uniToClaim.greaterThan('0') && (
-                        <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/uni">
-                          (claim)
-                        </StyledInternalLink>
-                      )}
-                    </TYPE.white>
-                  </RowBetween>
-                ) : null}
               </AutoColumn>
             </CardSection>
             <Break />
@@ -140,7 +139,7 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
             ) : null}
             <RowBetween>
               <TYPE.white color="white">VIPER in circulation:</TYPE.white>
-              <TYPE.white color="white">{circulation?.toFixed(0, { groupSeparator: ',' })}</TYPE.white>
+              <TYPE.white color="white">{totalUnlockedSupply?.toFixed(0, { groupSeparator: ',' })}</TYPE.white>
             </RowBetween>
             <RowBetween>
               <TYPE.white color="white">Total Supply</TYPE.white>

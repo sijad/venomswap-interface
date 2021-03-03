@@ -24,6 +24,7 @@ import { BIG_INT_ZERO } from '../../constants'
 
 import { Blockchain } from '@viperswap/sdk'
 import useBlockchain from '../../hooks/useBlockchain'
+import baseCurrencies from '../../utils/baseCurrencies'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -31,7 +32,7 @@ const PageWrapper = styled(AutoColumn)`
 `
 
 const VoteCard = styled(DataCard)`
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #27ae60 0%, #000000 100%);
+  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #00c09c 100%);
   overflow: hidden;
 `
 
@@ -79,8 +80,12 @@ const EmptyProposals = styled.div`
 
 export default function Pool() {
   const theme = useContext(ThemeContext)
-  const { account } = useActiveWeb3React()
+  const { account, chainId } = useActiveWeb3React()
   const blockchain = useBlockchain()
+  
+  const baseCurrency = baseCurrencies(chainId)[0]
+  const addLiquidityUrl = `/add/${baseCurrency.symbol}`
+  const createPoolUrl = `/create/${baseCurrency.symbol}`
 
   // fetch the user's balances of all tracked V2 LP tokens
   const trackedTokenPairs = useTrackedTokenPairs()
@@ -141,7 +146,7 @@ export default function Pool() {
               </RowBetween>
               <RowBetween>
                 <TYPE.white fontSize={14}>
-                  {`Liquidity providers earn a 0.3% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity.`}
+                  {`Liquidity providers earn a 0.2% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity.`}
                 </TYPE.white>
               </RowBetween>
               {blockchain === Blockchain.ETHEREUM && (
@@ -168,7 +173,7 @@ export default function Pool() {
                 </TYPE.mediumHeader>
               </HideSmall>
               <ButtonRow>
-                <ResponsiveButtonSecondary as={Link} padding="6px 8px" to="/create/ETH">
+                <ResponsiveButtonSecondary as={Link} padding="6px 8px" to={createPoolUrl}>
                   Create a pair
                 </ResponsiveButtonSecondary>
                 <ResponsiveButtonPrimary
@@ -176,7 +181,7 @@ export default function Pool() {
                   as={Link}
                   padding="6px 8px"
                   borderRadius="12px"
-                  to="/add/ETH"
+                  to={addLiquidityUrl}
                 >
                   <Text fontWeight={500} fontSize={16}>
                     Add Liquidity
@@ -216,7 +221,7 @@ export default function Pool() {
                   (stakingPair, i) =>
                     stakingPair[1] && ( // skip pairs that arent loaded
                       <FullPositionCard
-                        key={stakingInfosWithBalance[i].stakingRewardAddress}
+                        key={stakingInfosWithBalance[i].pid}
                         pair={stakingPair[1]}
                         stakedBalance={stakingInfosWithBalance[i].stakedAmount}
                       />

@@ -1,4 +1,4 @@
-import { Currency, Pair } from '@viperswap/sdk'
+import { Currency, CurrencyAmount, Pair } from '@viperswap/sdk'
 import React, { useState, useCallback } from 'react'
 import styled from 'styled-components'
 import { darken } from 'polished'
@@ -131,6 +131,7 @@ interface CurrencyInputPanelProps {
   id: string
   showCommonBases?: boolean
   customBalanceText?: string
+  overrideSelectedCurrencyBalance?: CurrencyAmount | null
 }
 
 export default function CurrencyInputPanel({
@@ -148,13 +149,17 @@ export default function CurrencyInputPanel({
   otherCurrency,
   id,
   showCommonBases,
-  customBalanceText
+  customBalanceText,
+  overrideSelectedCurrencyBalance = null
 }: CurrencyInputPanelProps) {
   const { t } = useTranslation()
 
   const [modalOpen, setModalOpen] = useState(false)
   const { account } = useActiveWeb3React()
-  const selectedCurrencyBalance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
+  let selectedCurrencyBalance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
+  if (overrideSelectedCurrencyBalance) {
+    selectedCurrencyBalance = overrideSelectedCurrencyBalance
+  }
   const theme = useTheme()
 
   const handleDismissSearch = useCallback(() => {

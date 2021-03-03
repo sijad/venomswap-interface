@@ -17,6 +17,9 @@ import { AutoColumn, ColumnCenter } from '../Column'
 import Confetti from '../Confetti'
 import { Break, CardBGImage, CardBGImageSmaller, CardNoise, CardSection, DataCard } from '../earn/styled'
 
+import useBlockchain from '../../hooks/useBlockchain'
+import getExplorerName from '../../utils/getExplorerName'
+
 import Modal from '../Modal'
 import { RowBetween } from '../Row'
 
@@ -50,6 +53,9 @@ export default function ClaimModal() {
   const toggleClaimModal = useToggleSelfClaimModal()
 
   const { account, chainId } = useActiveWeb3React()
+
+  const blockchain = useBlockchain()
+  const explorerName = getExplorerName(blockchain)
 
   // used for UI loading states
   const [attempting, setAttempting] = useState<boolean>(false)
@@ -137,7 +143,7 @@ export default function ClaimModal() {
           <AutoColumn gap="md" style={{ padding: '1rem', paddingTop: '0' }} justify="center">
             <TYPE.subHeader fontWeight={500}>
               As a member of the Viperswap community you may claim VIPER to be used for voting and governance. <br /> <br />
-              <ExternalLink href="https://uniswap.org/blog/uni">Read more about UNI</ExternalLink>
+              <ExternalLink href="https://uniswap.org/blog/uni">Read more about VIPER</ExternalLink>
             </TYPE.subHeader>
             <ButtonPrimary
               disabled={!isAddress(account ?? '')}
@@ -147,7 +153,7 @@ export default function ClaimModal() {
               mt="1rem"
               onClick={onClaim}
             >
-              Claim UNI
+              Claim VIPER
             </ButtonPrimary>
           </AutoColumn>
         </ContentWrapper>
@@ -174,7 +180,7 @@ export default function ClaimModal() {
               </TYPE.largeHeader>
               {!claimConfirmed && (
                 <Text fontSize={36} color={'#ff007a'} fontWeight={800}>
-                  {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} UNI
+                  {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} VIPER
                 </Text>
               )}
             </AutoColumn>
@@ -196,7 +202,7 @@ export default function ClaimModal() {
             )}
             {attempting && claimSubmitted && !claimConfirmed && chainId && claimTxn?.hash && (
               <ExternalLink href={getEtherscanLink(chainId, claimTxn?.hash, 'transaction')} style={{ zIndex: 99 }}>
-                View transaction on Etherscan
+                View transaction on {explorerName}
               </ExternalLink>
             )}
           </AutoColumn>

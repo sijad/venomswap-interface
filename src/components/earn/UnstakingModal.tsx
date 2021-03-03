@@ -6,12 +6,13 @@ import { RowBetween } from '../Row'
 import { TYPE, CloseIcon } from '../../theme'
 import { ButtonError } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
-import { useStakingContract } from '../../hooks/useContract'
+import { useMasterBreederContract } from '../../hooks/useContract'
 import { SubmittedView, LoadingView } from '../ModalViews'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import FormattedCurrencyAmount from '../FormattedCurrencyAmount'
 import { useActiveWeb3React } from '../../hooks'
+import { ZERO_ADDRESS } from '../../constants'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -32,19 +33,21 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
 
+  const referral = ZERO_ADDRESS
+
   function wrappedOndismiss() {
     setHash(undefined)
     setAttempting(false)
     onDismiss()
   }
 
-  const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
+  const masterBreeder = useMasterBreederContract()
 
   async function onWithdraw() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
+    if (masterBreeder && stakingInfo?.stakedAmount) {
       setAttempting(true)
-      await stakingContract
-        .exit({ gasLimit: 300000 })
+      await masterBreeder
+        .withdraw(stakingInfo.pid, `0x${stakingInfo.stakedAmount.raw.toString(16)}`, referral)
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Withdraw deposited liquidity`
@@ -87,11 +90,11 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
               <TYPE.body fontWeight={600} fontSize={36}>
                 {<FormattedCurrencyAmount currencyAmount={stakingInfo?.earnedAmount} />}
               </TYPE.body>
-              <TYPE.body>Unclaimed UNI</TYPE.body>
+              <TYPE.body>Unclaimed VIPER</TYPE.body>
             </AutoColumn>
           )}
           <TYPE.subHeader style={{ textAlign: 'center' }}>
-            When you withdraw, your UNI is claimed and your liquidity is removed from the mining pool.
+            When you withdraw, your VIPER is claimed and your liquidity is removed from the mining pool.
           </TYPE.subHeader>
           <ButtonError disabled={!!error} error={!!error && !!stakingInfo?.stakedAmount} onClick={onWithdraw}>
             {error ?? 'Withdraw & Claim'}
@@ -101,8 +104,8 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOndismiss}>
           <AutoColumn gap="12px" justify={'center'}>
-            <TYPE.body fontSize={20}>Withdrawing {stakingInfo?.stakedAmount?.toSignificant(4)} UNI-V2</TYPE.body>
-            <TYPE.body fontSize={20}>Claiming {stakingInfo?.earnedAmount?.toSignificant(4)} UNI</TYPE.body>
+            <TYPE.body fontSize={20}>Withdrawing {stakingInfo?.stakedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
+            <TYPE.body fontSize={20}>Claiming {stakingInfo?.earnedAmount?.toSignificant(4)} VIPER</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -110,8 +113,8 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
         <SubmittedView onDismiss={wrappedOndismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Withdrew UNI-V2!</TYPE.body>
-            <TYPE.body fontSize={20}>Claimed UNI!</TYPE.body>
+            <TYPE.body fontSize={20}>Withdrew VIPER-LP!</TYPE.body>
+            <TYPE.body fontSize={20}>Claimed VIPER!</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

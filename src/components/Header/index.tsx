@@ -137,7 +137,7 @@ const UNIAmount = styled(AccountElement)`
   height: 36px;
   font-weight: 500;
   background-color: ${({ theme }) => theme.bg3};
-  background: radial-gradient(174.47% 188.91% at 1.84% 0%, #ff007a 0%, #2172e5 100%), #edeef2;
+  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #005224 100%);
 `
 
 const UNIWrapper = styled.span`
@@ -350,6 +350,9 @@ export default function Header() {
           </StyledNavLink>
           <StyledNavLink id={`stake-nav-link`} to={'/staking'}>
             Staking
+          </StyledNavLink>
+          <StyledNavLink id={`stake-nav-link`} to={'/viperPit'}>
+            ViperPit
           </StyledNavLink>
           {blockchain === Blockchain.ETHEREUM && (
             <StyledNavLink id={`stake-nav-link`} to={'/vote'}>

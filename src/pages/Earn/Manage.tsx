@@ -3,7 +3,8 @@ import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import { JSBI, TokenAmount, ETHER } from '@viperswap/sdk'
+import { JSBI, ETHER } from '@viperswap/sdk'
+//import { JSBI, TokenAmount, ETHER } from '@viperswap/sdk'
 import { RouteComponentProps } from 'react-router-dom'
 import DoubleCurrencyLogo from '../../components/DoubleLogo'
 import { useCurrency } from '../../hooks/Tokens'
@@ -15,7 +16,7 @@ import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/
 import { ButtonPrimary, ButtonEmpty } from '../../components/Button'
 import StakingModal from '../../components/earn/StakingModal'
 import { useStakingInfo } from '../../state/stake/hooks'
-import UnstakingModal from '../../components/earn/UnstakingModal'
+import ModifiedUnstakingModal from '../../components/earn/ModifiedUnstakingModal'
 import ClaimRewardModal from '../../components/earn/ClaimRewardModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
@@ -24,11 +25,12 @@ import { CountUp } from 'use-count-up'
 
 import { wrappedCurrency } from '../../utils/wrappedCurrency'
 import { currencyId } from '../../utils/currencyId'
-import { useTotalSupply } from '../../data/TotalSupply'
+//import { useTotalSupply } from '../../data/TotalSupply'
 import { usePair } from '../../data/Reserves'
 import usePrevious from '../../hooks/usePrevious'
-import useUSDCPrice from '../../utils/useUSDCPrice'
-import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants'
+//import useUSDCPrice from '../../utils/useUSDCPrice'
+import { BIG_INT_ZERO } from '../../constants'
+//import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -65,12 +67,12 @@ const StyledBottomCard = styled(DataCard)<{ dim: any }>`
   z-index: 1;
 `
 
-const PoolData = styled(DataCard)`
+/*const PoolData = styled(DataCard)`
   background: none;
   border: 1px solid ${({ theme }) => theme.bg4};
   padding: 1rem;
   z-index: 1;
-`
+`*/
 
 const VoteCard = styled(DataCard)`
   background: radial-gradient(76.02% 75.41% at 1.84% 0%, #27ae60 0%, #000000 100%);
@@ -103,6 +105,7 @@ export default function Manage({
   const stakingInfo = useStakingInfo(stakingTokenPair)?.[0]
 
   // detect existing unstaked LP position to show add button if none found
+  console.log(stakingInfo?.stakedAmount.raw.toString(10))
   const userLiquidityUnstaked = useTokenBalance(account ?? undefined, stakingInfo?.stakedAmount?.token)
   const showAddLiquidityButton = Boolean(stakingInfo?.stakedAmount?.equalTo('0') && userLiquidityUnstaked?.equalTo('0'))
 
@@ -115,11 +118,11 @@ export default function Manage({
   const disableTop = !stakingInfo?.stakedAmount || stakingInfo.stakedAmount.equalTo(JSBI.BigInt(0))
 
   const token = currencyA === ETHER ? tokenB : tokenA
-  const WETH = currencyA === ETHER ? tokenA : tokenB
+  //const WETH = currencyA === ETHER ? tokenA : tokenB
   const backgroundColor = useColor(token)
 
   // get WETH value of staked LP tokens
-  const totalSupplyOfStakingToken = useTotalSupply(stakingInfo?.stakedAmount?.token)
+  /*const totalSupplyOfStakingToken = useTotalSupply(stakingInfo?.stakedAmount?.token)
   let valueOfTotalStakedAmountInWETH: TokenAmount | undefined
   if (totalSupplyOfStakingToken && stakingTokenPair && stakingInfo && WETH) {
     // take the total amount of LP tokens staked, multiply by ETH value of all LP tokens, divide by all LP tokens
@@ -133,15 +136,15 @@ export default function Manage({
         totalSupplyOfStakingToken.raw
       )
     )
-  }
+  }*/
 
   const countUpAmount = stakingInfo?.earnedAmount?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
 
   // get the USD value of staked WETH
-  const USDPrice = useUSDCPrice(WETH)
+  /*const USDPrice = useUSDCPrice(WETH)
   const valueOfTotalStakedAmountInUSDC =
-    valueOfTotalStakedAmountInWETH && USDPrice?.quote(valueOfTotalStakedAmountInWETH)
+    valueOfTotalStakedAmountInWETH && USDPrice?.quote(valueOfTotalStakedAmountInWETH)*/
 
   const toggleWalletModal = useWalletModalToggle()
 
@@ -162,32 +165,6 @@ export default function Manage({
         <DoubleCurrencyLogo currency0={currencyA ?? undefined} currency1={currencyB ?? undefined} size={24} />
       </RowBetween>
 
-      <DataRow style={{ gap: '24px' }}>
-        <PoolData>
-          <AutoColumn gap="sm">
-            <TYPE.body style={{ margin: 0 }}>Total deposits</TYPE.body>
-            <TYPE.body fontSize={24} fontWeight={500}>
-              {valueOfTotalStakedAmountInUSDC
-                ? `$${valueOfTotalStakedAmountInUSDC.toFixed(0, { groupSeparator: ',' })}`
-                : `${valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ETH`}
-            </TYPE.body>
-          </AutoColumn>
-        </PoolData>
-        <PoolData>
-          <AutoColumn gap="sm">
-            <TYPE.body style={{ margin: 0 }}>Pool Rate</TYPE.body>
-            <TYPE.body fontSize={24} fontWeight={500}>
-              {stakingInfo?.active
-                ? stakingInfo?.totalRewardRate
-                    ?.multiply(BIG_INT_SECONDS_IN_WEEK)
-                    ?.toFixed(0, { groupSeparator: ',' }) ?? '-'
-                : '0'}
-              {' UNI / week'}
-            </TYPE.body>
-          </AutoColumn>
-        </PoolData>
-      </DataRow>
-
       {showAddLiquidityButton && (
         <VoteCard>
           <CardBGImage />
@@ -195,11 +172,11 @@ export default function Manage({
           <CardSection>
             <AutoColumn gap="md">
               <RowBetween>
-                <TYPE.white fontWeight={600}>Step 1. Get UNI-V2 Liquidity tokens</TYPE.white>
+                <TYPE.white fontWeight={600}>Step 1. Get VIPER-LP Liquidity tokens</TYPE.white>
               </RowBetween>
               <RowBetween style={{ marginBottom: '1rem' }}>
                 <TYPE.white fontSize={14}>
-                  {`UNI-V2 LP tokens are required. Once you've added liquidity to the ${currencyA?.symbol}-${currencyB?.symbol} pool you can stake your liquidity tokens on this page.`}
+                  {`VIPER-LP tokens are required. Once you've added liquidity to the ${currencyA?.symbol}-${currencyB?.symbol} pool you can stake your liquidity tokens on this page.`}
                 </TYPE.white>
               </RowBetween>
               <ButtonPrimary
@@ -226,7 +203,7 @@ export default function Manage({
             stakingInfo={stakingInfo}
             userLiquidityUnstaked={userLiquidityUnstaked}
           />
-          <UnstakingModal
+          <ModifiedUnstakingModal
             isOpen={showUnstakingModal}
             onDismiss={() => setShowUnstakingModal(false)}
             stakingInfo={stakingInfo}
@@ -254,7 +231,7 @@ export default function Manage({
                     {stakingInfo?.stakedAmount?.toSignificant(6) ?? '-'}
                   </TYPE.white>
                   <TYPE.white>
-                    UNI-V2 {currencyA?.symbol}-{currencyB?.symbol}
+                  VIPER-LP {currencyA?.symbol}-{currencyB?.symbol}
                   </TYPE.white>
                 </RowBetween>
               </AutoColumn>
@@ -266,7 +243,7 @@ export default function Manage({
             <AutoColumn gap="sm">
               <RowBetween>
                 <div>
-                  <TYPE.black>Your unclaimed UNI</TYPE.black>
+                  <TYPE.black>Your unclaimed VIPER</TYPE.black>
                 </div>
                 {stakingInfo?.earnedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.earnedAmount?.raw) && (
                   <ButtonEmpty
@@ -291,17 +268,7 @@ export default function Manage({
                     duration={1}
                   />
                 </TYPE.largeHeader>
-                <TYPE.black fontSize={16} fontWeight={500}>
-                  <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px ' }}>
-                    ⚡
-                  </span>
-                  {stakingInfo?.active
-                    ? stakingInfo?.rewardRate
-                        ?.multiply(BIG_INT_SECONDS_IN_WEEK)
-                        ?.toSignificant(4, { groupSeparator: ',' }) ?? '-'
-                    : '0'}
-                  {' UNI / week'}
-                </TYPE.black>
+                <TYPE.black fontSize={16} fontWeight={500}></TYPE.black>
               </RowBetween>
             </AutoColumn>
           </StyledBottomCard>
@@ -310,14 +277,25 @@ export default function Manage({
           <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
             ⭐️
           </span>
-          When you withdraw, the contract will automagically claim UNI on your behalf!
+          When you withdraw, the contract will automagically claim VIPER on your behalf!
         </TYPE.main>
 
         {!showAddLiquidityButton && (
           <DataRow style={{ marginBottom: '1rem' }}>
             {stakingInfo && stakingInfo.active && (
               <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={handleDepositClick}>
-                {stakingInfo?.stakedAmount?.greaterThan(JSBI.BigInt(0)) ? 'Deposit' : 'Deposit UNI-V2 LP Tokens'}
+                {stakingInfo?.stakedAmount?.greaterThan(JSBI.BigInt(0)) ? 'Deposit' : 'Deposit VIPER-LP Tokens'}
+              </ButtonPrimary>
+            )}
+
+            {stakingInfo?.earnedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.earnedAmount?.raw) && (
+              <ButtonPrimary
+                padding="8px"
+                borderRadius="8px"
+                width="160px"
+                onClick={() => setShowClaimRewardModal(true)}
+              >
+                Claim
               </ButtonPrimary>
             )}
 
@@ -336,7 +314,7 @@ export default function Manage({
           </DataRow>
         )}
         {!userLiquidityUnstaked ? null : userLiquidityUnstaked.equalTo('0') ? null : !stakingInfo?.active ? null : (
-          <TYPE.main>{userLiquidityUnstaked.toSignificant(6)} UNI-V2 LP tokens available</TYPE.main>
+          <TYPE.main>{userLiquidityUnstaked.toSignificant(6)} VIPER-LP tokens available</TYPE.main>
         )}
       </PositionInfo>
     </PageWrapper>

@@ -14,6 +14,9 @@ import { getEtherscanLink } from '../../utils'
 import { ExternalLink } from '../../theme/components'
 import { TokenAmount } from '@viperswap/sdk'
 
+import useBlockchain from '../../hooks/useBlockchain'
+import getExplorerName from '../../utils/getExplorerName'
+
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
   padding: 24px;
@@ -49,6 +52,9 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
     voteCallback: (proposalId: string | undefined, support: boolean) => Promise<string> | undefined
   } = useVoteCallback()
   const availableVotes: TokenAmount | undefined = useUserVotes()
+
+  const blockchain = useBlockchain()
+  const explorerName = getExplorerName(blockchain)
 
   // monitor call to help UI loading state
   const [hash, setHash] = useState<string | undefined>()
@@ -133,7 +139,7 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
             </AutoColumn>
             {chainId && (
               <ExternalLink href={getEtherscanLink(chainId, hash, 'transaction')} style={{ marginLeft: '4px' }}>
-                <TYPE.subHeader>View transaction on Etherscan</TYPE.subHeader>
+                <TYPE.subHeader>View transaction on {explorerName}</TYPE.subHeader>
               </ExternalLink>
             )}
           </AutoColumn>

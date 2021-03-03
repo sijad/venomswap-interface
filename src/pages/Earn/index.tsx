@@ -2,15 +2,15 @@ import React from 'react'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { STAKING_REWARDS_INFO, useStakingInfo } from '../../state/stake/hooks'
-import { TYPE, ExternalLink } from '../../theme'
+//import { STAKING_REWARDS_INFO, useStakingInfo } from '../../state/stake/hooks'
+import { TYPE } from '../../theme'
+//import { ButtonPrimary } from '../../components/Button'
 import PoolCard from '../../components/earn/PoolCard'
 import { RowBetween } from '../../components/Row'
-import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
-import { Countdown } from './Countdown'
+import { CardSection, ExtraDataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
+//import { Countdown } from './Countdown'
 import Loader from '../../components/Loader'
 import { useActiveWeb3React } from '../../hooks'
-import { JSBI } from '@viperswap/sdk'
-import { BIG_INT_ZERO } from '../../constants'
 import { OutlineCard } from '../../components/Card'
 
 const PageWrapper = styled(AutoColumn)`
@@ -22,6 +22,19 @@ const TopSection = styled(AutoColumn)`
   max-width: 720px;
   width: 100%;
 `
+/*
+const ButtonWrapper = styled(AutoColumn)`
+  max-width: 150px;
+  width: 100%;
+`
+<ButtonWrapper>
+  <StyledInternalLink to={`/claimAllRewards`} style={{ width: '100%' }}>
+    <ButtonPrimary padding="8px" borderRadius="8px" >
+      Claim all rewards
+    </ButtonPrimary>
+  </StyledInternalLink>
+</ButtonWrapper>
+*/
 
 const PoolSection = styled.div`
   display: grid;
@@ -39,7 +52,7 @@ flex-direction: column;
 `
 
 export default function Earn() {
-  const { chainId } = useActiveWeb3React()
+  const { chainId, account } = useActiveWeb3React()
 
   // staking info for connected account
   const stakingInfos = useStakingInfo()
@@ -48,15 +61,19 @@ export default function Earn() {
    * only show staking cards with balance
    * @todo only account for this if rewards are inactive
    */
-  const stakingInfosWithBalance = stakingInfos?.filter(s => JSBI.greaterThan(s.stakedAmount.raw, BIG_INT_ZERO))
+  //const stakingInfosWithBalance = stakingInfos?.filter(s => JSBI.greaterThan(s.stakedAmount.raw, BIG_INT_ZERO))
+
+  const activeStakingInfos = stakingInfos?.filter(s => s.active)
 
   // toggle copy if rewards are inactive
+  //const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
+
   const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
 
   return (
     <PageWrapper gap="lg" justify="center">
       <TopSection gap="md">
-        <DataCard>
+        <ExtraDataCard>
           <CardBGImage />
           <CardNoise />
           <CardSection>
@@ -69,37 +86,31 @@ export default function Earn() {
                   Deposit your Liquidity Provider tokens to receive VIPER, the Viper Protocol governance token.
                 </TYPE.white>
               </RowBetween>{' '}
-              <ExternalLink
-                style={{ color: 'white', textDecoration: 'underline' }}
-                href="https://uniswap.org/blog/uni/"
-                target="_blank"
-              >
-                <TYPE.white fontSize={14}>Read more about VIPER</TYPE.white>
-              </ExternalLink>
             </AutoColumn>
           </CardSection>
           <CardBGImage />
           <CardNoise />
-        </DataCard>
+        </ExtraDataCard>
       </TopSection>
 
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
         <DataRow style={{ alignItems: 'baseline' }}>
-          <TYPE.mediumHeader style={{ marginTop: '0.5rem' }}>Participating pools</TYPE.mediumHeader>
-          <Countdown exactEnd={stakingInfos?.[0]?.periodFinish} />
+          <TYPE.mediumHeader style={{ marginTop: '0.5rem' }}>Pools</TYPE.mediumHeader>
         </DataRow>
 
         <PoolSection>
-          {stakingRewardsExist && stakingInfos?.length === 0 ? (
+          {account && stakingRewardsExist && stakingInfos?.length === 0 ? (
             <Loader style={{ margin: 'auto' }} />
-          ) : !stakingRewardsExist ? (
+          ) : account && !stakingRewardsExist ? (
             <OutlineCard>No active pools</OutlineCard>
-          ) : stakingInfos?.length !== 0 && stakingInfosWithBalance.length === 0 ? (
+          ) : account && stakingInfos?.length !== 0 && !activeStakingInfos ? (
             <OutlineCard>No active pools</OutlineCard>
+          ) : !account ? (
+            <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
           ) : (
-            stakingInfosWithBalance?.map(stakingInfo => {
+            activeStakingInfos?.map(stakingInfo => {
               // need to sort by added liquidity here
-              return <PoolCard key={stakingInfo.stakingRewardAddress} stakingInfo={stakingInfo} />
+              return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
             })
           )}
         </PoolSection>

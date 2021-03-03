@@ -123,8 +123,6 @@ export function useSwapCallback(
   const { address: recipientAddress } = useENS(recipientAddressOrName)
   const recipient = recipientAddressOrName === null ? account : recipientAddress
 
-  console.log({ trade })
-
   return useMemo(() => {
     if (!trade || !library || !account || !chainId) {
       return { state: SwapCallbackState.INVALID, callback: null, error: 'Missing dependencies' }
@@ -216,7 +214,7 @@ export function useSwapCallback(
             const inputAmount = trade.inputAmount.toSignificant(3)
             const outputAmount = trade.outputAmount.toSignificant(3)
 
-            const base = `Swap ${inputAmount} ${adjustedInputCurrency.symbol} for ${outputAmount} ${adjustedOutputCurrency.symbol}`
+            const base = `Swap ${inputAmount} ${adjustedInputCurrency?.symbol} for ${outputAmount} ${adjustedOutputCurrency?.symbol}`
 
             const withRecipient =
               recipient === account

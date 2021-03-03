@@ -1,7 +1,9 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Token, TokenAmount } from '@viperswap/sdk'
-import { useTokenContract } from '../hooks/useContract'
+import { useTokenContract, useViperContract } from '../hooks/useContract'
 import { useSingleCallResult } from '../state/multicall/hooks'
+import { VIPER } from '../constants'
+import { useActiveWeb3React } from '../hooks'
 
 // returns undefined if input token is undefined, or fails to get token contract,
 // or contract total supply cannot be fetched
@@ -11,4 +13,12 @@ export function useTotalSupply(token?: Token): TokenAmount | undefined {
   const totalSupply: BigNumber = useSingleCallResult(contract, 'totalSupply')?.result?.[0]
 
   return token && totalSupply ? new TokenAmount(token, totalSupply.toString()) : undefined
+}
+
+export function useViperSupply(method = 'totalSupply'): TokenAmount | undefined {
+  const { chainId } = useActiveWeb3React()
+  const contract = useViperContract()
+  const value: BigNumber = useSingleCallResult(contract, method)?.result?.[0]
+  const token = chainId && VIPER[chainId]
+  return token && value ? new TokenAmount(token, value.toString()) : undefined
 }

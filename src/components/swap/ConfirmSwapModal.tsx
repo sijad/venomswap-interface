@@ -7,6 +7,9 @@ import TransactionConfirmationModal, {
 import SwapModalFooter from './SwapModalFooter'
 import SwapModalHeader from './SwapModalHeader'
 
+import useBlockchain from '../../hooks/useBlockchain'
+import getBlockchainAdjustedCurrency from '../../utils/getBlockchainAdjustedCurrency'
+
 /**
  * Returns true if the trade requires a confirmation of details before we can submit it
  * @param tradeA trade A
@@ -47,6 +50,8 @@ export default function ConfirmSwapModal({
   swapErrorMessage: string | undefined
   onDismiss: () => void
 }) {
+  const blockchain = useBlockchain()
+
   const showAcceptChanges = useMemo(
     () => Boolean(trade && originalTrade && tradeMeaningfullyDiffers(trade, originalTrade)),
     [originalTrade, trade]
@@ -76,10 +81,13 @@ export default function ConfirmSwapModal({
     ) : null
   }, [allowedSlippage, onConfirm, showAcceptChanges, swapErrorMessage, trade])
 
+  const adjustedInputCurrency = getBlockchainAdjustedCurrency(blockchain, trade?.inputAmount?.currency)
+  const adjustedOutputCurrency = getBlockchainAdjustedCurrency(blockchain, trade?.outputAmount?.currency)
+
   // text to show while loading
   const pendingText = `Swapping ${trade?.inputAmount?.toSignificant(6)} ${
-    trade?.inputAmount?.currency?.symbol
-  } for ${trade?.outputAmount?.toSignificant(6)} ${trade?.outputAmount?.currency?.symbol}`
+    adjustedInputCurrency?.symbol
+  } for ${trade?.outputAmount?.toSignificant(6)} ${adjustedOutputCurrency?.symbol}`
 
   const confirmationContent = useCallback(
     () =>

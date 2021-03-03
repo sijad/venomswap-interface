@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import useIsArgentWallet from '../../hooks/useIsArgentWallet'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
+import { Blockchain } from '@viperswap/sdk'
 import Modal from '../Modal'
 import { AutoColumn } from '../Column'
 import styled from 'styled-components'
@@ -12,23 +13,28 @@ import CurrencyInputPanel from '../CurrencyInputPanel'
 import { TokenAmount, Pair } from '@viperswap/sdk'
 import { useActiveWeb3React } from '../../hooks'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { usePairContract, useStakingContract } from '../../hooks/useContract'
+import { usePairContract } from '../../hooks/useContract'
 import { useApproveCallback, ApprovalState } from '../../hooks/useApproveCallback'
 import { splitSignature } from 'ethers/lib/utils'
 import { StakingInfo, useDerivedStakeInfo } from '../../state/stake/hooks'
-import { wrappedCurrencyAmount } from '../../utils/wrappedCurrency'
+//import { wrappedCurrencyAmount } from '../../utils/wrappedCurrency'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
+import { useMasterBreederContract } from '../../hooks/useContract'
+import useBlockchain from '../../hooks/useBlockchain'
+import { ZERO_ADDRESS } from '../../constants'
+import { BlueCard } from '../Card'
+import { ColumnCenter } from '../Column'
 
-const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
+/*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
   justify-content: space-between;
   padding-right: 20px;
   padding-left: 20px;
 
   opacity: ${({ dim }) => (dim ? 0.5 : 1)};
-`
+`*/
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -48,7 +54,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
   const { parsedAmount, error } = useDerivedStakeInfo(typedValue, stakingInfo.stakedAmount.token, userLiquidityUnstaked)
-  const parsedAmountWrapped = wrappedCurrencyAmount(parsedAmount, chainId)
+  /*const parsedAmountWrapped = wrappedCurrencyAmount(parsedAmount, chainId)
 
   let hypotheticalRewardRate: TokenAmount = new TokenAmount(stakingInfo.rewardRate.token, '0')
   if (parsedAmountWrapped?.greaterThan('0')) {
@@ -57,7 +63,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
       stakingInfo.totalStakedAmount.add(parsedAmountWrapped),
       stakingInfo.totalRewardRate
     )
-  }
+  }*/
 
   // state for pending and submitted txn views
   const addTransaction = useTransactionAdder()
@@ -69,6 +75,11 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     onDismiss()
   }, [onDismiss])
 
+  const isArgentWallet = useIsArgentWallet()
+  const masterBreeder = useMasterBreederContract()
+  const blockchain = useBlockchain()
+  const referral = ZERO_ADDRESS
+
   // pair contract for this token to be staked
   const dummyPair = new Pair(new TokenAmount(stakingInfo.tokens[0], '0'), new TokenAmount(stakingInfo.tokens[1], '0'))
   const pairContract = usePairContract(dummyPair.liquidityToken.address)
@@ -76,25 +87,14 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   // approval data for stake
   const deadline = useTransactionDeadline()
   const [signatureData, setSignatureData] = useState<{ v: number; r: string; s: string; deadline: number } | null>(null)
-  const [approval, approveCallback] = useApproveCallback(parsedAmount, stakingInfo.stakingRewardAddress)
+  const [approval, approveCallback] = useApproveCallback(parsedAmount, masterBreeder?.address)
 
-  const isArgentWallet = useIsArgentWallet()
-  const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
   async function onStake() {
     setAttempting(true)
-    if (stakingContract && parsedAmount && deadline) {
+    if (masterBreeder && parsedAmount && deadline) {
       if (approval === ApprovalState.APPROVED) {
-        await stakingContract.stake(`0x${parsedAmount.raw.toString(16)}`, { gasLimit: 350000 })
-      } else if (signatureData) {
-        stakingContract
-          .stakeWithPermit(
-            `0x${parsedAmount.raw.toString(16)}`,
-            signatureData.deadline,
-            signatureData.v,
-            signatureData.r,
-            signatureData.s,
-            { gasLimit: 350000 }
-          )
+        await masterBreeder
+          .deposit(stakingInfo.pid, `0x${parsedAmount.raw.toString(16)}`, referral)
           .then((response: TransactionResponse) => {
             addTransaction(response, {
               summary: `Deposit liquidity`
@@ -134,6 +134,11 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
       return approveCallback()
     }
 
+    const signatureEnabled = [Blockchain.ETHEREUM, Blockchain.BINANCE_SMART_CHAIN].includes(blockchain)
+    if (!signatureEnabled) {
+      return approveCallback()
+    }
+
     // try to gather a signature for permission
     const nonce = await pairContract.nonces(account)
 
@@ -158,7 +163,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     ]
     const message = {
       owner: account,
-      spender: stakingInfo.stakingRewardAddress,
+      spender: masterBreeder?.address,
       value: liquidityAmount.raw.toString(),
       nonce: nonce.toHexString(),
       deadline: deadline.toNumber()
@@ -200,6 +205,25 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             <TYPE.mediumHeader>Deposit</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
+
+          <RowBetween>
+            <ColumnCenter>
+              <BlueCard>
+                <AutoColumn gap="10px">
+                  <TYPE.link fontWeight={400} color={'primaryText1'}>
+                    <b>Important:</b> There&apos;s a <b>0.75% deposit fee</b> when depositing funds to the liquidity farming pools.
+                    <br />
+                    <br />
+                    These fees are rewarded to the treasury which is owned by the Viper DAO and its users.
+                    <br />
+                    <br />
+                    The allocation and use of the funds will be fully controlled by the VIPER DAO via active governance.
+                  </TYPE.link>
+                </AutoColumn>
+              </BlueCard>
+            </ColumnCenter>
+          </RowBetween>
+
           <CurrencyInputPanel
             value={typedValue}
             onUserInput={onUserInput}
@@ -212,17 +236,6 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             customBalanceText={'Available to deposit: '}
             id="stake-liquidity-token"
           />
-
-          <HypotheticalRewardRate dim={!hypotheticalRewardRate.greaterThan('0')}>
-            <div>
-              <TYPE.black fontWeight={600}>Weekly Rewards</TYPE.black>
-            </div>
-
-            <TYPE.black>
-              {hypotheticalRewardRate.multiply((60 * 60 * 24 * 7).toString()).toSignificant(4, { groupSeparator: ',' })}{' '}
-              UNI / week
-            </TYPE.black>
-          </HypotheticalRewardRate>
 
           <RowBetween>
             <ButtonConfirmed
@@ -248,7 +261,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Depositing Liquidity</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} UNI-V2</TYPE.body>
+            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -256,7 +269,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Deposited {parsedAmount?.toSignificant(4)} UNI-V2</TYPE.body>
+            <TYPE.body fontSize={20}>Deposited {parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

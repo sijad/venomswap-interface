@@ -11,6 +11,9 @@ import Circle from '../../assets/images/blue-loader.svg'
 import { getEtherscanLink } from '../../utils'
 import { ExternalLink } from '../../theme/components'
 
+import useBlockchain from '../../hooks/useBlockchain'
+import getExplorerName from '../../utils/getExplorerName'
+
 const ConfirmOrLoadingWrapper = styled.div`
   width: 100%;
   padding: 24px;
@@ -49,6 +52,8 @@ export function SubmittedView({
 }) {
   const theme = useContext(ThemeContext)
   const { chainId } = useActiveWeb3React()
+  const blockchain = useBlockchain()
+  const explorerName = getExplorerName(blockchain)
 
   return (
     <ConfirmOrLoadingWrapper>
@@ -63,7 +68,7 @@ export function SubmittedView({
         {children}
         {chainId && hash && (
           <ExternalLink href={getEtherscanLink(chainId, hash, 'transaction')} style={{ marginLeft: '4px' }}>
-            <TYPE.subHeader>View transaction on Etherscan</TYPE.subHeader>
+            <TYPE.subHeader>View transaction on {explorerName}</TYPE.subHeader>
           </ExternalLink>
         )}
       </AutoColumn>
