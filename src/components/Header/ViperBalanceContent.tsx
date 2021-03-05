@@ -9,8 +9,8 @@ import { useViperSupply } from '../../data/TotalSupply'
 import { useActiveWeb3React } from '../../hooks'
 //import { useMerkleDistributorContract } from '../../hooks/useContract'
 //import useCurrentBlockTimestamp from '../../hooks/useCurrentBlockTimestamp'
-import { useTotalUniEarned } from '../../state/stake/hooks'
-import { useAggregateUniBalance, useTokenBalance } from '../../state/wallet/hooks'
+import { useTotalLockedViperEarned, useTotalUnlockedViperEarned } from '../../state/stake/hooks'
+import { useAggregateViperBalance, useTokenBalance } from '../../state/wallet/hooks'
 import { ExternalLink, StyledInternalLink, TYPE, UniTokenAnimated } from '../../theme'
 //import { computeUniCirculation } from '../../utils/computeUniCirculation'
 import useUSDCPrice from '../../utils/useUSDCPrice'
@@ -42,11 +42,11 @@ const StyledClose = styled(X)`
 /**
  * Content for balance stats modal
  */
-export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowUniBalanceModal: any }) {
+export default function ViperBalanceContent({ setShowUniBalanceModal }: { setShowUniBalanceModal: any }) {
   const { account, chainId } = useActiveWeb3React()
   const viper = chainId ? VIPER[chainId] : undefined
 
-  const total = useAggregateUniBalance()
+  const total = useAggregateViperBalance()
   const viperBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
     viper,
@@ -65,7 +65,8 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
     'totalBalanceOf',
     VIPER_INTERFACE
   )
-  const uniToClaim: TokenAmount | undefined = useTotalUniEarned()
+  const lockedViperToClaim: TokenAmount | undefined = useTotalLockedViperEarned()
+  const unlockedViperToClaim: TokenAmount | undefined = useTotalUnlockedViperEarned()
   const totalSupply: TokenAmount | undefined = useViperSupply()
   const totalUnlockedSupply: TokenAmount | undefined = useViperSupply('unlockedSupply')
   const viperPrice = useUSDCPrice(viper)
@@ -106,10 +107,21 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
                   <TYPE.white color="white">{viperBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
                 <RowBetween>
-                  <TYPE.white color="white">Rewards:</TYPE.white>
+                  <TYPE.white color="white">Unlocked rewards:</TYPE.white>
                   <TYPE.white color="white">
-                    {uniToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
-                    {uniToClaim && uniToClaim.greaterThan('0') && (
+                    {unlockedViperToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
+                    {unlockedViperToClaim && unlockedViperToClaim.greaterThan('0') && (
+                      <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/staking">
+                        (claim)
+                      </StyledInternalLink>
+                    )}
+                  </TYPE.white>
+                </RowBetween>
+                <RowBetween>
+                  <TYPE.white color="white">Locked rewards:</TYPE.white>
+                  <TYPE.white color="white">
+                    {lockedViperToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
+                    {lockedViperToClaim && lockedViperToClaim.greaterThan('0') && (
                       <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/staking">
                         (claim)
                       </StyledInternalLink>

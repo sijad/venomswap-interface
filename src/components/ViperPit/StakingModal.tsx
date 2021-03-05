@@ -18,6 +18,7 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
 import { useViperPitContract } from '../../hooks/useContract'
+import { calculateGasMargin } from '../../utils'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -67,11 +68,16 @@ export default function StakingModal({ isOpen, onDismiss, stakingToken, userLiqu
     setAttempting(true)
     if (viperPit && parsedAmount && deadline) {
       if (approval === ApprovalState.APPROVED) {
+        const formattedAmount = `0x${parsedAmount.raw.toString(16)}`
+        const estimatedGas = await viperPit.estimateGas.enter(formattedAmount)
+
         await viperPit
-          .enter(`0x${parsedAmount.raw.toString(16)}`)
+          .enter(formattedAmount, {
+            gasLimit: calculateGasMargin(estimatedGas)
+          })
           .then((response: TransactionResponse) => {
             addTransaction(response, {
-              summary: `Deposit liquidity`
+              summary: `Deposit VIPER to ViperPit`
             })
             setHash(response.hash)
           })
@@ -151,7 +157,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingToken, userLiqu
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Depositing VIPER to ViperPit</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
+            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} VIPER</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -159,7 +165,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingToken, userLiqu
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Deposited {parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
+            <TYPE.body fontSize={20}>Deposited {parsedAmount?.toSignificant(4)} VIPER</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

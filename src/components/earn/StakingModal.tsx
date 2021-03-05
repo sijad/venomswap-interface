@@ -26,6 +26,7 @@ import useBlockchain from '../../hooks/useBlockchain'
 import { ZERO_ADDRESS } from '../../constants'
 import { BlueCard } from '../Card'
 import { ColumnCenter } from '../Column'
+import { calculateGasMargin } from '../../utils'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -93,8 +94,14 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     setAttempting(true)
     if (masterBreeder && parsedAmount && deadline) {
       if (approval === ApprovalState.APPROVED) {
+        const formattedAmount = `0x${parsedAmount.raw.toString(16)}`
+
+        const estimatedGas = await masterBreeder.estimateGas.deposit(stakingInfo.pid, formattedAmount, referral)
+
         await masterBreeder
-          .deposit(stakingInfo.pid, `0x${parsedAmount.raw.toString(16)}`, referral)
+          .deposit(stakingInfo.pid, formattedAmount, referral, {
+            gasLimit: calculateGasMargin(estimatedGas)
+          })
           .then((response: TransactionResponse) => {
             addTransaction(response, {
               summary: `Deposit liquidity`

@@ -11,6 +11,7 @@ import { SubmittedView, LoadingView } from '../ModalViews'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks'
+import { calculateGasMargin } from '../../utils'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -37,13 +38,18 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
     onDismiss()
   }
 
-  const stakingContract = useMasterBreederContract()
+  const masterBreeder = useMasterBreederContract()
 
   async function onClaimReward() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
+    if (masterBreeder && stakingInfo?.stakedAmount) {
       setAttempting(true)
-      await stakingContract
-        .claimReward(stakingInfo.pid, { gasLimit: 350000 })
+
+      const estimatedGas = await masterBreeder.estimateGas.claimReward(stakingInfo.pid)
+
+      await masterBreeder
+        .claimReward(stakingInfo.pid, {
+          gasLimit: calculateGasMargin(estimatedGas)
+        })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Claim accumulated VIPER rewards`

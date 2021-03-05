@@ -14,6 +14,7 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
 import { useViperPitContract } from '../../hooks/useContract'
+import { calculateGasMargin } from '../../utils'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -56,11 +57,17 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
   async function onWithdraw() {
     if (viperPit && userLiquidityStaked) {
       setAttempting(true)
+
+      const formattedAmount = `0x${parsedAmount?.raw.toString(16)}`
+      const estimatedGas = await viperPit.estimateGas.leave(formattedAmount)
+
       await viperPit
-        .leave(`0x${parsedAmount?.raw.toString(16)}`)
+        .leave(formattedAmount, {
+          gasLimit: calculateGasMargin(estimatedGas)
+        })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Withdraw deposited liquidity`
+            summary: `Withdraw VIPER from ViperPit`
           })
           setHash(response.hash)
         })
@@ -116,7 +123,7 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Withdrawing VIPER from ViperPit</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
+            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} VIPER</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -124,7 +131,7 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Withdrew {parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
+            <TYPE.body fontSize={20}>Withdraw {parsedAmount?.toSignificant(4)} VIPER</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

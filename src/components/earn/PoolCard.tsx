@@ -9,7 +9,7 @@ import { ButtonPrimary } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
 import { useColor } from '../../hooks/useColor'
 import { currencyId } from '../../utils/currencyId'
-import { CardNoise, CardBGImage } from './styled'
+import { Break, CardNoise, CardBGImage } from './styled'
 import { unwrappedToken } from '../../utils/wrappedCurrency'
 //import { useTotalSupply } from '../../data/TotalSupply'
 //import { usePair } from '../../data/Reserves'
@@ -25,6 +25,17 @@ const StatContainer = styled.div`
   margin-bottom: 1rem;
   margin-right: 1rem;
   margin-left: 1rem;
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+  display: none;
+`};
+`
+
+const StatContainerTop = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  gap: 12px;
+  margin: 1rem;
   ${({ theme }) => theme.mediaWidth.upToSmall`
   display: none;
 `};
@@ -58,7 +69,7 @@ const TopSection = styled.div`
   `};
 `
 
-/*const BottomSection = styled.div<{ showBackground: boolean }>`
+const BottomSection = styled.div<{ showBackground: boolean }>`
   padding: 12px 16px;
   opacity: ${({ showBackground }) => (showBackground ? '1' : '0.4')};
   border-radius: 0 0 12px 12px;
@@ -67,7 +78,7 @@ const TopSection = styled.div`
   align-items: baseline;
   justify-content: space-between;
   z-index: 1;
-`*/
+`
 
 export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) {
   const token0 = stakingInfo.tokens[0]
@@ -136,7 +147,68 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
               : '-'}
           </TYPE.white>
         </RowBetween>
+        <RowBetween>
+          <TYPE.white> Emission rate </TYPE.white>
+          <TYPE.white>
+            {stakingInfo
+              ? stakingInfo.active
+                ? `${stakingInfo.poolRewardsPerBlock.toSignificant(4, { groupSeparator: ',' })} VIPER / block`
+                : '0 VIPER / block'
+              : '-'}
+          </TYPE.white>
+        </RowBetween>
       </StatContainer>
+
+      {isStaking && (
+        <>
+          <Break />
+          <StatContainerTop>
+            <RowBetween>
+              <TYPE.white> Your Unlocked Rewards </TYPE.white>
+              <TYPE.white>
+                <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                  🔓
+                </span>
+                {stakingInfo
+                  ? stakingInfo.active
+                    ? `${stakingInfo.unlockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} VIPER`
+                    : '0 VIPER'
+                  : '-'}
+              </TYPE.white>
+            </RowBetween>
+            <RowBetween>
+              <TYPE.white> Your Locked Rewards </TYPE.white>
+              <TYPE.white>
+                <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                  🔒
+                </span>
+                {stakingInfo
+                  ? stakingInfo.active
+                    ? `${stakingInfo.lockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} VIPER`
+                    : '0 VIPER'
+                  : '-'}
+              </TYPE.white>
+            </RowBetween>
+          </StatContainerTop>
+          <Break />
+          <BottomSection showBackground={true}>
+            <TYPE.black color={'white'} fontWeight={500}>
+              <span>Your Total Rewards</span>
+            </TYPE.black>
+
+            <TYPE.black style={{ textAlign: 'right' }} color={'white'} fontWeight={500}>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚡
+              </span>
+              {stakingInfo
+                ? stakingInfo.active
+                  ? `${stakingInfo.earnedAmount.toSignificant(4, { groupSeparator: ',' })} VIPER`
+                  : '0 VIPER'
+                : '-'}
+            </TYPE.black>
+          </BottomSection>
+        </>
+      )}
     </Wrapper>
   )
 }

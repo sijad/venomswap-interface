@@ -8,7 +8,7 @@ import { useMulticallContract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
 import { useSingleContractMultipleData, useMultipleContractSingleData } from '../multicall/hooks'
 import { useUserUnclaimedAmount } from '../claim/hooks'
-import { useTotalUniEarned } from '../stake/hooks'
+import { useTotalUnlockedViperEarned } from '../stake/hooks'
 
 /**
  * Returns a map of the given addresses to their eventually consistent ETH balances.
@@ -147,22 +147,22 @@ export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | u
 }
 
 // get the total owned, unclaimed, and unharvested UNI for account
-export function useAggregateUniBalance(): TokenAmount | undefined {
+export function useAggregateViperBalance(): TokenAmount | undefined {
   const { account, chainId } = useActiveWeb3React()
 
-  const uni = chainId ? VIPER[chainId] : undefined
+  const viper = chainId ? VIPER[chainId] : undefined
 
-  const uniBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, uni)
-  const uniUnclaimed: TokenAmount | undefined = useUserUnclaimedAmount(account)
-  const uniUnHarvested: TokenAmount | undefined = useTotalUniEarned()
+  const viperBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, viper)
+  const viperUnclaimed: TokenAmount | undefined = useUserUnclaimedAmount(account)
+  const viperUnHarvested: TokenAmount | undefined = useTotalUnlockedViperEarned()
 
-  if (!uni) return undefined
+  if (!viper) return undefined
 
   return new TokenAmount(
-    uni,
+    viper,
     JSBI.add(
-      JSBI.add(uniBalance?.raw ?? JSBI.BigInt(0), uniUnclaimed?.raw ?? JSBI.BigInt(0)),
-      uniUnHarvested?.raw ?? JSBI.BigInt(0)
+      JSBI.add(viperBalance?.raw ?? JSBI.BigInt(0), viperUnclaimed?.raw ?? JSBI.BigInt(0)),
+      viperUnHarvested?.raw ?? JSBI.BigInt(0)
     )
   )
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useMemo } from 'react'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -8,13 +8,14 @@ import { JSBI, ETHER } from '@viperswap/sdk'
 import { RouteComponentProps } from 'react-router-dom'
 import DoubleCurrencyLogo from '../../components/DoubleLogo'
 import { useCurrency } from '../../hooks/Tokens'
-import { useWalletModalToggle } from '../../state/application/hooks'
+import { useWalletModalToggle, useBlockNumber } from '../../state/application/hooks'
 import { TYPE } from '../../theme'
 
 import { RowBetween } from '../../components/Row'
 import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
 import { ButtonPrimary, ButtonEmpty } from '../../components/Button'
 import StakingModal from '../../components/earn/StakingModal'
+import AwaitingRewards from '../../components/earn/AwaitingRewards'
 import { useStakingInfo } from '../../state/stake/hooks'
 import ModifiedUnstakingModal from '../../components/earn/ModifiedUnstakingModal'
 import ClaimRewardModal from '../../components/earn/ClaimRewardModal'
@@ -98,16 +99,30 @@ export default function Manage({
 
   // get currencies and pair
   const [currencyA, currencyB] = [useCurrency(currencyIdA), useCurrency(currencyIdB)]
+
   const tokenA = wrappedCurrency(currencyA ?? undefined, chainId)
   const tokenB = wrappedCurrency(currencyB ?? undefined, chainId)
 
   const [, stakingTokenPair] = usePair(tokenA, tokenB)
+
   const stakingInfo = useStakingInfo(stakingTokenPair)?.[0]
 
+  const currentBlock = useBlockNumber()
+
+  const rewardsStarted = useMemo<boolean>(() => {
+    return stakingInfo && currentBlock
+      ? JSBI.greaterThanOrEqual(JSBI.BigInt(currentBlock), JSBI.BigInt(stakingInfo.startBlock))
+      : false
+  }, [stakingInfo, currentBlock])
+
   // detect existing unstaked LP position to show add button if none found
-  console.log(stakingInfo?.stakedAmount.raw.toString(10))
   const userLiquidityUnstaked = useTokenBalance(account ?? undefined, stakingInfo?.stakedAmount?.token)
-  const showAddLiquidityButton = Boolean(stakingInfo?.stakedAmount?.equalTo('0') && userLiquidityUnstaked?.equalTo('0'))
+  //const showAddLiquidityButton =
+  //  stakingInfo === undefined || Boolean(stakingInfo?.stakedAmount?.equalTo('0') && userLiquidityUnstaked?.equalTo('0'))
+
+  const showAddLiquidityButton = useMemo<boolean>(() => {
+    return Boolean(stakingInfo?.stakedAmount?.equalTo('0') && userLiquidityUnstaked?.equalTo('0'))
+  }, [stakingInfo, userLiquidityUnstaked])
 
   // toggle for staking modal and unstaking modal
   const [showStakingModal, setShowStakingModal] = useState(false)
@@ -273,13 +288,17 @@ export default function Manage({
             </AutoColumn>
           </StyledBottomCard>
         </BottomSection>
-        <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
-          <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
-            ⭐️
-          </span>
-          When you withdraw, the contract will automagically claim VIPER on your behalf!
-        </TYPE.main>
-
+        <>
+          {rewardsStarted && (
+            <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
+                ⭐️
+              </span>
+              When you withdraw, the contract will automagically claim VIPER on your behalf!
+            </TYPE.main>
+          )}
+        </>
+        <AwaitingRewards />
         {!showAddLiquidityButton && (
           <DataRow style={{ marginBottom: '1rem' }}>
             {stakingInfo && stakingInfo.active && (
@@ -314,7 +333,7 @@ export default function Manage({
           </DataRow>
         )}
         {!userLiquidityUnstaked ? null : userLiquidityUnstaked.equalTo('0') ? null : !stakingInfo?.active ? null : (
-          <TYPE.main>{userLiquidityUnstaked.toSignificant(6)} VIPER-LP tokens available</TYPE.main>
+          <TYPE.main>{userLiquidityUnstaked.toSignificant(6)} VIPER-LP tokens available to deposit</TYPE.main>
         )}
       </PositionInfo>
     </PageWrapper>

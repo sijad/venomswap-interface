@@ -1,4 +1,4 @@
-import { getTokenLogoURL } from './../components/CurrencyLogo/index'
+import { getTokenFallbackLogoURL } from './../components/CurrencyLogo/index'
 import { wrappedCurrency } from 'utils/wrappedCurrency'
 import { Currency, Token } from '@viperswap/sdk'
 import { useCallback, useState } from 'react'
@@ -26,7 +26,7 @@ export default function useAddTokenToMetamask(
               address: token.address,
               symbol: token.symbol,
               decimals: token.decimals,
-              image: getTokenLogoURL(token.address)
+              image: getTokenFallbackLogoURL(token)
             }
           }
         })

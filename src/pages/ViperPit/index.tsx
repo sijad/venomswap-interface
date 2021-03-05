@@ -205,7 +205,11 @@ export default function ViperPit({
           <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
             ⭐️
           </span>
-          When you withdraw you&apos;ll receive your share of earned VIPER trading fees!
+          ViperPit rewards aren&apos;t locked
+          <br />
+          &mdash; when you withdraw you&apos;ll receive 100%
+          <br />
+          of your share of earned VIPER trading fees straight away!
         </TYPE.main>
 
         {account && (

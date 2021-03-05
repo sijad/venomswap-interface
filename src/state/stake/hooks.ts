@@ -1,45 +1,18 @@
-import { ChainId, CurrencyAmount, JSBI, Token, TokenAmount, WETH, Pair } from '@viperswap/sdk'
+import { CurrencyAmount, JSBI, Token, TokenAmount, Pair } from '@viperswap/sdk'
 import { useMemo } from 'react'
 import { VIPER } from '../../constants'
-//import { DAI, VIPER, USDC, USDT, WBTC } from '../../constants'
-import { BUSD } from '../../constants/tokens'
-//import { BUSD, ONE_ETH, LINK } from '../../constants/tokens'
+import { STAKING_REWARDS_INFO } from '../../constants/staking'
 import { useActiveWeb3React } from '../../hooks'
 //import { NEVER_RELOAD, useMultipleContractSingleData } from '../multicall/hooks'
-import {
-  useSingleCallResult,
-  useSingleContractMultipleData
-} from '../multicall/hooks'
+import { useSingleCallResult, useSingleContractMultipleData } from '../multicall/hooks'
 import { tryParseAmount } from '../swap/hooks'
 //import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
 import { useMasterBreederContract } from '../../hooks/useContract'
+//import { useBlockNumber } from '../application/hooks'
 
 export const STAKING_GENESIS = 6502000
 
 export const REWARDS_DURATION_DAYS = 60
-
-export const STAKING_REWARDS_INFO: {
-  [chainId in ChainId]?: {
-    tokens: [Token, Token]
-    pid: number
-  }[]
-} = {
-  [ChainId.HARMONY_TESTNET]: [
-    {
-      tokens: [WETH[ChainId.HARMONY_TESTNET], BUSD[ChainId.HARMONY_TESTNET]],
-      pid: 0
-    },
-    {
-      tokens: [WETH[ChainId.HARMONY_TESTNET], VIPER[ChainId.HARMONY_TESTNET]],
-      pid: 1
-    }
-    /*{
-      tokens: [LINK[ChainId.HARMONY_TESTNET], BUSD[ChainId.HARMONY_TESTNET]],
-      pid: 2
-    }*/
-  ]
-}
-
 export interface StakingInfo {
   // the pool id (pid) of the pool
   pid: number
@@ -47,8 +20,14 @@ export interface StakingInfo {
   allocPoint: number | undefined
   // start block for all the rewards pools
   startBlock: number
+  // base rewards per block
+  baseRewardsPerBlock: TokenAmount
+  // pool specific rewards per block
+  poolRewardsPerBlock: TokenAmount
   // the percentage of rewards locked
-  lockRewardsPercentage: JSBI
+  lockedRewardsPercentageUnits: number
+  // the percentage of rewards locked
+  unlockedRewardsPercentageUnits: number
   // the tokens involved in this pair
   tokens: [Token, Token]
   // the amount of token currently staked, or undefined if no account
@@ -86,6 +65,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
   const viper = chainId ? VIPER[chainId] : undefined
 
   const pids = useMemo(() => masterInfo.map(({ pid }) => pid), [masterInfo])
+
   const pidAccountMapping = useMemo(
     () => masterInfo.map(({ pid }) => (account ? [pid, account] : [undefined, undefined])),
     [masterInfo, account]
@@ -100,9 +80,22 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     pids.map(pids => [pids])
   )
 
+  // getNewRewardPerBlock uses pid = 0 to return the base rewards
+  // poolIds have to be +1'd to map to their actual pid
+  // also include pid 0 to get the base emission rate
+  let adjustedPids = pids.map(pid => pid + 1)
+  adjustedPids = [...[0], ...adjustedPids]
+
+  const poolRewardsPerBlock = useSingleContractMultipleData(
+    masterBreederContract,
+    'getNewRewardPerBlock',
+    adjustedPids.map(adjustedPids => [adjustedPids])
+  )
+
   //const poolLength = useSingleCallResult(masterBreederContract, 'poolLength')
   const startBlock = useSingleCallResult(masterBreederContract, 'START_BLOCK')
   const lockRewardsRatio = useSingleCallResult(masterBreederContract, 'PERCENT_LOCK_BONUS_REWARD')
+  //const rewardPerBlock = useSingleCallResult(masterBreederContract, 'REWARD_PER_BLOCK')
 
   return useMemo(() => {
     if (!chainId || !viper) return []
@@ -114,27 +107,44 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
       const userInfo = userInfos[index]
       const pendingReward = pendingRewards[index]
 
-      if (poolInfo && !poolInfo.loading && pendingReward && !pendingReward.loading && userInfo && !userInfo.loading) {
+      // poolRewardsPerBlock indexes have to be +1'd to get the actual specific pool data
+      const baseRewardsPerBlock = poolRewardsPerBlock[0]
+      const specificPoolRewardsPerBlock = poolRewardsPerBlock[index + 1]
+
+      if (
+        poolInfo &&
+        !poolInfo.loading &&
+        pendingReward &&
+        !pendingReward.loading &&
+        userInfo &&
+        !userInfo.loading &&
+        baseRewardsPerBlock &&
+        !baseRewardsPerBlock.loading &&
+        specificPoolRewardsPerBlock &&
+        !specificPoolRewardsPerBlock.loading
+      ) {
         if (poolInfo.error || userInfo.error || pendingReward.error) {
-          console.error('Failed to load staking rewards info')
+          //console.error('Failed to load staking rewards info')
           return memo
         }
 
-        const lockRewardsRatioPercentage = JSBI.BigInt(lockRewardsRatio.result?.[0])
+        const baseBlockRewards = new TokenAmount(viper, JSBI.BigInt(baseRewardsPerBlock?.result?.[0]))
+
+        const poolBlockRewards = specificPoolRewardsPerBlock?.result?.[0]
+          ? new TokenAmount(viper, JSBI.BigInt(specificPoolRewardsPerBlock?.result?.[0]))
+          : baseBlockRewards
+
+        const lockedRewardsPercentageUnits = Number(lockRewardsRatio.result?.[0])
+        const unlockedRewardsPercentageUnits = 100 - lockedRewardsPercentageUnits
+
         const calculatedTotalPendingRewards = JSBI.BigInt(pendingReward?.result?.[0] ?? 0)
-        const unlockedRewardsRatioPercentage = JSBI.divide(
-          JSBI.subtract(JSBI.BigInt(100), lockRewardsRatioPercentage),
+        const calculatedLockedPendingRewards = JSBI.divide(
+          JSBI.multiply(calculatedTotalPendingRewards, JSBI.BigInt(lockedRewardsPercentageUnits)),
           JSBI.BigInt(100)
         )
-        const lockedRewardsRatioPercentage = JSBI.divide(lockRewardsRatioPercentage, JSBI.BigInt(100))
-        const calculatedLockedPendingRewards = JSBI.multiply(
-          calculatedTotalPendingRewards,
-          lockedRewardsRatioPercentage
-        )
-
-        const calculatedUnlockedPendingRewards = JSBI.multiply(
-          calculatedTotalPendingRewards,
-          unlockedRewardsRatioPercentage
+        const calculatedUnlockedPendingRewards = JSBI.divide(
+          JSBI.multiply(calculatedTotalPendingRewards, JSBI.BigInt(unlockedRewardsPercentageUnits)),
+          JSBI.BigInt(100)
         )
 
         const tokens = masterInfo[index].tokens
@@ -150,25 +160,43 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         const allocPoint = poolInfoResult && poolInfoResult[1]
         const active = poolInfoResult && JSBI.GT(JSBI.BigInt(allocPoint), 0) ? true : false
 
-        memo.push({
+        const stakingInfo = {
           pid: pid,
-          startBlock: startsAtBlock,
           allocPoint: allocPoint,
-          lockRewardsPercentage: lockRewardsRatioPercentage,
+          startBlock: startsAtBlock,
+          baseRewardsPerBlock: baseBlockRewards,
+          poolRewardsPerBlock: poolBlockRewards,
+          lockedRewardsPercentageUnits: lockedRewardsPercentageUnits,
+          unlockedRewardsPercentageUnits: unlockedRewardsPercentageUnits,
           tokens: masterInfo[index].tokens,
           stakedAmount: stakedAmount,
           earnedAmount: totalPendingRewardAmount,
           lockedEarnedAmount: totalPendingLockedRewardAmount,
           unlockedEarnedAmount: totalPendingUnlockedRewardAmount,
           active: active
-        })
+        }
+
+        console.log({ stakingInfo })
+
+        memo.push(stakingInfo)
       }
       return memo
     }, [])
-  }, [chainId, masterInfo, pids, poolInfos, userInfos, pendingRewards, startBlock, lockRewardsRatio, viper])
+  }, [
+    chainId,
+    masterInfo,
+    pids,
+    poolInfos,
+    userInfos,
+    pendingRewards,
+    startBlock,
+    lockRewardsRatio,
+    poolRewardsPerBlock,
+    viper
+  ])
 }
 
-export function useTotalUniEarned(): TokenAmount | undefined {
+export function useTotalViperEarned(): TokenAmount | undefined {
   const { chainId } = useActiveWeb3React()
   const viper = chainId ? VIPER[chainId] : undefined
   const stakingInfos = useStakingInfo()
@@ -178,6 +206,38 @@ export function useTotalUniEarned(): TokenAmount | undefined {
     return (
       stakingInfos?.reduce(
         (accumulator, stakingInfo) => accumulator.add(stakingInfo.earnedAmount),
+        new TokenAmount(viper, '0')
+      ) ?? new TokenAmount(viper, '0')
+    )
+  }, [stakingInfos, viper])
+}
+
+export function useTotalLockedViperEarned(): TokenAmount | undefined {
+  const { chainId } = useActiveWeb3React()
+  const viper = chainId ? VIPER[chainId] : undefined
+  const stakingInfos = useStakingInfo()
+
+  return useMemo(() => {
+    if (!viper) return undefined
+    return (
+      stakingInfos?.reduce(
+        (accumulator, stakingInfo) => accumulator.add(stakingInfo.lockedEarnedAmount),
+        new TokenAmount(viper, '0')
+      ) ?? new TokenAmount(viper, '0')
+    )
+  }, [stakingInfos, viper])
+}
+
+export function useTotalUnlockedViperEarned(): TokenAmount | undefined {
+  const { chainId } = useActiveWeb3React()
+  const viper = chainId ? VIPER[chainId] : undefined
+  const stakingInfos = useStakingInfo()
+
+  return useMemo(() => {
+    if (!viper) return undefined
+    return (
+      stakingInfos?.reduce(
+        (accumulator, stakingInfo) => accumulator.add(stakingInfo.unlockedEarnedAmount),
         new TokenAmount(viper, '0')
       ) ?? new TokenAmount(viper, '0')
     )

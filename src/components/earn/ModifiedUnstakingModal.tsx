@@ -17,6 +17,7 @@ import { useMasterBreederContract } from '../../hooks/useContract'
 import { ZERO_ADDRESS } from '../../constants'
 import { BlueCard } from '../Card'
 import { ColumnCenter } from '../Column'
+import { calculateGasMargin } from '../../utils'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -72,8 +73,14 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
   async function onWithdraw() {
     if (masterBreeder && stakingInfo?.stakedAmount) {
       setAttempting(true)
+
+      const formattedAmount = `0x${parsedAmount?.raw.toString(16)}`
+      const estimatedGas = await masterBreeder.estimateGas.withdraw(stakingInfo.pid, formattedAmount, referral)
+
       await masterBreeder
-        .withdraw(stakingInfo.pid, `0x${parsedAmount?.raw.toString(16)}`, referral)
+        .withdraw(stakingInfo.pid, formattedAmount, referral, {
+          gasLimit: calculateGasMargin(estimatedGas)
+        })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             summary: `Withdraw deposited liquidity`
@@ -114,19 +121,19 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
               <BlueCard>
                 <AutoColumn gap="10px">
                   <TYPE.link fontWeight={400} color={'primaryText1'}>
-                    <b>Important:</b> Viperswap utilizes LP withdrawal fees to disincentivize short term farming and dumping.
+                    <b>Important:</b> Viperswap utilizes LP withdrawal fees to disincentivize short term farming and selling.
                     <br />
                     <br />
                     Standard withdrawal fees range from 0.1% - 0.5%.
                   </TYPE.link>
                   <TYPE.link fontWeight={400} fontSize={12} color={'primaryText1'}>
-                    <b>Extra penalties will apply for the folowing conditions:</b>
+                    <b>Extra penalties will apply for the following conditions:</b>
                     <ul>
                       <li>1% fee if a user withdraws under 5 days</li>
                       <li>2% fee if a user withdraws under 3 days.</li>
                       <li>4% fee if a user withdraws under 24 hours.</li>
                       <li>8% fee if a user withdraws under 1 hour.</li>
-                      <li>25% slashing fee if user withdraws during the same block</li>
+                      <li>25% slashing fee if a user withdraws during the same block (in order to disincentivize the use of flash loans).</li>
                     </ul>
                   </TYPE.link>
                 </AutoColumn>
@@ -167,7 +174,7 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Withdrew {parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
+            <TYPE.body fontSize={20}>Withdraw {parsedAmount?.toSignificant(4)} VIPER-LP</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}
