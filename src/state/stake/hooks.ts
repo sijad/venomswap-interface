@@ -176,8 +176,6 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           active: active
         }
 
-        console.log({ stakingInfo })
-
         memo.push(stakingInfo)
       }
       return memo

@@ -1,6 +1,9 @@
+import { ChainId, Token } from '@viperswap/sdk'
+/*
 import { ChainId, Token, WETH } from '@viperswap/sdk'
 import { VIPER } from './'
 import { BUSD } from './tokens'
+*/
 
 export const STAKING_REWARDS_INFO: {
   [chainId in ChainId]?: {
@@ -23,14 +26,14 @@ export const STAKING_REWARDS_INFO: {
     }*/
   ],
   [ChainId.HARMONY_TESTNET]: [
-    {
-      tokens: [WETH[ChainId.HARMONY_TESTNET], BUSD[ChainId.HARMONY_TESTNET]],
-      pid: 0
-    },
-    {
-      tokens: [WETH[ChainId.HARMONY_TESTNET], VIPER[ChainId.HARMONY_TESTNET]],
-      pid: 1
-    }
+    //{
+    //  tokens: [WETH[ChainId.HARMONY_TESTNET], BUSD[ChainId.HARMONY_TESTNET]],
+    //  pid: 0
+    //},
+    //{
+    //  tokens: [WETH[ChainId.HARMONY_TESTNET], VIPER[ChainId.HARMONY_TESTNET]],
+    //  pid: 1
+    //}
     /*{
       tokens: [LINK[ChainId.HARMONY_TESTNET], BUSD[ChainId.HARMONY_TESTNET]],
       pid: 2

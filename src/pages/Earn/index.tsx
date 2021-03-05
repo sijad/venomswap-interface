@@ -1,5 +1,4 @@
-import React, { useMemo } from 'react'
-import { JSBI } from '@viperswap/sdk'
+import React from 'react'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
@@ -7,9 +6,6 @@ import { useStakingInfo } from '../../state/stake/hooks'
 import { TYPE } from '../../theme'
 //import { ButtonPrimary } from '../../components/Button'
 import PoolCard from '../../components/earn/PoolCard'
-import { useBlockNumber } from '../../state/application/hooks'
-import { useSingleCallResult } from '../../state/multicall/hooks'
-import { useMasterBreederContract } from '../../hooks/useContract'
 import AwaitingRewards from '../../components/earn/AwaitingRewards'
 import { RowBetween } from '../../components/Row'
 import { CardSection, ExtraDataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
@@ -60,8 +56,6 @@ flex-direction: column;
 export default function Earn() {
   const { chainId, account } = useActiveWeb3React()
 
-  const masterBreederContract = useMasterBreederContract()
-
   // staking info for connected account
   const stakingInfos = useStakingInfo()
 
@@ -75,17 +69,6 @@ export default function Earn() {
 
   // toggle copy if rewards are inactive
   //const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
-
-  const rewardsStartBlock = useSingleCallResult(masterBreederContract, 'START_BLOCK').result?.[0]
-  const currentBlock = useBlockNumber()
-
-  const rewardsStarted = useMemo<boolean>(() => {
-    return rewardsStartBlock && currentBlock
-      ? JSBI.greaterThanOrEqual(JSBI.BigInt(currentBlock), JSBI.BigInt(rewardsStartBlock))
-      : false
-  }, [rewardsStartBlock, currentBlock])
-
-  console.log({ rewardsStarted })
 
   const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
 
@@ -121,24 +104,22 @@ export default function Earn() {
 
         <AwaitingRewards />
 
-        {stakingRewardsExist && (
-          <PoolSection>
-          {account && stakingRewardsExist && stakingInfos?.length === 0 ? (
-            <Loader style={{ margin: 'auto' }} />
-          ) : account && !stakingRewardsExist ? (
-            <OutlineCard>No active pools</OutlineCard>
-          ) : account && stakingInfos?.length !== 0 && !activeStakingInfos ? (
-            <OutlineCard>No active pools</OutlineCard>
-          ) : !account ? (
-            <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
-          ) : (
-            activeStakingInfos?.map(stakingInfo => {
-              // need to sort by added liquidity here
-              return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
-            })
-          )}
-        </PoolSection>
+        <PoolSection>
+        {account && stakingRewardsExist && stakingInfos?.length === 0 ? (
+          <Loader style={{ margin: 'auto' }} />
+        ) : account && !stakingRewardsExist ? (
+          <OutlineCard>No active pools</OutlineCard>
+        ) : account && stakingInfos?.length !== 0 && !activeStakingInfos ? (
+          <OutlineCard>No active pools</OutlineCard>
+        ) : !account ? (
+          <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
+        ) : (
+          activeStakingInfos?.map(stakingInfo => {
+            // need to sort by added liquidity here
+            return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
+          })
         )}
+        </PoolSection>
 
         {stakingRewardsExist && baseEmissions && (
           <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
