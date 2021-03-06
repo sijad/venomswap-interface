@@ -1,4 +1,4 @@
-import { ChainId, TokenAmount } from '@viperswap/sdk'
+import { Blockchain, ChainId, TokenAmount } from '@viperswap/sdk'
 import React, { useState } from 'react'
 import { Text } from 'rebass'
 import { NavLink } from 'react-router-dom'
@@ -11,7 +11,7 @@ import Logo from '../../assets/svg/viperswap/black.svg'
 import LogoDark from '../../assets/svg/viperswap/white.svg'
 import { useActiveWeb3React } from '../../hooks'
 import { useDarkModeManager } from '../../state/user/hooks'
-import { useETHBalances, useAggregateUniBalance } from '../../state/wallet/hooks'
+import { useETHBalances, useAggregateViperBalance } from '../../state/wallet/hooks'
 import { CardNoise } from '../earn/styled'
 import { CountUp } from 'use-count-up'
 import { TYPE, ExternalLink } from '../../theme'
@@ -28,11 +28,10 @@ import { useUserHasAvailableClaim } from '../../state/claim/hooks'
 import { useUserHasSubmittedClaim } from '../../state/transactions/hooks'
 import { Dots } from '../swap/styleds'
 import Modal from '../Modal'
-import UniBalanceContent from './UniBalanceContent'
+import ViperBalanceContent from './ViperBalanceContent'
 import usePrevious from '../../hooks/usePrevious'
-
-import { Blockchain } from '@viperswap/sdk'
-import { BLOCKCHAIN, BASE_CURRENCY } from '../../connectors'
+import { BASE_CURRENCY } from '../../connectors'
+import useBlockchain from '../../hooks/useBlockchain'
 
 const HeaderFrame = styled.div`
   display: grid;
@@ -138,7 +137,7 @@ const UNIAmount = styled(AccountElement)`
   height: 36px;
   font-weight: 500;
   background-color: ${({ theme }) => theme.bg3};
-  background: radial-gradient(174.47% 188.91% at 1.84% 0%, #ff007a 0%, #2172e5 100%), #edeef2;
+  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #005224 100%);
 `
 
 const UNIWrapper = styled.span`
@@ -299,6 +298,7 @@ const NETWORK_LABELS: { [chainId in ChainId]?: string } = {
 
 export default function Header() {
   const { account, chainId } = useActiveWeb3React()
+  const blockchain = useBlockchain()
   const { t } = useTranslation()
 
   const userEthBalance = useETHBalances(account ? [account] : [])?.[account ?? '']
@@ -311,7 +311,7 @@ export default function Header() {
 
   const { claimTxn } = useUserHasSubmittedClaim(account ?? undefined)
 
-  const aggregateBalance: TokenAmount | undefined = useAggregateUniBalance()
+  const aggregateBalance: TokenAmount | undefined = useAggregateViperBalance()
 
   const [showUniBalanceModal, setShowUniBalanceModal] = useState(false)
   const showClaimPopup = useShowClaimPopup()
@@ -323,7 +323,7 @@ export default function Header() {
     <HeaderFrame>
       <ClaimModal />
       <Modal isOpen={showUniBalanceModal} onDismiss={() => setShowUniBalanceModal(false)}>
-        <UniBalanceContent setShowUniBalanceModal={setShowUniBalanceModal} />
+        <ViperBalanceContent setShowUniBalanceModal={setShowUniBalanceModal} />
       </Modal>
       <HeaderRow>
         <Title href=".">
@@ -348,13 +348,18 @@ export default function Header() {
           >
             {t('pool')}
           </StyledNavLink>
-          <StyledNavLink id={`stake-nav-link`} to={'/viper'}>
-            VIPER
+          <StyledNavLink id={`stake-nav-link`} to={'/staking'}>
+            Staking
           </StyledNavLink>
-          <StyledNavLink id={`stake-nav-link`} to={'/vote'}>
-            Vote
+          <StyledNavLink id={`stake-nav-link`} to={'/viperPit'}>
+            ViperPit
           </StyledNavLink>
-          {BLOCKCHAIN === Blockchain.ETHEREUM && (
+          {blockchain === Blockchain.ETHEREUM && (
+            <StyledNavLink id={`stake-nav-link`} to={'/vote'}>
+              Vote
+            </StyledNavLink>
+          )}
+          {blockchain === Blockchain.ETHEREUM && (
             <StyledExternalLink id={`stake-nav-link`} href={'https://uniswap.info'}>
               Charts <span style={{ fontSize: '11px' }}>↗</span>
             </StyledExternalLink>
@@ -372,7 +377,7 @@ export default function Header() {
             <UNIWrapper onClick={toggleClaimModal}>
               <UNIAmount active={!!account && !availableClaim} style={{ pointerEvents: 'auto' }}>
                 <TYPE.white padding="0 2px">
-                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming UNI</Dots> : 'Claim VIPER'}
+                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming VIPER</Dots> : 'Claim VIPER'}
                 </TYPE.white>
               </UNIAmount>
               <CardNoise />

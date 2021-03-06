@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import ReactGA from 'react-ga'
 import styled from 'styled-components'
+import { Blockchain } from '@viperswap/sdk'
 import MetamaskIcon from '../../assets/images/metamask.png'
 import { ReactComponent as Close } from '../../assets/images/x.svg'
 import { fortmatic, injected, portis } from '../../connectors'
@@ -15,6 +16,7 @@ import { ApplicationModal } from '../../state/application/actions'
 import { useModalOpen, useWalletModalToggle } from '../../state/application/hooks'
 import { ExternalLink } from '../../theme'
 import AccountDetails from '../AccountDetails'
+import useBlockchain from '../../hooks/useBlockchain'
 
 import Modal from '../Modal'
 import Option from './Option'
@@ -127,6 +129,8 @@ export default function WalletModal({
 }) {
   // important that these are destructed from the account-specific web3-react context
   const { active, account, connector, activate, error } = useWeb3React()
+
+  const blockchain = useBlockchain()
 
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
 
@@ -351,8 +355,18 @@ export default function WalletModal({
           )}
           {walletView !== WALLET_VIEWS.PENDING && (
             <Blurb>
-              <span>New to Ethereum? &nbsp;</span>{' '}
-              <ExternalLink href="https://ethereum.org/wallets/">Learn more about wallets</ExternalLink>
+              {blockchain === Blockchain.ETHEREUM && (
+                <>
+                  <span>New to Ethereum? &nbsp;</span>{' '}
+                  <ExternalLink href="https://ethereum.org/wallets/">Learn more about wallets</ExternalLink>
+                </>
+              )}
+              {blockchain === Blockchain.HARMONY && (
+                <>
+                  <span>New to Harmony? &nbsp;</span>{' '}
+                  <ExternalLink href="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/metamask-wallet">Learn more about wallets</ExternalLink>
+                </>
+              )}
             </Blurb>
           )}
         </ContentWrapper>

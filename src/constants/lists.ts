@@ -17,7 +17,7 @@ const CMC_ALL_LIST = 'defi.cmc.eth'
 const CMC_STABLECOIN = 'stablecoin.cmc.eth'
 const KLEROS_LIST = 't2crtokens.eth'
 const GEMINI_LIST = 'https://www.gemini.com/uniswap/manifest.json'*/
-const VIPERSWAP_DEFAULT_LIST = 'https://raw.githubusercontent.com/ViperProtocol/viperswap-default-token-list/master/build/viperswap-default.tokenlist.json'
+const VIPERSWAP_DEFAULT_LIST = 'https://dvwecb5klcqus.cloudfront.net/viperswap/lists/viperswap-default.tokenlist.json'
 
 // lower index == higher priority for token import
 export const DEFAULT_LIST_OF_LISTS: string[] = [

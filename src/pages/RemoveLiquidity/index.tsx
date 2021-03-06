@@ -45,7 +45,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 
 import { BASE_CURRENCY, BASE_WRAPPED_CURRENCY } from '../../connectors'
 import { useRouterContractAddress } from '../../utils'
-import getBlockchain from '../../utils/getBlockchain'
+import useBlockchain from '../../hooks/useBlockchain'
 
 export default function RemoveLiquidity({
   history,
@@ -107,6 +107,7 @@ export default function RemoveLiquidity({
   const [approval, approveCallback] = useApproveCallback(parsedAmounts[Field.LIQUIDITY], v2RouterContractAddress)
 
   const isArgentWallet = useIsArgentWallet()
+  const blockchain = useBlockchain()
 
   async function onAttemptToApprove() {
     if (!pairContract || !pair || !library || !deadline) throw new Error('missing dependencies')
@@ -117,66 +118,69 @@ export default function RemoveLiquidity({
       return approveCallback()
     }
 
-    const blockchain = getBlockchain(chainId)
     const signatureEnabled = [Blockchain.ETHEREUM, Blockchain.BINANCE_SMART_CHAIN].includes(blockchain)
 
     if (signatureEnabled) {
-    // try to gather a signature for permission
-    const nonce = await pairContract.nonces(account)
+      // try to gather a signature for permission
+      const nonce = await pairContract.nonces(account)
 
-    const EIP712Domain = [
-      { name: 'name', type: 'string' },
-      { name: 'version', type: 'string' },
-      { name: 'chainId', type: 'uint256' },
-      { name: 'verifyingContract', type: 'address' }
-    ]
-    const domain = {
-      name: 'Viper LP Token',
-      version: '1',
-      chainId: chainId,
-      verifyingContract: pair.liquidityToken.address
-    }
-    const Permit = [
-      { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' },
-      { name: 'value', type: 'uint256' },
-      { name: 'nonce', type: 'uint256' },
-      { name: 'deadline', type: 'uint256' }
-    ]
-    const message = {
-      owner: account,
-      spender: v2RouterContractAddress,
-      value: liquidityAmount.raw.toString(),
-      nonce: nonce.toHexString(),
-      deadline: deadline.toNumber()
-    }
-    const data = JSON.stringify({
-      types: {
-        EIP712Domain,
-        Permit
-      },
-      domain,
-      primaryType: 'Permit',
-      message
-    })
+      const EIP712Domain = [
+        { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' }
+      ]
 
-    library
-      .send('eth_signTypedData_v4', [account, data])
-      .then(splitSignature)
-      .then(signature => {
-        setSignatureData({
-          v: signature.v,
-          r: signature.r,
-          s: signature.s,
-          deadline: deadline.toNumber()
+      const domain = {
+        name: 'Viper LP Token',
+        version: '1',
+        chainId: chainId,
+        verifyingContract: pair.liquidityToken.address
+      }
+
+      const Permit = [
+        { name: 'owner', type: 'address' },
+        { name: 'spender', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'deadline', type: 'uint256' }
+      ]
+
+      const message = {
+        owner: account,
+        spender: v2RouterContractAddress,
+        value: liquidityAmount.raw.toString(),
+        nonce: nonce.toHexString(),
+        deadline: deadline.toNumber()
+      }
+
+      const data = JSON.stringify({
+        types: {
+          EIP712Domain,
+          Permit
+        },
+        domain,
+        primaryType: 'Permit',
+        message
+      })
+
+      library
+        .send('eth_signTypedData_v4', [account, data])
+        .then(splitSignature)
+        .then(signature => {
+          setSignatureData({
+            v: signature.v,
+            r: signature.r,
+            s: signature.s,
+            deadline: deadline.toNumber()
+          })
         })
-      })
-      .catch(error => {
-        // for all errors other than 4001 (EIP-1193 user rejected request), fall back to manual approve
-        if (error?.code !== 4001) {
-          approveCallback()
-        }
-      })
+        .catch(error => {
+          // for all errors other than 4001 (EIP-1193 user rejected request), fall back to manual approve
+          if (error?.code !== 4001) {
+            approveCallback()
+          }
+        })
     } else {
       return approveCallback()
     }

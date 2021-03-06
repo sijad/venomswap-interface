@@ -6,14 +6,14 @@ export default function baseCurrencies(chainId: ChainId | undefined): Currency[]
 
   if (chainId) {
     switch (chainId) {
-      case 1666600000:
-      case 1666700000:
-        currencies.push(HARMONY)
-        currencies.push(WETH[chainId])
-        break
       case 56:
       case 97:
         currencies.push(BINANCE_COIN)
+        currencies.push(WETH[chainId])
+        break
+      case 1666600000:
+      case 1666700000:
+        currencies.push(HARMONY)
         currencies.push(WETH[chainId])
         break
       default:

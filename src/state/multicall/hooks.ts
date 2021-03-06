@@ -168,7 +168,7 @@ export function useSingleContractMultipleData(
 
   const calls = useMemo(
     () =>
-      contract && fragment && callInputs && callInputs.length > 0
+      contract && fragment && isValidMethodArgs(callInputs)
         ? callInputs.map<Call>(inputs => {
             return {
               address: contract.address,

@@ -1,6 +1,6 @@
 {
-  "name": "@uniswap/interface",
-  "description": "Uniswap Interface",
+  "name": "@viperswap/interface",
+  "description": "Viperswap Interface",
   "homepage": ".",
   "private": true,
   "devDependencies": {
@@ -30,10 +30,11 @@
     "@uniswap/governance": "^1.0.2",
     "@uniswap/liquidity-staker": "^1.0.2",
     "@uniswap/merkle-distributor": "1.0.1",
-    "@viperswap/sdk": "^1.0.0",
     "@uniswap/token-lists": "^1.0.0-beta.19",
-    "@viperswap/core": "^1.0.1",
-    "@viperswap/periphery": "^1.0.0",
+    "@viperswap/contracts": "^1.0.6",
+    "@viperswap/core": "^1.0.3",
+    "@viperswap/periphery": "^1.0.2",
+    "@viperswap/sdk": "^1.0.5",
     "@web3-react/core": "^6.0.9",
     "@web3-react/fortmatic-connector": "^6.0.9",
     "@web3-react/injected-connector": "^6.0.7",

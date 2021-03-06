@@ -1,21 +1,87 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import { ChainId, JSBI, Percent, Token, WETH } from '@viperswap/sdk'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 
 import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
 
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+export const ZERO_ONE_ADDRESS = '0x0000000000000000000000000000000000000001'
+
 export const ROUTER_ADDRESSES: { [chainId in ChainId]: string } = {
-  [ChainId.MAINNET]: '0x0000000000000000000000000000000000000001',
-  [ChainId.ROPSTEN]: '0x0000000000000000000000000000000000000001',
-  [ChainId.RINKEBY]: '0x0000000000000000000000000000000000000001',
-  [ChainId.GÖRLI]: '0x0000000000000000000000000000000000000001',
-  [ChainId.KOVAN]: '0x0000000000000000000000000000000000000001',
-  [ChainId.BSC_MAINNET]: '0x0000000000000000000000000000000000000001',
-  [ChainId.BSC_TESTNET]: '0x0000000000000000000000000000000000000001',
-  [ChainId.HARMONY_TESTNET]: '0x400d1219d9bA3C8Fe1CBDC5bE14342B50B035249',
-  [ChainId.HARMONY_MAINNET]: '0x0000000000000000000000000000000000000001'
+  [ChainId.MAINNET]: ZERO_ONE_ADDRESS,
+  [ChainId.ROPSTEN]: ZERO_ONE_ADDRESS,
+  [ChainId.RINKEBY]: ZERO_ONE_ADDRESS,
+  [ChainId.GÖRLI]: ZERO_ONE_ADDRESS,
+  [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
+  [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
+  [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
+  [ChainId.HARMONY_MAINNET]: '0x7cdd6b1b4762Fa4daaECd545C50131b34bb60334',
+  [ChainId.HARMONY_TESTNET]: '0xC88fCd9aD051A5d924f1aC90894f73d7dc1C25a4'
 }
 
-export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+export const GOVERNANCE_ADDRESS = '0x5e4be8Bc9637f0EAA1A755019e06A68ce081D58F'
+
+export const TIMELOCK_ADDRESS = '0x1a9C8182C09F50C8318d769245beA52c32BE35BC'
+
+export const VIPER: { [chainId in ChainId]: Token } = {
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
+  [ChainId.HARMONY_MAINNET]: new Token(
+    ChainId.HARMONY_MAINNET,
+    '0xF0dD44b40e1ADf4719Dd364684a3bE5FACf02e3A',
+    18,
+    'VIPER',
+    'Viper'
+  ),
+  [ChainId.HARMONY_TESTNET]: new Token(
+    ChainId.HARMONY_TESTNET,
+    '0x289E6Dc9e06dd5A0d35F957F8683B527794695C3',
+    18,
+    'VIPER',
+    'Viper'
+  )
+}
+
+export const MASTER_BREEDER: { [chainId in ChainId]: string } = {
+  [ChainId.MAINNET]: ZERO_ONE_ADDRESS,
+  [ChainId.RINKEBY]: ZERO_ONE_ADDRESS,
+  [ChainId.ROPSTEN]: ZERO_ONE_ADDRESS,
+  [ChainId.GÖRLI]: ZERO_ONE_ADDRESS,
+  [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
+  [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
+  [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
+  [ChainId.HARMONY_MAINNET]: '0x6185A3815389046Dd5D3F071652800ec042F53e0',
+  [ChainId.HARMONY_TESTNET]: '0xA7d5BCE6f52c528AdC06D2120AC8826Fa7b8cC0e'
+}
+
+export const VIPER_PIT: { [chainId in ChainId]: Token } = {
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
+  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
+  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
+  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
+  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
+  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
+  [ChainId.HARMONY_MAINNET]: new Token(
+    ChainId.HARMONY_MAINNET,
+    '0x9bE5C60D32d2398Abe3c0426E2E2F539845E9881',
+    18,
+    'xVIPER',
+    'ViperPit'
+  ),
+  [ChainId.HARMONY_TESTNET]: new Token(
+    ChainId.HARMONY_TESTNET,
+    '0x03c37Caa5CEa58AD86FF6ca1Eb49033D6De56E2e',
+    18,
+    'xVIPER',
+    'ViperPit'
+  )
+}
 
 export { PRELOADED_PROPOSALS } from './proposals'
 
@@ -37,28 +103,12 @@ export const AVERAGE_BLOCK_TIME_IN_SECS = 13
 export const PROPOSAL_LENGTH_IN_BLOCKS = 40_320
 export const PROPOSAL_LENGTH_IN_SECS = AVERAGE_BLOCK_TIME_IN_SECS * PROPOSAL_LENGTH_IN_BLOCKS
 
-export const GOVERNANCE_ADDRESS = '0x5e4be8Bc9637f0EAA1A755019e06A68ce081D58F'
-
-export const TIMELOCK_ADDRESS = '0x1a9C8182C09F50C8318d769245beA52c32BE35BC'
-
-const UNI_ADDRESS = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
-export const UNI: { [chainId in ChainId]: Token } = {
-  [ChainId.MAINNET]: new Token(ChainId.MAINNET, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, UNI_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.BSC_MAINNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.BSC_TESTNET]: new Token(ChainId.HARMONY_MAINNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.HARMONY_MAINNET]: new Token(ChainId.HARMONY_MAINNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap'),
-  [ChainId.HARMONY_TESTNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ADDRESS, 18, 'UNI', 'Uniswap')
-}
-
 export const COMMON_CONTRACT_NAMES: { [address: string]: string } = {
-  [UNI_ADDRESS]: 'UNI',
   [GOVERNANCE_ADDRESS]: 'Governance',
   [TIMELOCK_ADDRESS]: 'Timelock'
 }
+
+export const FALLBACK_GAS_LIMIT = BigNumber.from(6721900)
 
 // TODO: specify merkle distributor for mainnet
 export const MERKLE_DISTRIBUTOR_ADDRESS: { [chainId in ChainId]?: string } = {
