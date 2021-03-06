@@ -57,7 +57,7 @@ export default function AwaitingRewards() {
           {days ? `${days} ${days === 1 ? 'day' : 'days'}, ` : ''}
           {hours ? `${hours} ${hours === 1 ? 'hour' : 'hours'}, ` : ''}
           {minutes ? `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ` : ''}
-          {seconds ? `and ${seconds} ${seconds === 1 ? 'second' : 'seconds'}` : ''}
+          {seconds ? `${minutes && minutes > 0 ? 'and ' : ''}${seconds} ${seconds === 1 ? 'second' : 'seconds'}` : ''}
           </b> from now.
           <br />
           <br />

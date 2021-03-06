@@ -109,7 +109,7 @@ export default function ViperBalanceContent({ setShowUniBalanceModal }: { setSho
                 <RowBetween>
                   <TYPE.white color="white">Unlocked rewards:</TYPE.white>
                   <TYPE.white color="white">
-                    {unlockedViperToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
+                    {unlockedViperToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
                     {unlockedViperToClaim && unlockedViperToClaim.greaterThan('0') && (
                       <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/staking">
                         (claim)
@@ -120,7 +120,7 @@ export default function ViperBalanceContent({ setShowUniBalanceModal }: { setSho
                 <RowBetween>
                   <TYPE.white color="white">Locked rewards:</TYPE.white>
                   <TYPE.white color="white">
-                    {lockedViperToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
+                    {lockedViperToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
                     {lockedViperToClaim && lockedViperToClaim.greaterThan('0') && (
                       <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/staking">
                         (claim)

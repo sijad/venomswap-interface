@@ -15,7 +15,7 @@ export const ROUTER_ADDRESSES: { [chainId in ChainId]: string } = {
   [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
-  [ChainId.HARMONY_MAINNET]: '0x8c4F280ab4A10fAc7d308e2AF1634fC372415DeE',
+  [ChainId.HARMONY_MAINNET]: '0x7cdd6b1b4762Fa4daaECd545C50131b34bb60334',
   [ChainId.HARMONY_TESTNET]: '0xC88fCd9aD051A5d924f1aC90894f73d7dc1C25a4'
 }
 
@@ -33,7 +33,7 @@ export const VIPER: { [chainId in ChainId]: Token } = {
   [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
-    '0x121a8795E1c4657c310504f2D61D9932eCCd69f6',
+    '0xF0dD44b40e1ADf4719Dd364684a3bE5FACf02e3A',
     18,
     'VIPER',
     'Viper'
@@ -55,7 +55,7 @@ export const MASTER_BREEDER: { [chainId in ChainId]: string } = {
   [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
-  [ChainId.HARMONY_MAINNET]: '0x78306d13789b699ed3E17b4383Dc4b0a55287810',
+  [ChainId.HARMONY_MAINNET]: '0x6185A3815389046Dd5D3F071652800ec042F53e0',
   [ChainId.HARMONY_TESTNET]: '0xA7d5BCE6f52c528AdC06D2120AC8826Fa7b8cC0e'
 }
 
@@ -69,7 +69,7 @@ export const VIPER_PIT: { [chainId in ChainId]: Token } = {
   [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
-    '0xA9da4187F8b20DC012cB7575F2E75A12c56220eD',
+    '0x9bE5C60D32d2398Abe3c0426E2E2F539845E9881',
     18,
     'xVIPER',
     'ViperPit'
