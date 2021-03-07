@@ -1,4 +1,4 @@
-import { JSBI, Token, TokenAmount } from '@viperswap/sdk'
+import { JSBI, Token, TokenAmount } from '@venomswap/sdk'
 import { BigNumber } from 'ethers'
 import { STAKING_GENESIS } from '../state/stake/hooks'
 

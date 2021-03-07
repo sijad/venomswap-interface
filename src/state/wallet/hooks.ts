@@ -1,5 +1,5 @@
-import { VIPER } from './../../constants/index'
-import { Currency, CurrencyAmount, JSBI, Token, TokenAmount, DEFAULT_CURRENCIES } from '@viperswap/sdk'
+import { GOVERNANCE_TOKEN } from './../../constants/index'
+import { Currency, CurrencyAmount, JSBI, Token, TokenAmount, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import { useMemo } from 'react'
 import ERC20_INTERFACE from '../../constants/abis/erc20'
 import { useAllTokens } from '../../hooks/Tokens'
@@ -8,7 +8,7 @@ import { useMulticallContract } from '../../hooks/useContract'
 import { isAddress } from '../../utils'
 import { useSingleContractMultipleData, useMultipleContractSingleData } from '../multicall/hooks'
 import { useUserUnclaimedAmount } from '../claim/hooks'
-import { useTotalUnlockedViperEarned } from '../stake/hooks'
+import { useTotalUnlockedGovTokensEarned } from '../stake/hooks'
 
 /**
  * Returns a map of the given addresses to their eventually consistent ETH balances.
@@ -147,22 +147,22 @@ export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | u
 }
 
 // get the total owned, unclaimed, and unharvested UNI for account
-export function useAggregateViperBalance(): TokenAmount | undefined {
+export function useAggregateGovTokenBalance(): TokenAmount | undefined {
   const { account, chainId } = useActiveWeb3React()
 
-  const viper = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
 
-  const viperBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, viper)
-  const viperUnclaimed: TokenAmount | undefined = useUserUnclaimedAmount(account)
-  const viperUnHarvested: TokenAmount | undefined = useTotalUnlockedViperEarned()
+  const govTokenBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, govToken)
+  const govTokenUnclaimed: TokenAmount | undefined = useUserUnclaimedAmount(account)
+  const govTokenUnHarvested: TokenAmount | undefined = useTotalUnlockedGovTokensEarned()
 
-  if (!viper) return undefined
+  if (!govToken) return undefined
 
   return new TokenAmount(
-    viper,
+    govToken,
     JSBI.add(
-      JSBI.add(viperBalance?.raw ?? JSBI.BigInt(0), viperUnclaimed?.raw ?? JSBI.BigInt(0)),
-      viperUnHarvested?.raw ?? JSBI.BigInt(0)
+      JSBI.add(govTokenBalance?.raw ?? JSBI.BigInt(0), govTokenUnclaimed?.raw ?? JSBI.BigInt(0)),
+      govTokenUnHarvested?.raw ?? JSBI.BigInt(0)
     )
   )
 }

@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react'
-import { TokenAmount } from '@viperswap/sdk'
+import { TokenAmount } from '@venomswap/sdk'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 
-//import { JSBI } from '@viperswap/sdk'
-//import { JSBI, TokenAmount, ETHER } from '@viperswap/sdk'
+//import { JSBI } from '@venomswap/sdk'
+//import { JSBI, TokenAmount, ETHER } from '@venomswap/sdk'
 import { RouteComponentProps } from 'react-router-dom'
 import { useWalletModalToggle } from '../../state/application/hooks'
 import { TYPE } from '../../theme'
@@ -21,9 +21,9 @@ import { CountUp } from 'use-count-up'
 
 import usePrevious from '../../hooks/usePrevious'
 
-import { VIPER, VIPER_PIT } from '../../constants'
-import { VIPER_INTERFACE } from '../../constants/abis/viper'
-import { VIPER_PIT_INTERFACE } from '../../constants/abis/viperPit'
+import { GOVERNANCE_TOKEN, PIT } from '../../constants'
+import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
+import { PIT_INTERFACE } from '../../constants/abis/pit'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -99,31 +99,26 @@ export default function ViperPit({
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
 
-  const viper = chainId ? VIPER[chainId] : undefined
-  const viperPit = chainId ? VIPER_PIT[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const pit = chainId ? PIT[chainId] : undefined
 
-  const viperBalance: TokenAmount | undefined = useTokenBalance(
+  const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
-    viper,
+    govToken,
     'balanceOf',
-    VIPER_INTERFACE
+    GOVERNANCE_TOKEN_INTERFACE
   )
 
-  const viperPitBalance: TokenAmount | undefined = useTokenBalance(
-    account ?? undefined,
-    viperPit,
-    'balanceOf',
-    VIPER_PIT_INTERFACE
-  )
+  const pitBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, pit, 'balanceOf', PIT_INTERFACE)
 
-  const userLiquidityStaked = viperPitBalance
-  const userLiquidityUnstaked = viperBalance
+  const userLiquidityStaked = pitBalance
+  const userLiquidityUnstaked = govTokenBalance
 
   // toggle for staking modal and unstaking modal
   const [showStakingModal, setShowStakingModal] = useState(false)
   const [showUnstakingModal, setShowUnstakingModal] = useState(false)
 
-  const countUpAmount = viperPitBalance?.toFixed(6) ?? '0'
+  const countUpAmount = pitBalance?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
 
   const toggleWalletModal = useWalletModalToggle()
@@ -139,19 +134,19 @@ export default function ViperPit({
   return (
     <PageWrapper gap="lg" justify="center">
 
-      {viper && (
+      {govToken && (
         <>
           <StakingModal
             isOpen={showStakingModal}
             onDismiss={() => setShowStakingModal(false)}
-            stakingToken={viper}
+            stakingToken={govToken}
             userLiquidityUnstaked={userLiquidityUnstaked}
           />
           <ModifiedUnstakingModal
             isOpen={showUnstakingModal}
             onDismiss={() => setShowUnstakingModal(false)}
             userLiquidityStaked={userLiquidityStaked}
-            stakingToken={viper}
+            stakingToken={govToken}
           />
         </>
       )}
@@ -225,7 +220,7 @@ export default function ViperPit({
         )}
         {account && (
           <TYPE.main>
-            {viperBalance?.toFixed(2, { groupSeparator: ',' })} VIPER tokens available to deposit to the Viper Pit
+            {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} VIPER tokens available to deposit to the Viper Pit
           </TYPE.main>
         )}
       </TopSection>

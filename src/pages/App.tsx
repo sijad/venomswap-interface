@@ -32,7 +32,7 @@ import { OpenClaimAddressModalAndRedirectToSwap, RedirectPathToSwapOnly, Redirec
 import Vote from './Vote'
 import VotePage from './Vote/VotePage'
 
-import { Blockchain } from '@viperswap/sdk'
+import { Blockchain } from '@venomswap/sdk'
 import useBlockchain from '../hooks/useBlockchain'
 
 const AppWrapper = styled.div`

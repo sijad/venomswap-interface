@@ -1,4 +1,4 @@
-import { Currency, Token } from '@viperswap/sdk'
+import { Currency, Token } from '@venomswap/sdk'
 import React, { useCallback, useEffect, useState } from 'react'
 import useLast from '../../hooks/useLast'
 import Modal from '../Modal'

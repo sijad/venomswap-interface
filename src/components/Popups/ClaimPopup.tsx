@@ -1,4 +1,4 @@
-import { TokenAmount } from '@viperswap/sdk'
+import { TokenAmount } from '@venomswap/sdk'
 import React, { useEffect } from 'react'
 import { X } from 'react-feather'
 import styled, { keyframes } from 'styled-components'

@@ -1,6 +1,6 @@
-import { TokenAmount, Pair, Currency } from '@viperswap/sdk'
+import { TokenAmount, Pair, Currency } from '@venomswap/sdk'
 import { useMemo } from 'react'
-import { abi as IUniswapV2PairABI } from '@viperswap/core/build/IUniswapV2Pair.json'
+import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
 import { Interface } from '@ethersproject/abi'
 import { useActiveWeb3React } from '../hooks'
 

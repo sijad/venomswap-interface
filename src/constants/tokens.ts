@@ -1,4 +1,4 @@
-import { ChainId, Token } from '@viperswap/sdk'
+import { ChainId, Token } from '@venomswap/sdk'
 import { ZERO_ONE_ADDRESS } from './index'
 
 export const BUSD: { [chainId in ChainId]: Token } = {

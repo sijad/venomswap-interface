@@ -1,4 +1,4 @@
-import { Blockchain } from '@viperswap/sdk'
+import { Blockchain } from '@venomswap/sdk'
 import getBlockchain from '../utils/getBlockchain'
 import { useActiveWeb3React } from './index'
 

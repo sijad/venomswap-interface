@@ -8,7 +8,7 @@ import { TYPE, CloseIcon } from '../../theme'
 import { ButtonConfirmed, ButtonError } from '../Button'
 import ProgressCircles from '../ProgressSteps'
 import CurrencyInputPanel from '../CurrencyInputPanel'
-import { TokenAmount, Token } from '@viperswap/sdk'
+import { TokenAmount, Token } from '@venomswap/sdk'
 import { useActiveWeb3React } from '../../hooks'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { useApproveCallback, ApprovalState } from '../../hooks/useApproveCallback'
@@ -17,7 +17,7 @@ import { useDerivedStakeInfo } from '../../state/stake/hooks'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
-import { useViperPitContract } from '../../hooks/useContract'
+import { usePitContract } from '../../hooks/useContract'
 import { calculateGasMargin } from '../../utils'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
@@ -58,20 +58,20 @@ export default function StakingModal({ isOpen, onDismiss, stakingToken, userLiqu
     onDismiss()
   }, [onDismiss])
 
-  const viperPit = useViperPitContract()
+  const pit = usePitContract()
 
   // approval data for stake
   const deadline = useTransactionDeadline()
-  const [approval, approveCallback] = useApproveCallback(parsedAmount, viperPit?.address)
+  const [approval, approveCallback] = useApproveCallback(parsedAmount, pit?.address)
 
   async function onStake() {
     setAttempting(true)
-    if (viperPit && parsedAmount && deadline) {
+    if (pit && parsedAmount && deadline) {
       if (approval === ApprovalState.APPROVED) {
         const formattedAmount = `0x${parsedAmount.raw.toString(16)}`
-        const estimatedGas = await viperPit.estimateGas.enter(formattedAmount)
+        const estimatedGas = await pit.estimateGas.enter(formattedAmount)
 
-        await viperPit
+        await pit
           .enter(formattedAmount, {
             gasLimit: calculateGasMargin(estimatedGas)
           })
@@ -105,7 +105,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingToken, userLiqu
   }, [maxAmountInput, onUserInput])
 
   async function onAttemptToApprove() {
-    if (!viperPit || !library || !deadline) throw new Error('missing dependencies')
+    if (!pit || !library || !deadline) throw new Error('missing dependencies')
     const liquidityAmount = parsedAmount
     if (!liquidityAmount) throw new Error('missing liquidity amount')
 

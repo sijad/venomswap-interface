@@ -1,23 +1,23 @@
-import { ChainId, TokenAmount } from '@viperswap/sdk'
+import { ChainId, TokenAmount } from '@venomswap/sdk'
 import React from 'react'
 //import React, { useMemo } from 'react'
 import { X } from 'react-feather'
 import styled from 'styled-components'
 import tokenLogo from '../../assets/images/token-logo.png'
-import { VIPER } from '../../constants'
-import { useViperSupply } from '../../data/TotalSupply'
+import { GOVERNANCE_TOKEN } from '../../constants'
+import { useGovTokenSupply } from '../../data/TotalSupply'
 import { useActiveWeb3React } from '../../hooks'
 //import { useMerkleDistributorContract } from '../../hooks/useContract'
 //import useCurrentBlockTimestamp from '../../hooks/useCurrentBlockTimestamp'
-import { useTotalLockedViperEarned, useTotalUnlockedViperEarned } from '../../state/stake/hooks'
-import { useAggregateViperBalance, useTokenBalance } from '../../state/wallet/hooks'
+import { useTotalLockedGovTokensEarned, useTotalUnlockedGovTokensEarned } from '../../state/stake/hooks'
+import { useAggregateGovTokenBalance, useTokenBalance } from '../../state/wallet/hooks'
 import { ExternalLink, StyledInternalLink, TYPE, UniTokenAnimated } from '../../theme'
 //import { computeUniCirculation } from '../../utils/computeUniCirculation'
 import useUSDCPrice from '../../utils/useUSDCPrice'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
 import { Break, CardBGImage, CardNoise, CardSection, DataCard } from '../earn/styled'
-import { VIPER_INTERFACE } from '../../constants/abis/viper'
+import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -42,34 +42,34 @@ const StyledClose = styled(X)`
 /**
  * Content for balance stats modal
  */
-export default function ViperBalanceContent({ setShowUniBalanceModal }: { setShowUniBalanceModal: any }) {
+export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { setShowUniBalanceModal: any }) {
   const { account, chainId } = useActiveWeb3React()
-  const viper = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
 
-  const total = useAggregateViperBalance()
-  const viperBalance: TokenAmount | undefined = useTokenBalance(
+  const total = useAggregateGovTokenBalance()
+  const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
-    viper,
+    govToken,
     'balanceOf',
-    VIPER_INTERFACE
+    GOVERNANCE_TOKEN_INTERFACE
   )
-  const viperLockedBalance: TokenAmount | undefined = useTokenBalance(
+  const govTokenLockedBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
-    viper,
+    govToken,
     'lockOf',
-    VIPER_INTERFACE
+    GOVERNANCE_TOKEN_INTERFACE
   )
-  const viperTotalBalance: TokenAmount | undefined = useTokenBalance(
+  const govTokenTotalBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
-    viper,
+    govToken,
     'totalBalanceOf',
-    VIPER_INTERFACE
+    GOVERNANCE_TOKEN_INTERFACE
   )
-  const lockedViperToClaim: TokenAmount | undefined = useTotalLockedViperEarned()
-  const unlockedViperToClaim: TokenAmount | undefined = useTotalUnlockedViperEarned()
-  const totalSupply: TokenAmount | undefined = useViperSupply()
-  const totalUnlockedSupply: TokenAmount | undefined = useViperSupply('unlockedSupply')
-  const viperPrice = useUSDCPrice(viper)
+  const lockedGovTokensToClaim: TokenAmount | undefined = useTotalLockedGovTokensEarned()
+  const unlockedGovTokensToClaim: TokenAmount | undefined = useTotalUnlockedGovTokensEarned()
+  const totalSupply: TokenAmount | undefined = useGovTokenSupply()
+  const totalUnlockedSupply: TokenAmount | undefined = useGovTokenSupply('unlockedSupply')
+  const govTokenPrice = useUSDCPrice(govToken)
   /*const blockTimestamp = useCurrentBlockTimestamp()
   const unclaimedUni = useTokenBalance(useMerkleDistributorContract()?.address, viper)
   const circulation: TokenAmount | undefined = useMemo(
@@ -104,13 +104,13 @@ export default function ViperBalanceContent({ setShowUniBalanceModal }: { setSho
               <AutoColumn gap="md">
                 <RowBetween>
                   <TYPE.white color="white">Balance:</TYPE.white>
-                  <TYPE.white color="white">{viperBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">{govTokenBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
                 <RowBetween>
                   <TYPE.white color="white">Unlocked rewards:</TYPE.white>
                   <TYPE.white color="white">
-                    {unlockedViperToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
-                    {unlockedViperToClaim && unlockedViperToClaim.greaterThan('0') && (
+                    {unlockedGovTokensToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
+                    {unlockedGovTokensToClaim && unlockedGovTokensToClaim.greaterThan('0') && (
                       <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/staking">
                         (claim)
                       </StyledInternalLink>
@@ -120,8 +120,8 @@ export default function ViperBalanceContent({ setShowUniBalanceModal }: { setSho
                 <RowBetween>
                   <TYPE.white color="white">Locked rewards:</TYPE.white>
                   <TYPE.white color="white">
-                    {lockedViperToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
-                    {lockedViperToClaim && lockedViperToClaim.greaterThan('0') && (
+                    {lockedGovTokensToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
+                    {lockedGovTokensToClaim && lockedGovTokensToClaim.greaterThan('0') && (
                       <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/staking">
                         (claim)
                       </StyledInternalLink>
@@ -130,11 +130,11 @@ export default function ViperBalanceContent({ setShowUniBalanceModal }: { setSho
                 </RowBetween>
                 <RowBetween>
                   <TYPE.white color="white">Locked Balance:</TYPE.white>
-                  <TYPE.white color="white">{viperLockedBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">{govTokenLockedBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
                 <RowBetween>
                   <TYPE.white color="white">Total Balance:</TYPE.white>
-                  <TYPE.white color="white">{viperTotalBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">{govTokenTotalBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
                 </RowBetween>
               </AutoColumn>
             </CardSection>
@@ -143,10 +143,10 @@ export default function ViperBalanceContent({ setShowUniBalanceModal }: { setSho
         )}
         <CardSection gap="sm">
           <AutoColumn gap="md">
-            {viper && viper.chainId === ChainId.MAINNET ? (
+            {govToken && govToken.chainId === ChainId.MAINNET ? (
               <RowBetween>
                 <TYPE.white color="white">VIPER price:</TYPE.white>
-                <TYPE.white color="white">${viperPrice?.toFixed(2) ?? '-'}</TYPE.white>
+                <TYPE.white color="white">${govTokenPrice?.toFixed(2) ?? '-'}</TYPE.white>
               </RowBetween>
             ) : null}
             <RowBetween>
@@ -157,8 +157,8 @@ export default function ViperBalanceContent({ setShowUniBalanceModal }: { setSho
               <TYPE.white color="white">Total Supply</TYPE.white>
               <TYPE.white color="white">{totalSupply?.toFixed(0, { groupSeparator: ',' })}</TYPE.white>
             </RowBetween>
-            {viper && viper.chainId === ChainId.MAINNET ? (
-              <ExternalLink href={`https://uniswap.info/token/${viper.address}`}>View UNI Analytics</ExternalLink>
+            {govToken && govToken.chainId === ChainId.MAINNET ? (
+              <ExternalLink href={`https://uniswap.info/token/${govToken.address}`}>View UNI Analytics</ExternalLink>
             ) : null}
           </AutoColumn>
         </CardSection>

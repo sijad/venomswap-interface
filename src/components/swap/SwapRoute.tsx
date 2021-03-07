@@ -1,4 +1,4 @@
-import { Trade } from '@viperswap/sdk'
+import { Trade } from '@venomswap/sdk'
 import React, { Fragment, memo, useContext } from 'react'
 import { ChevronRight } from 'react-feather'
 import { Flex } from 'rebass'

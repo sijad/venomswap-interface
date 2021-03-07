@@ -1,5 +1,5 @@
-import { VIPER, PRELOADED_PROPOSALS } from './../../constants/index'
-import { TokenAmount } from '@viperswap/sdk'
+import { GOVERNANCE_TOKEN, PRELOADED_PROPOSALS } from './../../constants/index'
+import { TokenAmount } from '@venomswap/sdk'
 import { isAddress } from 'ethers/lib/utils'
 import { useGovernanceContract, useUniContract } from '../../hooks/useContract'
 import { useSingleCallResult, useSingleContractMultipleData } from '../multicall/hooks'
@@ -160,9 +160,9 @@ export function useUserVotes(): TokenAmount | undefined {
   const uniContract = useUniContract()
 
   // check for available votes
-  const uni = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
   const votes = useSingleCallResult(uniContract, 'getCurrentVotes', [account ?? undefined])?.result?.[0]
-  return votes && uni ? new TokenAmount(uni, votes) : undefined
+  return votes && govToken ? new TokenAmount(govToken, votes) : undefined
 }
 
 // fetch available votes as of block (usually proposal start block)
@@ -171,10 +171,10 @@ export function useUserVotesAsOfBlock(block: number | undefined): TokenAmount | 
   const uniContract = useUniContract()
 
   // check for available votes
-  const uni = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
   const votes = useSingleCallResult(uniContract, 'getPriorVotes', [account ?? undefined, block ?? undefined])
     ?.result?.[0]
-  return votes && uni ? new TokenAmount(uni, votes) : undefined
+  return votes && govToken ? new TokenAmount(govToken, votes) : undefined
 }
 
 export function useDelegateCallback(): (delegatee: string | undefined) => undefined | Promise<string> {

@@ -1,4 +1,4 @@
-import { ChainId, Pair, Token } from '@viperswap/sdk'
+import { ChainId, Pair, Token } from '@venomswap/sdk'
 import flatMap from 'lodash.flatmap'
 import ReactGA from 'react-ga'
 import { useCallback, useMemo } from 'react'
@@ -199,7 +199,7 @@ export function useURLWarningToggle(): () => void {
  * @param tokenB the other token
  */
 export function toV2LiquidityToken([tokenA, tokenB]: [Token, Token]): Token {
-  return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB), 18, 'VIPER-LP', 'Viper LP Token')
+  return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB), 18, 'VENOM-LP', 'Viper LP Token')
 }
 
 /**

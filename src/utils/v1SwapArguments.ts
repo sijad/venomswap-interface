@@ -1,5 +1,5 @@
 import { MaxUint256 } from '@ethersproject/constants'
-import { CurrencyAmount, SwapParameters, Token, Trade, TradeOptionsDeadline, TradeType, DEFAULT_CURRENCIES } from '@viperswap/sdk'
+import { CurrencyAmount, SwapParameters, Token, Trade, TradeOptionsDeadline, TradeType, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import { getTradeVersion } from '../data/V1'
 import { Version } from '../hooks/useToggledVersion'
 

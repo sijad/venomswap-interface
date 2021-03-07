@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
-import { Token, TokenAmount, WETH } from '@viperswap/sdk'
+import { Token, TokenAmount, WETH } from '@venomswap/sdk'
 
 import { Text } from 'rebass'
 import { AutoColumn } from '../Column'
