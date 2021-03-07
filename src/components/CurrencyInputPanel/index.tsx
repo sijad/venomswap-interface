@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount, Pair } from '@viperswap/sdk'
+import { Currency, CurrencyAmount, Pair } from '@venomswap/sdk'
 import React, { useState, useCallback } from 'react'
 import styled from 'styled-components'
 import { darken } from 'polished'

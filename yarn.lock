@@ -2532,9 +2532,9 @@
   integrity sha512-1HcDas8SEj4z1Wc696tH56G8OlRaH/sqZOynNNB+HF0WOeXPaxTtbYzJY2oEfiUxjSKjhCKr+MvR7dCHcEelug==
 
 "@types/qs@^6.9.2":
-  version "6.9.5"
-  resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.5.tgz#434711bdd49eb5ee69d90c1d67c354a9a8ecb18b"
-  integrity sha512-/JHkVHtx/REVG0VVToGRGH2+23hsYLHdyG+GrvoUGlGAd0ErauXDyvHtRI/7H7mzLm+tBCKA7pfcpkQ1lf58iQ==
+  version "6.9.6"
+  resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.6.tgz#df9c3c8b31a247ec315e6996566be3171df4b3b1"
+  integrity sha512-0/HnwIfW4ki2D8L8c9GVcG5I72s9jP5GSLVF0VIXDW00kmIpA6O33G7a8n59Tmh7Nz0WUC3rSb7PTY/sdW2JzA==
 
 "@types/react-dom@^16.9.7":
   version "16.9.11"
@@ -2762,40 +2762,40 @@
   resolved "https://registry.yarnpkg.com/@uniswap/token-lists/-/token-lists-1.0.0-beta.19.tgz#5256db144fba721a6233f43b92ffb388cbd58327"
   integrity sha512-19V3KM7DAe40blWW1ApiaSYwqbq0JTKMO3yChGBrXzQBl+BoQZRTNZ4waCyoZ5QM45Q0Mxd6bCn6jXcH9G1kjg==
 
-"@viperswap/contracts@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@viperswap/contracts/-/contracts-1.0.6.tgz#5a76a00b84710f1a9e4cb5309b58d037c88f6517"
-  integrity sha512-dGkHZ9sCz4WIUCeeGnhLz0hZeHphAXLsPC50pmjnMb5b7M6l//OLtZms9pCFwK2u18wA/S3uBDOyfjE+IHZF6Q==
+"@venomswap/contracts@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@venomswap/contracts/-/contracts-1.0.0.tgz#9882607b9cae07106cb51cb05dd0348c5c4964e7"
+  integrity sha512-gaQWe0OUwwixN8yjRy+MzOuFQROnrtY9MwQXCcjsDawVPAd9EgHVFf5A8sqOo6J7LmTvgnsCa4rqn1/gjQTGTw==
   dependencies:
     "@openzeppelin/contracts" "^3.1.0"
-    "@viperswap/core" "^1.0.2"
-    "@viperswap/lib" "^1.0.1"
-    "@viperswap/periphery" "^1.0.1"
+    "@venomswap/core" "^1.0.0"
+    "@venomswap/lib" "^1.0.0"
+    "@venomswap/periphery" "^1.0.0"
 
-"@viperswap/core@1.0.3", "@viperswap/core@^1.0.2", "@viperswap/core@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@viperswap/core/-/core-1.0.3.tgz#ff780801938a87265e920a08d73c1cc964a00cc8"
-  integrity sha512-y6zPyuj3OG2Qh4Px6NOJ2+MXELOMZ4CtBo0ykAIbq8ixQh0Do59l34haZfKwsmLFVjjMqhp+v63dBhbtTV4azA==
+"@venomswap/core@1.0.0", "@venomswap/core@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@venomswap/core/-/core-1.0.0.tgz#f1336702e8ecce6b79b06212220da43a34b3749c"
+  integrity sha512-cd4+e5KKH7QmSjMhe50lty35eHuZVTh9YYnkWPdQPe6KG3R5P5JE3LFliwNLpuV4jWEYYRlEa3OaG3ie+BlYrg==
 
-"@viperswap/lib@1.0.1", "@viperswap/lib@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@viperswap/lib/-/lib-1.0.1.tgz#11df9aaf999eff114e2913f08bd3120c222078d5"
-  integrity sha512-mdhF4+WTfoCyzMpW0aEhkkiRwFszAifaLAi/8/VoB5mjPCCXX+75OR0e5n2Kyil4OGrqUkMN5rzTUX387Z3dvQ==
+"@venomswap/lib@1.0.0", "@venomswap/lib@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@venomswap/lib/-/lib-1.0.0.tgz#8e76f9d2746c8f0a892ba0a28c7ec7d14bec609c"
+  integrity sha512-3i0gg+Xlm6n0sy0oJi3SaOd8sARH92vWrdphJMRo7cObR9dp0IvXLcXV2eDxQto0Faa1IB/FOpx/NqgtopiQvA==
 
-"@viperswap/periphery@^1.0.1", "@viperswap/periphery@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@viperswap/periphery/-/periphery-1.0.2.tgz#bb5d32e1154cc9dca50f5a0089743d501aa12cd7"
-  integrity sha512-i+CQeBzpjGKAswmhc5BudqTDIIC6USlrEnNzcbshDAuW4O94qg5OhF8+5SR7DfXCxIHeOIjTWPvv8OSWErTztw==
+"@venomswap/periphery@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@venomswap/periphery/-/periphery-1.0.0.tgz#39fd3cf19ce16bfacb4abfefb76f18befccfaacf"
+  integrity sha512-mNm7YJl+zEedqLWQLx5QW4mCHMV2TG2sOBeYppperJC2NKRMj23XV+lyJ0wUOEcz2qvng/L8FlSgidzC+snyJw==
   dependencies:
-    "@viperswap/core" "1.0.3"
-    "@viperswap/lib" "1.0.1"
+    "@venomswap/core" "1.0.0"
+    "@venomswap/lib" "1.0.0"
 
-"@viperswap/sdk@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@viperswap/sdk/-/sdk-1.0.5.tgz#a9d9a0669e690e520bb83f51ab63adb46434e741"
-  integrity sha512-xkR+6hPxhexMWTxDVLZllGnrh2bafdyATzL9Wwyr6sZYz1hnAsYbm2rNlKPzY7uHBm5pT8a4GzgIxa50RI3ZRA==
+"@venomswap/sdk@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@venomswap/sdk/-/sdk-1.0.0.tgz#7759d9a54d8b8e91a8229de6eefbc2b2571e6bb8"
+  integrity sha512-cBsPBGC6TMj3cC44OrozMYPV4NnkDZp6TpvoUHXRCD2L6y7PDomkErH3Sd3EJBezr174DgsnKUeVUJrpzjwIrw==
   dependencies:
-    "@viperswap/core" "^1.0.3"
+    "@venomswap/core" "^1.0.0"
     big.js "^5.2.2"
     decimal.js-light "^2.5.0"
     jsbi "^3.1.1"
@@ -8092,9 +8092,9 @@ glob-parent@^3.1.0:
     path-dirname "^1.0.0"
 
 glob-parent@^5.0.0, glob-parent@~5.1.0:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.1.tgz#b6c1ef417c4e5663ea498f1c45afac6916bbc229"
-  integrity sha512-FnI+VGOpnlGHWZxthPGR+QhR78fuiK0sNLkHQv+bL9fQi57lNNdquIbna/WrfROrolq8GK5Ek6BiMwqL/voRYQ==
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.2.tgz#869832c58034fe68a4093c17dc15e8340d8401c4"
+  integrity sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==
   dependencies:
     is-glob "^4.0.1"
 

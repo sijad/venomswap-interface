@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { TransactionResponse } from '@ethersproject/providers'
-import { Currency, currencyEquals, TokenAmount, WETH, DEFAULT_CURRENCIES } from '@viperswap/sdk'
+import { Currency, currencyEquals, TokenAmount, WETH, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import React, { useCallback, useContext, useState } from 'react'
 import { Plus } from 'react-feather'
 import ReactGA from 'react-ga'

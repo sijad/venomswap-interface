@@ -1,4 +1,4 @@
-import { Currency, Token, DEFAULT_CURRENCIES } from '@viperswap/sdk'
+import { Currency, Token, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import { BASE_CURRENCY } from '../connectors'
 
 export function currencyId(currency: Currency): string {

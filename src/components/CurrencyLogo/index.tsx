@@ -1,4 +1,4 @@
-import { Currency, Token, ETHER, HARMONY, BINANCE_COIN, DEFAULT_CURRENCIES } from '@viperswap/sdk'
+import { Currency, Token, ETHER, HARMONY, BINANCE_COIN, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 

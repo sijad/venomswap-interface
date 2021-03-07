@@ -1,6 +1,6 @@
-import { CurrencyAmount, JSBI, Token, TokenAmount, Pair } from '@viperswap/sdk'
+import { CurrencyAmount, JSBI, Token, TokenAmount, Pair } from '@venomswap/sdk'
 import { useMemo } from 'react'
-import { VIPER } from '../../constants'
+import { GOVERNANCE_TOKEN } from '../../constants'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
 import { useActiveWeb3React } from '../../hooks'
 //import { NEVER_RELOAD, useMultipleContractSingleData } from '../multicall/hooks'
@@ -62,7 +62,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     [chainId, pairToFilterBy]
   )
 
-  const viper = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
 
   const pids = useMemo(() => masterInfo.map(({ pid }) => pid), [masterInfo])
 
@@ -98,7 +98,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
   //const rewardPerBlock = useSingleCallResult(masterBreederContract, 'REWARD_PER_BLOCK')
 
   return useMemo(() => {
-    if (!chainId || !viper) return []
+    if (!chainId || !govToken) return []
 
     return pids.reduce<StakingInfo[]>((memo, pid, index) => {
       const poolInfo = poolInfos[index]
@@ -128,10 +128,10 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           return memo
         }
 
-        const baseBlockRewards = new TokenAmount(viper, JSBI.BigInt(baseRewardsPerBlock?.result?.[0]))
+        const baseBlockRewards = new TokenAmount(govToken, JSBI.BigInt(baseRewardsPerBlock?.result?.[0]))
 
         const poolBlockRewards = specificPoolRewardsPerBlock?.result?.[0]
-          ? new TokenAmount(viper, JSBI.BigInt(specificPoolRewardsPerBlock?.result?.[0]))
+          ? new TokenAmount(govToken, JSBI.BigInt(specificPoolRewardsPerBlock?.result?.[0]))
           : baseBlockRewards
 
         const lockedRewardsPercentageUnits = Number(lockRewardsRatio.result?.[0])
@@ -150,12 +150,12 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         const tokens = masterInfo[index].tokens
         const dummyPair = new Pair(new TokenAmount(tokens[0], '0'), new TokenAmount(tokens[1], '0'))
         const stakedAmount = new TokenAmount(dummyPair.liquidityToken, JSBI.BigInt(userInfo?.result?.[0] ?? 0))
-        const totalPendingRewardAmount = new TokenAmount(viper, calculatedTotalPendingRewards)
-        const totalPendingLockedRewardAmount = new TokenAmount(viper, calculatedLockedPendingRewards)
-        const totalPendingUnlockedRewardAmount = new TokenAmount(viper, calculatedUnlockedPendingRewards)
+        const totalPendingRewardAmount = new TokenAmount(govToken, calculatedTotalPendingRewards)
+        const totalPendingLockedRewardAmount = new TokenAmount(govToken, calculatedLockedPendingRewards)
+        const totalPendingUnlockedRewardAmount = new TokenAmount(govToken, calculatedUnlockedPendingRewards)
         const startsAtBlock = startBlock.result?.[0]
 
-        // poolInfo: lpToken address, allocPoint uint256, lastRewardBlock uint256, accViperPerShare uint256
+        // poolInfo: lpToken address, allocPoint uint256, lastRewardBlock uint256, accGovTokenPerShare uint256
         const poolInfoResult = poolInfo.result
         const allocPoint = poolInfoResult && poolInfoResult[1]
         const active = poolInfoResult && JSBI.GT(JSBI.BigInt(allocPoint), 0) ? true : false
@@ -190,56 +190,56 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     startBlock,
     lockRewardsRatio,
     poolRewardsPerBlock,
-    viper
+    govToken
   ])
 }
 
-export function useTotalViperEarned(): TokenAmount | undefined {
+export function useTotalGovTokensEarned(): TokenAmount | undefined {
   const { chainId } = useActiveWeb3React()
-  const viper = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
   const stakingInfos = useStakingInfo()
 
   return useMemo(() => {
-    if (!viper) return undefined
+    if (!govToken) return undefined
     return (
       stakingInfos?.reduce(
         (accumulator, stakingInfo) => accumulator.add(stakingInfo.earnedAmount),
-        new TokenAmount(viper, '0')
-      ) ?? new TokenAmount(viper, '0')
+        new TokenAmount(govToken, '0')
+      ) ?? new TokenAmount(govToken, '0')
     )
-  }, [stakingInfos, viper])
+  }, [stakingInfos, govToken])
 }
 
-export function useTotalLockedViperEarned(): TokenAmount | undefined {
+export function useTotalLockedGovTokensEarned(): TokenAmount | undefined {
   const { chainId } = useActiveWeb3React()
-  const viper = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
   const stakingInfos = useStakingInfo()
 
   return useMemo(() => {
-    if (!viper) return undefined
+    if (!govToken) return undefined
     return (
       stakingInfos?.reduce(
         (accumulator, stakingInfo) => accumulator.add(stakingInfo.lockedEarnedAmount),
-        new TokenAmount(viper, '0')
-      ) ?? new TokenAmount(viper, '0')
+        new TokenAmount(govToken, '0')
+      ) ?? new TokenAmount(govToken, '0')
     )
-  }, [stakingInfos, viper])
+  }, [stakingInfos, govToken])
 }
 
-export function useTotalUnlockedViperEarned(): TokenAmount | undefined {
+export function useTotalUnlockedGovTokensEarned(): TokenAmount | undefined {
   const { chainId } = useActiveWeb3React()
-  const viper = chainId ? VIPER[chainId] : undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
   const stakingInfos = useStakingInfo()
 
   return useMemo(() => {
-    if (!viper) return undefined
+    if (!govToken) return undefined
     return (
       stakingInfos?.reduce(
         (accumulator, stakingInfo) => accumulator.add(stakingInfo.unlockedEarnedAmount),
-        new TokenAmount(viper, '0')
-      ) ?? new TokenAmount(viper, '0')
+        new TokenAmount(govToken, '0')
+      ) ?? new TokenAmount(govToken, '0')
     )
-  }, [stakingInfos, viper])
+  }, [stakingInfos, govToken])
 }
 
 // based on typed value

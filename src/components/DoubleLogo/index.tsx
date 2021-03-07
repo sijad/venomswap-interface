@@ -1,4 +1,4 @@
-import { Currency } from '@viperswap/sdk'
+import { Currency } from '@venomswap/sdk'
 import React from 'react'
 import styled from 'styled-components'
 import CurrencyLogo from '../CurrencyLogo'

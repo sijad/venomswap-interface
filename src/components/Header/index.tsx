@@ -1,4 +1,4 @@
-import { Blockchain, ChainId, TokenAmount } from '@viperswap/sdk'
+import { Blockchain, ChainId, TokenAmount } from '@venomswap/sdk'
 import React, { useState } from 'react'
 import { Text } from 'rebass'
 import { NavLink } from 'react-router-dom'
@@ -11,7 +11,7 @@ import Logo from '../../assets/svg/viperswap/black.svg'
 import LogoDark from '../../assets/svg/viperswap/white.svg'
 import { useActiveWeb3React } from '../../hooks'
 import { useDarkModeManager } from '../../state/user/hooks'
-import { useETHBalances, useAggregateViperBalance } from '../../state/wallet/hooks'
+import { useETHBalances, useAggregateGovTokenBalance } from '../../state/wallet/hooks'
 import { CardNoise } from '../earn/styled'
 import { CountUp } from 'use-count-up'
 import { TYPE, ExternalLink } from '../../theme'
@@ -28,7 +28,7 @@ import { useUserHasAvailableClaim } from '../../state/claim/hooks'
 import { useUserHasSubmittedClaim } from '../../state/transactions/hooks'
 import { Dots } from '../swap/styleds'
 import Modal from '../Modal'
-import ViperBalanceContent from './ViperBalanceContent'
+import GovTokenBalanceContent from './GovTokenBalanceContent'
 import usePrevious from '../../hooks/usePrevious'
 import { BASE_CURRENCY } from '../../connectors'
 import useBlockchain from '../../hooks/useBlockchain'
@@ -311,7 +311,7 @@ export default function Header() {
 
   const { claimTxn } = useUserHasSubmittedClaim(account ?? undefined)
 
-  const aggregateBalance: TokenAmount | undefined = useAggregateViperBalance()
+  const aggregateBalance: TokenAmount | undefined = useAggregateGovTokenBalance()
 
   const [showUniBalanceModal, setShowUniBalanceModal] = useState(false)
   const showClaimPopup = useShowClaimPopup()
@@ -323,7 +323,7 @@ export default function Header() {
     <HeaderFrame>
       <ClaimModal />
       <Modal isOpen={showUniBalanceModal} onDismiss={() => setShowUniBalanceModal(false)}>
-        <ViperBalanceContent setShowUniBalanceModal={setShowUniBalanceModal} />
+        <GovTokenBalanceContent setShowUniBalanceModal={setShowUniBalanceModal} />
       </Modal>
       <HeaderRow>
         <Title href=".">

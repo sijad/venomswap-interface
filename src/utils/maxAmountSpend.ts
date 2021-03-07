@@ -1,4 +1,4 @@
-import { CurrencyAmount, JSBI, DEFAULT_CURRENCIES } from '@viperswap/sdk'
+import { CurrencyAmount, JSBI, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import { MIN_ETH } from '../constants'
 
 /**

@@ -11,7 +11,7 @@ import { ExternalLink } from '../../theme'
 import { ButtonPrimary } from '../Button'
 
 import useBlockchain from '../../hooks/useBlockchain'
-import { Blockchain } from '@viperswap/sdk'
+import { Blockchain } from '@venomswap/sdk'
 
 const StyledMenuIcon = styled(MenuIcon)`
   path {

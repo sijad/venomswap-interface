@@ -1,5 +1,5 @@
-import { VIPER } from './../../constants/index'
-import { TokenAmount, JSBI } from '@viperswap/sdk'
+import { GOVERNANCE_TOKEN } from './../../constants/index'
+import { TokenAmount, JSBI } from '@venomswap/sdk'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useEffect, useState } from 'react'
 import { useActiveWeb3React } from '../../hooks'
@@ -81,12 +81,12 @@ export function useUserUnclaimedAmount(account: string | null | undefined): Toke
   const userClaimData = useUserClaimData(account)
   const canClaim = useUserHasAvailableClaim(account)
 
-  const uni = chainId ? VIPER[chainId] : undefined
-  if (!uni) return undefined
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  if (!govToken) return undefined
   if (!canClaim || !userClaimData) {
-    return new TokenAmount(uni, JSBI.BigInt(0))
+    return new TokenAmount(govToken, JSBI.BigInt(0))
   }
-  return new TokenAmount(uni, JSBI.BigInt(userClaimData.amount))
+  return new TokenAmount(govToken, JSBI.BigInt(userClaimData.amount))
 }
 
 export function useClaimCallback(

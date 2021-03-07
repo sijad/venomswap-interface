@@ -1,4 +1,4 @@
-import { Currency, Percent, Price } from '@viperswap/sdk'
+import { Currency, Percent, Price } from '@venomswap/sdk'
 import React, { useContext } from 'react'
 import { Text } from 'rebass'
 import { ThemeContext } from 'styled-components'

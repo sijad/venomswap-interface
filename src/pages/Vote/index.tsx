@@ -14,8 +14,8 @@ import { useAllProposalData, ProposalData, useUserVotes, useUserDelegatee } from
 import DelegateModal from '../../components/vote/DelegateModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
-import { VIPER, ZERO_ADDRESS } from '../../constants'
-import { JSBI, TokenAmount, ChainId } from '@viperswap/sdk'
+import { GOVERNANCE_TOKEN, ZERO_ADDRESS } from '../../constants'
+import { JSBI, TokenAmount, ChainId } from '@venomswap/sdk'
 import { shortenAddress, getEtherscanLink } from '../../utils'
 import Loader from '../../components/Loader'
 import FormattedCurrencyAmount from '../../components/FormattedCurrencyAmount'
@@ -114,12 +114,12 @@ export default function Vote() {
 
   // user data
   const availableVotes: TokenAmount | undefined = useUserVotes()
-  const uniBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, chainId ? VIPER[chainId] : undefined)
+  const govTokenBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, chainId ? GOVERNANCE_TOKEN[chainId] : undefined)
   const userDelegatee: string | undefined = useUserDelegatee()
 
   // show delegation option if they have have a balance, but have not delegated
   const showUnlockVoting = Boolean(
-    uniBalance && JSBI.notEqual(uniBalance.raw, JSBI.BigInt(0)) && userDelegatee === ZERO_ADDRESS
+    govTokenBalance && JSBI.notEqual(govTokenBalance.raw, JSBI.BigInt(0)) && userDelegatee === ZERO_ADDRESS
   )
 
   return (
@@ -174,12 +174,12 @@ export default function Vote() {
             <TYPE.body fontWeight={500} mr="6px">
               <FormattedCurrencyAmount currencyAmount={availableVotes} /> Votes
             </TYPE.body>
-          ) : uniBalance &&
+          ) : govTokenBalance &&
             userDelegatee &&
             userDelegatee !== ZERO_ADDRESS &&
-            JSBI.notEqual(JSBI.BigInt(0), uniBalance?.raw) ? (
+            JSBI.notEqual(JSBI.BigInt(0), govTokenBalance?.raw) ? (
             <TYPE.body fontWeight={500} mr="6px">
-              <FormattedCurrencyAmount currencyAmount={uniBalance} /> Votes
+              <FormattedCurrencyAmount currencyAmount={govTokenBalance} /> Votes
             </TYPE.body>
           ) : (
             ''

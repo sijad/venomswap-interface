@@ -7,13 +7,13 @@ import { TYPE, CloseIcon } from '../../theme'
 import { ButtonError } from '../Button'
 import CurrencyInputPanel from '../CurrencyInputPanel'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { TokenAmount, Token } from '@viperswap/sdk'
+import { TokenAmount, Token } from '@venomswap/sdk'
 import { useDerivedUnstakeInfo } from '../../state/stake/hooks'
 //import { wrappedCurrencyAmount } from '../../utils/wrappedCurrency'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
-import { useViperPitContract } from '../../hooks/useContract'
+import { usePitContract } from '../../hooks/useContract'
 import { calculateGasMargin } from '../../utils'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
@@ -52,16 +52,16 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
     onDismiss()
   }, [onDismiss])
 
-  const viperPit = useViperPitContract()
+  const pit = usePitContract()
 
   async function onWithdraw() {
-    if (viperPit && userLiquidityStaked) {
+    if (pit && userLiquidityStaked) {
       setAttempting(true)
 
       const formattedAmount = `0x${parsedAmount?.raw.toString(16)}`
-      const estimatedGas = await viperPit.estimateGas.leave(formattedAmount)
+      const estimatedGas = await pit.estimateGas.leave(formattedAmount)
 
-      await viperPit
+      await pit
         .leave(formattedAmount, {
           gasLimit: calculateGasMargin(estimatedGas)
         })

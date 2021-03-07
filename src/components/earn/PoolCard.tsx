@@ -4,7 +4,7 @@ import { RowBetween } from '../Row'
 import styled from 'styled-components'
 import { TYPE, StyledInternalLink } from '../../theme'
 import DoubleCurrencyLogo from '../DoubleLogo'
-//import { JSBI, TokenAmount } from '@viperswap/sdk'
+//import { JSBI, TokenAmount } from '@venomswap/sdk'
 import { ButtonPrimary } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
 import { useColor } from '../../hooks/useColor'
@@ -15,7 +15,7 @@ import { unwrappedToken } from '../../utils/wrappedCurrency'
 //import { usePair } from '../../data/Reserves'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
 //import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
-import { DEFAULT_CURRENCIES } from '@viperswap/sdk'
+import { DEFAULT_CURRENCIES } from '@venomswap/sdk'
 
 const StatContainer = styled.div`
   display: flex;

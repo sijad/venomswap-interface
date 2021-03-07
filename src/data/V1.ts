@@ -12,7 +12,7 @@ import {
   Trade,
   TradeType,
   WETH
-} from '@viperswap/sdk'
+} from '@venomswap/sdk'
 import { useMemo } from 'react'
 import { useActiveWeb3React } from '../hooks'
 import { useAllTokens } from '../hooks/Tokens'

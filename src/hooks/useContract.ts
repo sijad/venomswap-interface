@@ -1,15 +1,15 @@
 import { Contract } from '@ethersproject/contracts'
 import { abi as GOVERNANCE_ABI } from '@uniswap/governance/build/GovernorAlpha.json'
 import { abi as UNI_ABI } from '@uniswap/governance/build/Uni.json'
-import { abi as VIPER_ABI } from '@viperswap/contracts/build/Viper.json'
+import { abi as GOVERNANCE_TOKEN_ABI } from '@venomswap/contracts/build/GovernanceToken.json'
 import { abi as STAKING_REWARDS_ABI } from '@uniswap/liquidity-staker/build/StakingRewards.json'
-import { abi as MASTER_BREEDER_ABI } from '@viperswap/contracts/build/MasterBreeder.json'
-import { abi as VIPER_PIT_ABI } from '@viperswap/contracts/build/ViperPit.json'
+import { abi as MASTER_BREEDER_ABI } from '@venomswap/contracts/build/MasterBreeder.json'
+import { abi as PIT_ABI } from '@venomswap/contracts/build/Pit.json'
 import { abi as MERKLE_DISTRIBUTOR_ABI } from '@uniswap/merkle-distributor/build/MerkleDistributor.json'
-import { ChainId, WETH } from '@viperswap/sdk'
-import { abi as IUniswapV2PairABI } from '@viperswap/core/build/IUniswapV2Pair.json'
+import { ChainId, WETH } from '@venomswap/sdk'
+import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
 import { useMemo } from 'react'
-import { GOVERNANCE_ADDRESS, MERKLE_DISTRIBUTOR_ADDRESS, VIPER, MASTER_BREEDER, VIPER_PIT } from '../constants'
+import { GOVERNANCE_ADDRESS, MERKLE_DISTRIBUTOR_ADDRESS, GOVERNANCE_TOKEN, MASTER_BREEDER, PIT } from '../constants'
 import {
   ARGENT_WALLET_DETECTOR_ABI,
   ARGENT_WALLET_DETECTOR_MAINNET_ADDRESS
@@ -116,17 +116,17 @@ export function useGovernanceContract(): Contract | null {
 
 export function useUniContract(): Contract | null {
   const { chainId } = useActiveWeb3React()
-  return useContract(chainId ? VIPER[chainId].address : undefined, UNI_ABI, true)
+  return useContract(chainId ? GOVERNANCE_TOKEN[chainId].address : undefined, UNI_ABI, true)
 }
 
-export function useViperContract(): Contract | null {
+export function useGovTokenContract(): Contract | null {
   const { chainId } = useActiveWeb3React()
-  return useContract(chainId ? VIPER[chainId].address : undefined, VIPER_ABI, true)
+  return useContract(chainId ? GOVERNANCE_TOKEN[chainId].address : undefined, GOVERNANCE_TOKEN_ABI, true)
 }
 
-export function useViperPitContract(withSignerIfPossible?: boolean): Contract | null {
+export function usePitContract(withSignerIfPossible?: boolean): Contract | null {
   const { chainId } = useActiveWeb3React()
-  return useContract(chainId ? VIPER_PIT[chainId].address : undefined, VIPER_PIT_ABI, withSignerIfPossible)
+  return useContract(chainId ? PIT[chainId].address : undefined, PIT_ABI, withSignerIfPossible)
 }
 
 export function useStakingContract(stakingAddress?: string, withSignerIfPossible?: boolean): Contract | null {

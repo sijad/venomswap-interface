@@ -1,4 +1,4 @@
-import { Token } from '@viperswap/sdk'
+import { Token } from '@venomswap/sdk'
 import React, { useCallback } from 'react'
 import Modal from '../Modal'
 import { ImportToken } from 'components/SearchModal/ImportToken'

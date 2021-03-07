@@ -1,4 +1,4 @@
-import { Blockchain, Currency, ETHER, BINANCE_COIN, HARMONY } from '@viperswap/sdk'
+import { Blockchain, Currency, ETHER, BINANCE_COIN, HARMONY } from '@venomswap/sdk'
 
 export default function getBlockchainAdjustedCurrency(
   blockchain: Blockchain,

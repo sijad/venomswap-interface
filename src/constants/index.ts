@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { ChainId, JSBI, Percent, Token, WETH } from '@viperswap/sdk'
+import { ChainId, JSBI, Percent, Token, WETH } from '@venomswap/sdk'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 
 import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
@@ -15,15 +15,15 @@ export const ROUTER_ADDRESSES: { [chainId in ChainId]: string } = {
   [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
-  [ChainId.HARMONY_MAINNET]: '0x7cdd6b1b4762Fa4daaECd545C50131b34bb60334',
-  [ChainId.HARMONY_TESTNET]: '0xC88fCd9aD051A5d924f1aC90894f73d7dc1C25a4'
+  [ChainId.HARMONY_MAINNET]: '0xA85Ddd34dED4B48d89a9EB5996D975185BF30757',
+  [ChainId.HARMONY_TESTNET]: '0xfc272952AB68Be21dd590Bac75dB3B912Eea0798'
 }
 
 export const GOVERNANCE_ADDRESS = '0x5e4be8Bc9637f0EAA1A755019e06A68ce081D58F'
 
 export const TIMELOCK_ADDRESS = '0x1a9C8182C09F50C8318d769245beA52c32BE35BC'
 
-export const VIPER: { [chainId in ChainId]: Token } = {
+export const GOVERNANCE_TOKEN: { [chainId in ChainId]: Token } = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
   [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
   [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
@@ -33,14 +33,14 @@ export const VIPER: { [chainId in ChainId]: Token } = {
   [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'VIPER', 'Viper'),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
-    '0xF0dD44b40e1ADf4719Dd364684a3bE5FACf02e3A',
+    '0x2baF193459EF3175C29305A5150edDB3e37a3213',
     18,
     'VIPER',
     'Viper'
   ),
   [ChainId.HARMONY_TESTNET]: new Token(
     ChainId.HARMONY_TESTNET,
-    '0x289E6Dc9e06dd5A0d35F957F8683B527794695C3',
+    '0x1C9bE5192C3728E58ce2F5fb9dfFFcC7668c4c4E',
     18,
     'VIPER',
     'Viper'
@@ -55,11 +55,11 @@ export const MASTER_BREEDER: { [chainId in ChainId]: string } = {
   [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
-  [ChainId.HARMONY_MAINNET]: '0x6185A3815389046Dd5D3F071652800ec042F53e0',
-  [ChainId.HARMONY_TESTNET]: '0xA7d5BCE6f52c528AdC06D2120AC8826Fa7b8cC0e'
+  [ChainId.HARMONY_MAINNET]: '0xE83F3614eB758c6a6f608fe7cf0D735797Fcc6a3',
+  [ChainId.HARMONY_TESTNET]: '0x89663BB6Afb197eea823270C8Bf9Ff79A9503042'
 }
 
-export const VIPER_PIT: { [chainId in ChainId]: Token } = {
+export const PIT: { [chainId in ChainId]: Token } = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
   [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
   [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
@@ -69,14 +69,14 @@ export const VIPER_PIT: { [chainId in ChainId]: Token } = {
   [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
-    '0x9bE5C60D32d2398Abe3c0426E2E2F539845E9881',
+    '0xBb2cE0D77befb3960a9672fc4F22AFFa0f19FFeA',
     18,
     'xVIPER',
     'ViperPit'
   ),
   [ChainId.HARMONY_TESTNET]: new Token(
     ChainId.HARMONY_TESTNET,
-    '0x03c37Caa5CEa58AD86FF6ca1Eb49033D6De56E2e',
+    '0xCbeb76E7CDf4397DF8D03e335192237B8AeA3D30',
     18,
     'xVIPER',
     'ViperPit'
