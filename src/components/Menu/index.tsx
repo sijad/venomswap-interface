@@ -109,7 +109,7 @@ export default function Menu() {
 
       {open && (
         <MenuFlyout>
-          <MenuItem id="link" href="https://t.me/ViperProtocol">
+          <MenuItem id="link" href="https://t.me/VenomDAO">
             <MessageCircle size={14} />
             Telegram
           </MenuItem>

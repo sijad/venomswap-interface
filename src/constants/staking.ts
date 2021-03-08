@@ -9,14 +9,14 @@ export const STAKING_REWARDS_INFO: {
   }[]
 } = {
   [ChainId.HARMONY_MAINNET]: [
-    //{
-    //  tokens: [WETH[ChainId.HARMONY_MAINNET], BUSD[ChainId.HARMONY_MAINNET]],
-    //  pid: 0
-    //},
-    //{
-    //  tokens: [WETH[ChainId.HARMONY_MAINNET], GOVERNANCE_TOKEN[ChainId.HARMONY_MAINNET]],
-    //  pid: 1
-    //}
+    {
+      tokens: [WETH[ChainId.HARMONY_MAINNET], BUSD[ChainId.HARMONY_MAINNET]],
+      pid: 0
+    },
+    {
+      tokens: [WETH[ChainId.HARMONY_MAINNET], GOVERNANCE_TOKEN[ChainId.HARMONY_MAINNET]],
+      pid: 1
+    }
     /*{
       tokens: [LINK[ChainId.HARMONY_MAINNET], BUSD[ChainId.HARMONY_MAINNET]],
       pid: 2
