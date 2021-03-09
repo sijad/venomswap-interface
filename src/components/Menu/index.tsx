@@ -88,7 +88,7 @@ const MenuItem = styled(ExternalLink)`
   }
 `
 
-const CODE_LINK = 'https://github.com/ViperProtocol'
+const CODE_LINK = 'https://github.com/VenomProtocol'
 
 export default function Menu() {
   const { account } = useActiveWeb3React()

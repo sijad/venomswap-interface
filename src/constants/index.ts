@@ -83,6 +83,18 @@ export const PIT: { [chainId in ChainId]: Token } = {
   )
 }
 
+export const WEB_INTERFACES: { [chainId in ChainId]: string[] } = {
+  [ChainId.MAINNET]: [''],
+  [ChainId.RINKEBY]: [''],
+  [ChainId.ROPSTEN]: [''],
+  [ChainId.GÖRLI]: [''],
+  [ChainId.KOVAN]: [''],
+  [ChainId.BSC_MAINNET]: [''],
+  [ChainId.BSC_TESTNET]: [''],
+  [ChainId.HARMONY_MAINNET]: ['viper.exchange', 'viperswap.one', 'viperswap.com', 'viperswap.io', 'viperswap.org'],
+  [ChainId.HARMONY_TESTNET]: ['viper.exchange', 'viperswap.one', 'viperswap.com', 'viperswap.io', 'viperswap.org']
+}
+
 export { PRELOADED_PROPOSALS } from './proposals'
 
 // a list of tokens by chain
