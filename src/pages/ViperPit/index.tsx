@@ -14,10 +14,13 @@ import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/
 import { ButtonPrimary } from '../../components/Button'
 import StakingModal from '../../components/ViperPit/StakingModal'
 import ModifiedUnstakingModal from '../../components/ViperPit/ModifiedUnstakingModal'
+import ClaimModal from '../../components/ViperPit/ClaimModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
 //import { useColor } from '../../hooks/useColor'
 import { CountUp } from 'use-count-up'
+
+import { BlueCard } from '../../components/Card'
 
 import usePrevious from '../../hooks/usePrevious'
 
@@ -117,6 +120,7 @@ export default function ViperPit({
   // toggle for staking modal and unstaking modal
   const [showStakingModal, setShowStakingModal] = useState(false)
   const [showUnstakingModal, setShowUnstakingModal] = useState(false)
+  const [showClaimModal, setShowClaimModal] = useState(false)
 
   const countUpAmount = pitBalance?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
@@ -148,6 +152,7 @@ export default function ViperPit({
             userLiquidityStaked={userLiquidityStaked}
             stakingToken={govToken}
           />
+          <ClaimModal isOpen={showClaimModal} onDismiss={() => setShowClaimModal(false)} />
         </>
       )}
 
@@ -196,33 +201,47 @@ export default function ViperPit({
           </StyledBottomCard>
         </BottomSection>
 
-        <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
-          <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
-            ⭐️
-          </span>
-          ViperPit rewards aren&apos;t locked
-          <br />
-          &mdash; when you withdraw you&apos;ll receive 100%
-          <br />
-          of your share of earned VIPER trading fees straight away!
-        </TYPE.main>
+        {account && (
+          <TYPE.main>
+            You have {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} VIPER tokens available to deposit to the Viper Pit
+          </TYPE.main>
+        )}
 
         {account && (
-          <DataRow style={{ marginBottom: '1rem' }}>
+          <DataRow style={{ marginBottom: '0rem' }}>
             <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={handleDepositClick}>
-              Stake
+              Deposit
+            </ButtonPrimary>
+
+            <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={() => setShowClaimModal(true)}>
+              Claim
             </ButtonPrimary>
 
             <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={() => setShowUnstakingModal(true)}>
               Withdraw
             </ButtonPrimary>
+
           </DataRow>
         )}
-        {account && (
-          <TYPE.main>
-            {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} VIPER tokens available to deposit to the Viper Pit
-          </TYPE.main>
-        )}
+
+        <BlueCard>
+          <AutoColumn gap="10px">
+            <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
+                💡
+              </span>
+              <b>Important:</b> Your VIPER rewards will only be visible
+              <br />
+              after you withdraw your xVIPER tokens from the pool.
+              <br />
+              <br />
+              ViperPit does not have any withdrawal fees.
+              <br />
+              Tokens are also 100% unlocked when they are claimed.
+            </TYPE.main>
+          </AutoColumn>
+        </BlueCard>
+
       </TopSection>
     </PageWrapper>
   )

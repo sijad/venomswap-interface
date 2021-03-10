@@ -333,7 +333,7 @@ export default function Manage({
           </DataRow>
         )}
         {!userLiquidityUnstaked ? null : userLiquidityUnstaked.equalTo('0') ? null : !stakingInfo?.active ? null : (
-          <TYPE.main>{userLiquidityUnstaked.toSignificant(6)} VENOM-LP tokens available to deposit</TYPE.main>
+          <TYPE.main>You have {userLiquidityUnstaked.toSignificant(6)} VENOM-LP tokens available to deposit</TYPE.main>
         )}
       </PositionInfo>
     </PageWrapper>

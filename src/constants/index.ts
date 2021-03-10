@@ -59,6 +59,18 @@ export const MASTER_BREEDER: { [chainId in ChainId]: string } = {
   [ChainId.HARMONY_TESTNET]: '0x7620742d0E0725ae7fc0952288F838b9ddF32EC6'
 }
 
+export const PIT_BREEDER: { [chainId in ChainId]: string } = {
+  [ChainId.MAINNET]: ZERO_ONE_ADDRESS,
+  [ChainId.RINKEBY]: ZERO_ONE_ADDRESS,
+  [ChainId.ROPSTEN]: ZERO_ONE_ADDRESS,
+  [ChainId.GÖRLI]: ZERO_ONE_ADDRESS,
+  [ChainId.KOVAN]: ZERO_ONE_ADDRESS,
+  [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
+  [ChainId.BSC_TESTNET]: ZERO_ONE_ADDRESS,
+  [ChainId.HARMONY_MAINNET]: '0x08913d353091e24B361f0E519e2f7aD07a78995d',
+  [ChainId.HARMONY_TESTNET]: '0x868a9a960b721065B36921a6b22935d65f549f95'
+}
+
 export const PIT: { [chainId in ChainId]: Token } = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
   [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, 'xVIPER', 'ViperPit'),
