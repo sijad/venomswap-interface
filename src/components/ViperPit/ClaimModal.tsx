@@ -59,6 +59,8 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
     pitBreeder?.address
   ])
 
+  const minimumAmountWei = 1000
+
   const [claimFrom, claimTo] = useMemo<string[][]>(() => {
     const claimFrom: string[] = []
     const claimTo: string[] = []
@@ -67,7 +69,7 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
       const stakingPool = stakingPools[index]
       const result = results[index]
       if (result && !result.loading) {
-        if (JSBI.GT(JSBI.BigInt(result?.result?.[0]), 0)) {
+        if (JSBI.GT(JSBI.BigInt(result?.result?.[0]), minimumAmountWei)) {
           claimFrom.push(stakingPool.tokens[0].address)
           claimTo.push(stakingPool.tokens[1].address)
         }
