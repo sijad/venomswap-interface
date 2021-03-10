@@ -13,60 +13,28 @@ import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks'
 import { calculateGasMargin } from '../../utils'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
-import { useBlockNumber } from '../../state/application/hooks'
-import useBlockchain from '../../hooks/useBlockchain'
-import getBlockchainBlockTime from '../../utils/getBlockchainBlockTime'
-import { BlueCard } from '../Card'
+import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
+import { Interface } from '@ethersproject/abi'
+import { useMultipleContractSingleData } from '../../state/multicall/hooks'
+import { toV2LiquidityToken } from '../../state/user/hooks'
+const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
   padding: 1rem;
 `
-
 interface ClaimModalProps {
   isOpen: boolean
   onDismiss: () => void
 }
 
-const MINUTE = 60
-const HOUR = MINUTE * 60
-const DAY = HOUR * 24
-
 export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
   const { account, chainId } = useActiveWeb3React()
-
-  const blockchain = useBlockchain()
-  const blockTime = getBlockchainBlockTime(blockchain)
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
-
-  const rewardsStartBlock = 10271502
-  const currentBlock = useBlockNumber()
-
-  const rewardsStarted = useMemo<boolean>(() => {
-    return rewardsStartBlock && currentBlock
-      ? JSBI.greaterThanOrEqual(JSBI.BigInt(currentBlock), JSBI.BigInt(rewardsStartBlock))
-      : false
-  }, [rewardsStartBlock, currentBlock])
-
-  const blocksLeftUntilRewards = useMemo<number>(() => {
-    return rewardsStartBlock && currentBlock ? rewardsStartBlock - currentBlock : 0
-  }, [rewardsStartBlock, currentBlock])
-
-  const secondsToRewards = !rewardsStarted ? blocksLeftUntilRewards * blockTime : 0
-  let startingAt = secondsToRewards
-  const days = (startingAt - (startingAt % DAY)) / DAY
-  startingAt -= days * DAY
-  const hours = (startingAt - (startingAt % HOUR)) / HOUR
-  startingAt -= hours * HOUR
-  const minutes = (startingAt - (startingAt % MINUTE)) / MINUTE
-  startingAt -= minutes * MINUTE
-  const seconds = startingAt
-
-  console.log({ currentBlock, rewardsStarted, blocksLeftUntilRewards })
 
   function wrappedOnDismiss() {
     setHash(undefined)
@@ -75,16 +43,41 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
   }
 
   const pitBreeder = usePitBreederContract()
-  const stakingPools = chainId ? STAKING_REWARDS_INFO[chainId] : []
-  const claimFrom: string[] = []
-  const claimTo: string[] = []
+  const stakingPools = useMemo(() => (chainId ? STAKING_REWARDS_INFO[chainId] : []), [chainId])
 
-  if (stakingPools) {
-    for (const pool of stakingPools) {
-      claimFrom.push(pool.tokens[0].address)
-      claimTo.push(pool.tokens[1].address)
+  const liquidityTokenAddresses = useMemo(
+    () =>
+      stakingPools
+        ? stakingPools.map(item => {
+            return toV2LiquidityToken(item.tokens).address
+          })
+        : [],
+    [stakingPools]
+  )
+
+  const results = useMultipleContractSingleData(liquidityTokenAddresses, PAIR_INTERFACE, 'balanceOf', [
+    pitBreeder?.address
+  ])
+
+  const [claimFrom, claimTo] = useMemo<string[][]>(() => {
+    const claimFrom: string[] = []
+    const claimTo: string[] = []
+
+    for (let index = 0; stakingPools && index < stakingPools.length; index++) {
+      const stakingPool = stakingPools[index]
+      const result = results[index]
+      if (result && !result.loading) {
+        if (JSBI.GT(JSBI.BigInt(result?.result?.[0]), 0)) {
+          claimFrom.push(stakingPool.tokens[0].address)
+          claimTo.push(stakingPool.tokens[1].address)
+        }
+      }
     }
-  }
+
+    return [claimFrom, claimTo]
+  }, [stakingPools, results])
+
+  const rewardsAreClaimable = claimFrom.length > 0 && claimTo.length > 0
 
   async function onClaimRewards() {
     if (pitBreeder) {
@@ -97,7 +90,6 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
           gasLimit: calculateGasMargin(estimatedGas)
         })
         .then((response: TransactionResponse) => {
-          console.log({ response })
           addTransaction(response, {
             summary: `Claim ViperPit rewards`
           })
@@ -128,33 +120,26 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
               💎
             </span>
           </TYPE.body>
-          {rewardsStarted && (
+          {rewardsAreClaimable && (
             <>
-            <TYPE.body fontSize={14} style={{ textAlign: 'center' }}>
-              When you claim rewards, collected LP fees will be used to market buy VIPER.
-              <br /><br />
-              The purchased VIPER tokens will then be distributed to the ViperPit stakers as a reward.
-            </TYPE.body>
-            <ButtonError disabled={!!error} error={!!error} onClick={onClaimRewards}>
-              {error ?? 'Claim'}
-            </ButtonError>
+              <TYPE.body fontSize={14} style={{ textAlign: 'center' }}>
+                When you claim rewards, collected LP fees will be used to market buy VIPER.
+                <br /><br />
+                The purchased VIPER tokens will then be distributed to the ViperPit stakers as a reward.
+              </TYPE.body>
+              <ButtonError disabled={!!error} error={!!error} onClick={onClaimRewards}>
+                {error ?? 'Claim'}
+              </ButtonError>
             </>
           )}
-          {!rewardsStarted && (
-            <BlueCard>
-              <AutoColumn gap="10px">
-                <TYPE.body fontSize={14} style={{ textAlign: 'center' }}>
-                  The ViperPit claim rewards feature is expected to go live at block number <b>{rewardsStartBlock}</b>.
-                  <br /><br />
-                  Expected start: <b>
-                  {days ? `${days} ${days === 1 ? 'day' : 'days'}, ` : ''}
-                  {hours ? `${hours} ${hours === 1 ? 'hour' : 'hours'}, ` : ''}
-                  {minutes ? `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ` : ''}
-                  {seconds ? `${minutes && minutes > 0 ? 'and ' : ''}${seconds} ${seconds === 1 ? 'second' : 'seconds'}` : ''}
-                  </b> from now.
-                </TYPE.body>
-              </AutoColumn>
-            </BlueCard>
+          {!rewardsAreClaimable && (
+            <TYPE.body fontSize={14} style={{ textAlign: 'center' }}>
+              There are no trading fee rewards available
+              <br />
+              to claim right now.
+              <br /><br />
+              Please wait a little bit and then check back here again.
+            </TYPE.body>
           )}
         </ContentWrapper>
       )}
@@ -162,11 +147,6 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>Claiming ViperPit rewards</TYPE.body>
-            <TYPE.body fontSize={12}>
-              (MetaMask window might take a while to appear &mdash;
-              <br />
-              please be patient)
-            </TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
