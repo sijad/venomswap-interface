@@ -22,7 +22,7 @@
     "@types/react-virtualized-auto-sizer": "^1.0.0",
     "@types/react-window": "^1.8.2",
     "@types/rebass": "^4.0.5",
-    "@types/styled-components": "^5.1.0",
+    "@types/styled-components": "=5.1.7",
     "@types/testing-library__cypress": "^5.0.5",
     "@types/wcag-contrast": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^2.31.0",
