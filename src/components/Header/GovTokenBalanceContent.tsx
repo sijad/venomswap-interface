@@ -77,9 +77,9 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
     unlockedRewards:
       'Unlocked pending rewards - 5% of your claimable rewards will be directly accessible upon claiming.',
     lockedRewards:
-      'Locked pending rewards - 95% of your claimable rewards will be locked until 00:00:00 December 25th, 2021 (UTC). They will thereafter gradually unlock until December 25th 2022.',
+      'Locked pending rewards - 95% of your claimable rewards will be locked until 00:00:00 December 25th, 2021 (UTC). They will thereafter gradually unlock until December 25th, 2022.',
     lockedBalance:
-      'Locked balance - Your locked balance will remain locked until 00:00:00 December 25th, 2021 (UTC). Your locked tokens will thereafter gradually unlock until December 25th 2022.'
+      'Locked balance - Your locked balance will remain locked until 00:00:00 December 25th, 2021 (UTC). Your locked tokens will thereafter gradually unlock until December 25th, 2022.'
   }
 
   return (
