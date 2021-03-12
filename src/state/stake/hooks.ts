@@ -8,6 +8,11 @@ import { useSingleCallResult, useSingleContractMultipleData } from '../multicall
 import { tryParseAmount } from '../swap/hooks'
 //import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
 import { useMasterBreederContract } from '../../hooks/useContract'
+import { useMultipleContractSingleData } from '../../state/multicall/hooks'
+import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
+import { Interface } from '@ethersproject/abi'
+const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
+//import { useTotalSupply } from '../../data/TotalSupply'
 //import { useBlockNumber } from '../application/hooks'
 
 export const STAKING_GENESIS = 6502000
@@ -16,6 +21,8 @@ export const REWARDS_DURATION_DAYS = 60
 export interface StakingInfo {
   // the pool id (pid) of the pool
   pid: number
+  // the tokens involved in this pair
+  tokens: [Token, Token]
   // the allocation point for the given pool
   allocPoint: number | undefined
   // start block for all the rewards pools
@@ -28,8 +35,8 @@ export interface StakingInfo {
   lockedRewardsPercentageUnits: number
   // the percentage of rewards locked
   unlockedRewardsPercentageUnits: number
-  // the tokens involved in this pair
-  tokens: [Token, Token]
+  // the amount of currently total staked tokens in the pool
+  totalStakedAmount: TokenAmount
   // the amount of token currently staked, or undefined if no account
   stakedAmount: TokenAmount
   // the amount of reward token earned by the active account, or undefined if no account
@@ -80,6 +87,20 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     pids.map(pids => [pids])
   )
 
+  const lpTokenAddresses = useMemo(() => {
+    return poolInfos.reduce<string[]>((memo, poolInfo) => {
+      if (poolInfo && !poolInfo.loading && poolInfo.result) {
+        const [lpTokenAddress] = poolInfo.result
+        memo.push(lpTokenAddress)
+      }
+      return memo
+    }, [])
+  }, [poolInfos])
+
+  const lpTokenBalances = useMultipleContractSingleData(lpTokenAddresses, PAIR_INTERFACE, 'balanceOf', [
+    masterBreederContract?.address
+  ])
+
   // getNewRewardPerBlock uses pid = 0 to return the base rewards
   // poolIds have to be +1'd to map to their actual pid
   // also include pid 0 to get the base emission rate
@@ -106,6 +127,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
       // amount uint256, rewardDebt uint256, rewardDebtAtBlock uint256, lastWithdrawBlock uint256, firstDepositBlock uint256, blockdelta uint256, lastDepositBlock uint256
       const userInfo = userInfos[index]
       const pendingReward = pendingRewards[index]
+      const totalStakedState = lpTokenBalances[index]
 
       // poolRewardsPerBlock indexes have to be +1'd to get the actual specific pool data
       const baseRewardsPerBlock = poolRewardsPerBlock[0]
@@ -121,7 +143,9 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         baseRewardsPerBlock &&
         !baseRewardsPerBlock.loading &&
         specificPoolRewardsPerBlock &&
-        !specificPoolRewardsPerBlock.loading
+        !specificPoolRewardsPerBlock.loading && 
+        totalStakedState && 
+        !totalStakedState.loading
       ) {
         if (poolInfo.error || userInfo.error || pendingReward.error) {
           //console.error('Failed to load staking rewards info')
@@ -150,6 +174,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         const tokens = masterInfo[index].tokens
         const dummyPair = new Pair(new TokenAmount(tokens[0], '0'), new TokenAmount(tokens[1], '0'))
         const stakedAmount = new TokenAmount(dummyPair.liquidityToken, JSBI.BigInt(userInfo?.result?.[0] ?? 0))
+        const totalStakedAmount = new TokenAmount(dummyPair.liquidityToken, JSBI.BigInt(totalStakedState.result?.[0]))
         const totalPendingRewardAmount = new TokenAmount(govToken, calculatedTotalPendingRewards)
         const totalPendingLockedRewardAmount = new TokenAmount(govToken, calculatedLockedPendingRewards)
         const totalPendingUnlockedRewardAmount = new TokenAmount(govToken, calculatedUnlockedPendingRewards)
@@ -169,6 +194,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           lockedRewardsPercentageUnits: lockedRewardsPercentageUnits,
           unlockedRewardsPercentageUnits: unlockedRewardsPercentageUnits,
           tokens: masterInfo[index].tokens,
+          totalStakedAmount: totalStakedAmount,
           stakedAmount: stakedAmount,
           earnedAmount: totalPendingRewardAmount,
           lockedEarnedAmount: totalPendingLockedRewardAmount,
@@ -187,6 +213,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     poolInfos,
     userInfos,
     pendingRewards,
+    lpTokenBalances,
     startBlock,
     lockRewardsRatio,
     poolRewardsPerBlock,

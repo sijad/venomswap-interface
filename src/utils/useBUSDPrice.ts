@@ -14,8 +14,6 @@ export default function useBUSDPrice(currency?: Currency): Price | undefined {
   const wrapped = wrappedCurrency(currency, chainId)
   const busd = chainId && BUSD[chainId]
 
-  console.log({ wrapped, busd })
-
   const tokenPairs: [Currency | undefined, Currency | undefined][] = useMemo(
     () => [
       [
@@ -28,11 +26,7 @@ export default function useBUSDPrice(currency?: Currency): Price | undefined {
     [chainId, currency, wrapped, busd]
   )
 
-  console.log({ tokenPairs })
-
   const [[ethPairState, ethPair], [busdPairState, busdPair], [busdEthPairState, busdEthPair]] = usePairs(tokenPairs)
-
-  console.log({ ethPairState, ethPair, busdPairState, busdEthPairState, busdEthPair })
 
   return useMemo(() => {
     if (!currency || !wrapped || !chainId) {
@@ -48,23 +42,14 @@ export default function useBUSDPrice(currency?: Currency): Price | undefined {
       }
     }
 
-    console.log({ wrapped })
-
     // handle busd
     if (busd && wrapped.equals(busd)) {
       return busd ? new Price(busd, busd, '1', '1') : undefined
     }
 
-    console.log({ wrapped })
-
     const ethPairETHAmount = ethPair?.reserveOf(WETH[chainId])
     const ethPairETHBUSDValue: JSBI =
       ethPairETHAmount && busdEthPair ? busdEthPair.priceOf(WETH[chainId]).quote(ethPairETHAmount).raw : JSBI.BigInt(0)
-
-    console.log({ ethPairETHAmount, ethPairETHBUSDValue })
-
-    console.log('ethPairETHAmount', ethPairETHAmount?.toSignificant(4))
-    console.log('ethPairETHAmount', ethPairETHBUSDValue?.toString())
 
     // all other tokens
     // first try the usdc pair
