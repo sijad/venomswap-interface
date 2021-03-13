@@ -1,4 +1,4 @@
-import { Blockchain, ChainId, TokenAmount } from '@venomswap/sdk'
+import { ChainId, TokenAmount } from '@venomswap/sdk'
 import React, { useState } from 'react'
 import { Text } from 'rebass'
 import { NavLink } from 'react-router-dom'
@@ -14,7 +14,7 @@ import { useDarkModeManager } from '../../state/user/hooks'
 import { useETHBalances, useAggregateGovTokenBalance } from '../../state/wallet/hooks'
 import { CardNoise } from '../earn/styled'
 import { CountUp } from 'use-count-up'
-import { TYPE, ExternalLink } from '../../theme'
+import { TYPE } from '../../theme'
 
 import { YellowCard } from '../Card'
 import { Moon, Sun } from 'react-feather'
@@ -31,7 +31,6 @@ import Modal from '../Modal'
 import GovTokenBalanceContent from './GovTokenBalanceContent'
 import usePrevious from '../../hooks/usePrevious'
 import { BASE_CURRENCY } from '../../connectors'
-import useBlockchain from '../../hooks/useBlockchain'
 
 const HeaderFrame = styled.div`
   display: grid;
@@ -229,7 +228,7 @@ const StyledNavLink = styled(NavLink).attrs({
   }
 `
 
-const StyledExternalLink = styled(ExternalLink).attrs({
+/*const StyledExternalLink = styled(ExternalLink).attrs({
   activeClassName
 })<{ isActive?: boolean }>`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -258,7 +257,7 @@ const StyledExternalLink = styled(ExternalLink).attrs({
   ${({ theme }) => theme.mediaWidth.upToExtraSmall`
       display: none;
 `}
-`
+`*/
 
 export const StyledMenuButton = styled.button`
   position: relative;
@@ -298,7 +297,6 @@ const NETWORK_LABELS: { [chainId in ChainId]?: string } = {
 
 export default function Header() {
   const { account, chainId } = useActiveWeb3React()
-  const blockchain = useBlockchain()
   const { t } = useTranslation()
 
   const userEthBalance = useETHBalances(account ? [account] : [])?.[account ?? '']
@@ -354,16 +352,6 @@ export default function Header() {
           <StyledNavLink id={`stake-nav-link`} to={'/viperPit'}>
             ViperPit
           </StyledNavLink>
-          {blockchain === Blockchain.ETHEREUM && (
-            <StyledNavLink id={`stake-nav-link`} to={'/vote'}>
-              Vote
-            </StyledNavLink>
-          )}
-          {blockchain === Blockchain.ETHEREUM && (
-            <StyledExternalLink id={`stake-nav-link`} href={'https://uniswap.info'}>
-              Charts <span style={{ fontSize: '11px' }}>↗</span>
-            </StyledExternalLink>
-          )}
         </HeaderLinks>
       </HeaderRow>
       <HeaderControls>
