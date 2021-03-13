@@ -11,7 +11,7 @@ async function getColorFromToken(token: Token): Promise<string | null> {
   }
 
   const path = [56, 97, 1666600000, 1666700000].includes(token.chainId)
-    ? `https://dvwecb5klcqus.cloudfront.net/venomswap/tokens/${token.symbol}.png`
+    ? `https://d1xrz6ki9z98vb.cloudfront.net/venomswap/tokens/${token.symbol}.png`
     : `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${token.address}/logo.png`
 
   return Vibrant.from(path)
