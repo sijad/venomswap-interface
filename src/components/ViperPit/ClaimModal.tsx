@@ -17,6 +17,8 @@ import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.j
 import { Interface } from '@ethersproject/abi'
 import { useMultipleContractSingleData } from '../../state/multicall/hooks'
 import { toV2LiquidityToken } from '../../state/user/hooks'
+import { GOVERNANCE_TOKEN, PIT_SETTINGS } from '../../constants'
+
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
 const ContentWrapper = styled(AutoColumn)`
@@ -30,6 +32,9 @@ interface ClaimModalProps {
 
 export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
   const { account, chainId } = useActiveWeb3React()
+
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
@@ -125,9 +130,9 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
           {rewardsAreClaimable && (
             <>
               <TYPE.body fontSize={14} style={{ textAlign: 'center' }}>
-                When you claim rewards, collected LP fees will be used to market buy VIPER.
+                When you claim rewards, collected LP fees will be used to market buy {govToken?.symbol}.
                 <br /><br />
-                The purchased VIPER tokens will then be distributed to the ViperPit stakers as a reward.
+                The purchased {govToken?.symbol} tokens will then be distributed to the {pitSettings?.name} stakers as a reward.
               </TYPE.body>
               <ButtonError disabled={!!error} error={!!error} onClick={onClaimRewards}>
                 {error ?? 'Claim'}
@@ -148,7 +153,7 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
-            <TYPE.body fontSize={20}>Claiming ViperPit rewards</TYPE.body>
+            <TYPE.body fontSize={20}>Claiming {pitSettings?.name} rewards</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -156,7 +161,7 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Claimed VIPER!</TYPE.body>
+            <TYPE.body fontSize={20}>Claimed {govToken?.symbol}!</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}
