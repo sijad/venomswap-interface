@@ -31,7 +31,7 @@
     "@uniswap/liquidity-staker": "^1.0.2",
     "@uniswap/merkle-distributor": "1.0.1",
     "@uniswap/token-lists": "^1.0.0-beta.19",
-    "@venomswap/contracts": "^1.0.0",
+    "@venomswap/contracts": "^1.0.1",
     "@venomswap/core": "^1.0.0",
     "@venomswap/periphery": "^1.0.0",
     "@venomswap/sdk": "^1.0.2",
