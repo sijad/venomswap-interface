@@ -30,7 +30,7 @@ import { currencyId } from '../../utils/currencyId'
 import { usePair } from '../../data/Reserves'
 import usePrevious from '../../hooks/usePrevious'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
-import { BIG_INT_ZERO } from '../../constants'
+import { BIG_INT_ZERO, GOVERNANCE_TOKEN } from '../../constants'
 //import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants'
 
 const PageWrapper = styled(AutoColumn)`
@@ -96,6 +96,8 @@ export default function Manage({
   }
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
+
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
 
   // get currencies and pair
   const [currencyA, currencyB] = [useCurrency(currencyIdA), useCurrency(currencyIdB)]
@@ -258,7 +260,7 @@ export default function Manage({
             <AutoColumn gap="sm">
               <RowBetween>
                 <div>
-                  <TYPE.black>Your unclaimed VIPER</TYPE.black>
+                  <TYPE.black>Your unclaimed {govToken?.symbol}</TYPE.black>
                 </div>
                 {stakingInfo?.earnedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.earnedAmount?.raw) && (
                   <ButtonEmpty
@@ -294,7 +296,7 @@ export default function Manage({
               <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
                 ⭐️
               </span>
-              When you withdraw, the contract will automagically claim VIPER on your behalf!
+              When you withdraw, the contract will automatically claim {govToken?.symbol} on your behalf!
             </TYPE.main>
           )}
         </>

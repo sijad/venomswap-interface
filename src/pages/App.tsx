@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import { Route, Switch } from 'react-router-dom'
 import styled from 'styled-components'
 import GoogleAnalyticsReporter from '../components/analytics/GoogleAnalyticsReporter'
@@ -19,7 +19,7 @@ import {
 } from './AddLiquidity/redirects'
 import Earn from './Earn'
 import Manage from './Earn/Manage'
-import ViperPit from './ViperPit'
+import Pit from './Pit'
 import MigrateV1 from './MigrateV1'
 import MigrateV1Exchange from './MigrateV1/MigrateV1Exchange'
 import RemoveV1Exchange from './MigrateV1/RemoveV1Exchange'
@@ -31,6 +31,9 @@ import Swap from './Swap'
 import { OpenClaimAddressModalAndRedirectToSwap, RedirectPathToSwapOnly, RedirectToSwap } from './Swap/redirects'
 import Vote from './Vote'
 import VotePage from './Vote/VotePage'
+import { PIT_SETTINGS } from '../constants'
+import { useActiveWeb3React } from '../hooks'
+import usePlatformName from '../hooks/usePlatformName'
 
 import { Blockchain } from '@venomswap/sdk'
 import useBlockchain from '../hooks/useBlockchain'
@@ -78,7 +81,14 @@ function TopLevelModals() {
 }
 
 export default function App() {
+  const { chainId } = useActiveWeb3React()
   const blockchain = useBlockchain()
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
+  const platformName = usePlatformName()
+
+  useEffect(() => {
+    document.title = platformName
+  }, [platformName])
 
   return (
     <Suspense fallback={null}>
@@ -101,7 +111,7 @@ export default function App() {
               <Route exact strict path="/find" component={PoolFinder} />
               <Route exact strict path="/pool" component={Pool} />
               <Route exact strict path="/staking" component={Earn} />
-              <Route exact strict path="/viperPit" component={ViperPit} />
+              <Route exact strict path={pitSettings?.path} component={Pit} />
               {blockchain === Blockchain.ETHEREUM && <Route exact strict path="/vote" component={Vote} />}
               <Route exact strict path="/create" component={RedirectToAddLiquidity} />
               <Route exact path="/add" component={AddLiquidity} />

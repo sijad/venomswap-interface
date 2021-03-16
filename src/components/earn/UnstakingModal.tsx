@@ -12,7 +12,7 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import FormattedCurrencyAmount from '../FormattedCurrencyAmount'
 import { useActiveWeb3React } from '../../hooks'
-import { ZERO_ADDRESS } from '../../constants'
+import { ZERO_ADDRESS, GOVERNANCE_TOKEN } from '../../constants'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -26,7 +26,9 @@ interface StakingModalProps {
 }
 
 export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
-  const { account } = useActiveWeb3React()
+  const { chainId, account } = useActiveWeb3React()
+
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
@@ -90,11 +92,11 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
               <TYPE.body fontWeight={600} fontSize={36}>
                 {<FormattedCurrencyAmount currencyAmount={stakingInfo?.earnedAmount} />}
               </TYPE.body>
-              <TYPE.body>Unclaimed VIPER</TYPE.body>
+              <TYPE.body>Unclaimed {govToken?.symbol}</TYPE.body>
             </AutoColumn>
           )}
           <TYPE.subHeader style={{ textAlign: 'center' }}>
-            When you withdraw, your VIPER is claimed and your liquidity is removed from the mining pool.
+            When you withdraw, your {govToken?.symbol} is claimed and your liquidity is removed from the mining pool.
           </TYPE.subHeader>
           <ButtonError disabled={!!error} error={!!error && !!stakingInfo?.stakedAmount} onClick={onWithdraw}>
             {error ?? 'Withdraw & Claim'}
@@ -105,7 +107,9 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
         <LoadingView onDismiss={wrappedOndismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>Withdrawing {stakingInfo?.stakedAmount?.toSignificant(4)} VENOM-LP</TYPE.body>
-            <TYPE.body fontSize={20}>Claiming {stakingInfo?.earnedAmount?.toSignificant(4)} VIPER</TYPE.body>
+            <TYPE.body fontSize={20}>
+              Claiming {stakingInfo?.earnedAmount?.toSignificant(4)} {govToken?.symbol}
+            </TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -114,7 +118,7 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
             <TYPE.body fontSize={20}>Withdrew VENOM-LP!</TYPE.body>
-            <TYPE.body fontSize={20}>Claimed VIPER!</TYPE.body>
+            <TYPE.body fontSize={20}>Claimed {govToken?.symbol}!</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

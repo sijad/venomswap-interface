@@ -11,10 +11,12 @@ import { TokenAmount, Token } from '@venomswap/sdk'
 import { useDerivedUnstakeInfo } from '../../state/stake/hooks'
 //import { wrappedCurrencyAmount } from '../../utils/wrappedCurrency'
 import { TransactionResponse } from '@ethersproject/providers'
+import { useActiveWeb3React } from '../../hooks'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
 import { usePitContract } from '../../hooks/useContract'
 import { calculateGasMargin } from '../../utils'
+import { GOVERNANCE_TOKEN, PIT_SETTINGS } from '../../constants'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -38,6 +40,8 @@ interface StakingModalProps {
 }
 
 export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, userLiquidityStaked }: StakingModalProps) {
+  const { chainId } = useActiveWeb3React()
+
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
   const { parsedAmount, error } = useDerivedUnstakeInfo(typedValue, userLiquidityStaked)
@@ -52,6 +56,8 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
     onDismiss()
   }, [onDismiss])
 
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
   const pit = usePitContract()
 
   async function onWithdraw() {
@@ -67,7 +73,7 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
         })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Withdraw VIPER from ViperPit`
+            summary: `Withdraw ${govToken?.symbol} from ${pitSettings?.name}`
           })
           setHash(response.hash)
         })
@@ -122,8 +128,12 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
-            <TYPE.largeHeader>Withdrawing VIPER from ViperPit</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>{parsedAmount?.toSignificant(4)} VIPER</TYPE.body>
+            <TYPE.largeHeader>
+              Withdrawing {govToken?.symbol} from {pitSettings?.name}
+            </TYPE.largeHeader>
+            <TYPE.body fontSize={20}>
+              {parsedAmount?.toSignificant(4)} {govToken?.symbol}
+            </TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -131,7 +141,9 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingToken, 
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Withdraw {parsedAmount?.toSignificant(4)} VIPER</TYPE.body>
+            <TYPE.body fontSize={20}>
+              Withdraw {parsedAmount?.toSignificant(4)} {govToken?.symbol}
+            </TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

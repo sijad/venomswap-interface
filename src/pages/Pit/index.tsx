@@ -24,7 +24,7 @@ import { BlueCard } from '../../components/Card'
 
 import usePrevious from '../../hooks/usePrevious'
 
-import { GOVERNANCE_TOKEN, PIT } from '../../constants'
+import { GOVERNANCE_TOKEN, PIT, PIT_SETTINGS } from '../../constants'
 import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
 import { PIT_INTERFACE } from '../../constants/abis/pit'
 
@@ -81,7 +81,11 @@ const StyledBottomCard = styled(DataCard)<{ dim: any }>`
 `*/
 
 const CustomCard = styled(DataCard)`
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #00c09c 100%);
+  background: radial-gradient(
+    76.02% 75.41% at 1.84% 0%,
+    ${({ theme }) => theme.customCardGradientStart} 0%,
+    ${({ theme }) => theme.customCardGradientEnd} 100%
+  );
   overflow: hidden;
 `
 
@@ -104,6 +108,7 @@ export default function ViperPit({
 
   const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
   const pit = chainId ? PIT[chainId] : undefined
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 
   const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
@@ -164,11 +169,11 @@ export default function ViperPit({
               <CardNoise />
               <AutoColumn gap="md">
                 <RowBetween>
-                  <TYPE.white fontWeight={600}>ViperPit - DEX fee sharing</TYPE.white>
+                  <TYPE.white fontWeight={600}>{pitSettings?.name} - DEX fee sharing</TYPE.white>
                 </RowBetween>
                 <RowBetween style={{ alignItems: 'baseline' }}>
                   <TYPE.white fontSize={14}>
-                    Stake your VIPER tokens and earn 1/3rd of the generated trading fees.
+                    Stake your {govToken?.symbol} tokens and earn 1/3rd of the generated trading fees.
                   </TYPE.white>
                 </RowBetween>
                 <br />
@@ -181,7 +186,7 @@ export default function ViperPit({
             <AutoColumn gap="sm">
               <RowBetween>
                 <div>
-                  <TYPE.black>Your xVIPER Balance</TYPE.black>
+                  <TYPE.black>Your x{govToken?.symbol} Balance</TYPE.black>
                 </div>
               </RowBetween>
               <RowBetween style={{ alignItems: 'baseline' }}>
@@ -203,7 +208,7 @@ export default function ViperPit({
 
         {account && (
           <TYPE.main>
-            You have {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} VIPER tokens available to deposit to the Viper Pit
+            You have {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} {govToken?.symbol} tokens available to deposit to the {pitSettings?.name}
           </TYPE.main>
         )}
 
@@ -230,12 +235,12 @@ export default function ViperPit({
               <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
                 💡
               </span>
-              <b>Important:</b> Your VIPER rewards will only be visible
+              <b>Important:</b> Your {govToken?.symbol} rewards will only be visible
               <br />
-              after you withdraw your xVIPER tokens from the pool.
+              after you withdraw your x{govToken?.symbol} tokens from the pool.
               <br />
               <br />
-              ViperPit does not have any withdrawal fees.
+              {pitSettings?.name} does not have any withdrawal fees.
               <br />
               Tokens are also 100% unlocked when they are claimed.
             </TYPE.main>

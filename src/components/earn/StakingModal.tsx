@@ -1,7 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import useIsArgentWallet from '../../hooks/useIsArgentWallet'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
-import { Blockchain } from '@venomswap/sdk'
 import Modal from '../Modal'
 import { AutoColumn } from '../Column'
 import styled from 'styled-components'
@@ -15,18 +13,17 @@ import { useActiveWeb3React } from '../../hooks'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { usePairContract } from '../../hooks/useContract'
 import { useApproveCallback, ApprovalState } from '../../hooks/useApproveCallback'
-import { splitSignature } from 'ethers/lib/utils'
 import { StakingInfo, useDerivedStakeInfo } from '../../state/stake/hooks'
 //import { wrappedCurrencyAmount } from '../../utils/wrappedCurrency'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
 import { useMasterBreederContract } from '../../hooks/useContract'
-import useBlockchain from '../../hooks/useBlockchain'
 import { ZERO_ADDRESS } from '../../constants'
 import { BlueCard } from '../Card'
 import { ColumnCenter } from '../Column'
 import { calculateGasMargin } from '../../utils'
+import { GOVERNANCE_TOKEN } from '../../constants'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -50,7 +47,7 @@ interface StakingModalProps {
 }
 
 export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
-  const { account, chainId, library } = useActiveWeb3React()
+  const { library, chainId } = useActiveWeb3React()
 
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
@@ -76,9 +73,8 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     onDismiss()
   }, [onDismiss])
 
-  const isArgentWallet = useIsArgentWallet()
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
   const masterBreeder = useMasterBreederContract()
-  const blockchain = useBlockchain()
   const referral = ZERO_ADDRESS
 
   // pair contract for this token to be staked
@@ -137,71 +133,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     const liquidityAmount = parsedAmount
     if (!liquidityAmount) throw new Error('missing liquidity amount')
 
-    if (isArgentWallet) {
-      return approveCallback()
-    }
-
-    const signatureEnabled = [Blockchain.ETHEREUM, Blockchain.BINANCE_SMART_CHAIN].includes(blockchain)
-    if (!signatureEnabled) {
-      return approveCallback()
-    }
-
-    // try to gather a signature for permission
-    const nonce = await pairContract.nonces(account)
-
-    const EIP712Domain = [
-      { name: 'name', type: 'string' },
-      { name: 'version', type: 'string' },
-      { name: 'chainId', type: 'uint256' },
-      { name: 'verifyingContract', type: 'address' }
-    ]
-    const domain = {
-      name: 'Viper LP Token',
-      version: '1',
-      chainId: chainId,
-      verifyingContract: pairContract.address
-    }
-    const Permit = [
-      { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' },
-      { name: 'value', type: 'uint256' },
-      { name: 'nonce', type: 'uint256' },
-      { name: 'deadline', type: 'uint256' }
-    ]
-    const message = {
-      owner: account,
-      spender: masterBreeder?.address,
-      value: liquidityAmount.raw.toString(),
-      nonce: nonce.toHexString(),
-      deadline: deadline.toNumber()
-    }
-    const data = JSON.stringify({
-      types: {
-        EIP712Domain,
-        Permit
-      },
-      domain,
-      primaryType: 'Permit',
-      message
-    })
-
-    library
-      .send('eth_signTypedData_v4', [account, data])
-      .then(splitSignature)
-      .then(signature => {
-        setSignatureData({
-          v: signature.v,
-          r: signature.r,
-          s: signature.s,
-          deadline: deadline.toNumber()
-        })
-      })
-      .catch(error => {
-        // for all errors other than 4001 (EIP-1193 user rejected request), fall back to manual approve
-        if (error?.code !== 4001) {
-          approveCallback()
-        }
-      })
+    return approveCallback()
   }
 
   return (
@@ -221,10 +153,10 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
                     <b>Important:</b> There&apos;s a <b>0.75% deposit fee</b> when depositing funds to the liquidity farming pools.
                     <br />
                     <br />
-                    These fees are rewarded to the treasury which is owned by the Viper DAO and its users.
+                    These fees are rewarded to the treasury which is owned by the {govToken?.symbol} DAO and its users.
                     <br />
                     <br />
-                    The allocation and use of the funds will be fully controlled by the VIPER DAO via active governance.
+                    The allocation and use of the funds will be fully controlled by the {govToken?.symbol} DAO via active governance.
                   </TYPE.link>
                 </AutoColumn>
               </BlueCard>

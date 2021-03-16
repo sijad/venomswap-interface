@@ -7,8 +7,20 @@ export const BUSD: { [chainId in ChainId]: Token } = {
   [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
   [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
   [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
-  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
-  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+    18,
+    'BUSD',
+    'Binance USD'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee',
+    18,
+    'BUSD',
+    'Binance USD'
+  ),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
     '0xE176EBE47d621b984a73036B9DA5d834411ef734',
@@ -25,14 +37,26 @@ export const BUSD: { [chainId in ChainId]: Token } = {
   )
 }
 
-export const ONE_ETH: { [chainId in ChainId]: Token } = {
+export const BRIDGED_ETH: { [chainId in ChainId]: Token } = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
   [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
   [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
   [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
   [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
-  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
-  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
+    18,
+    'ETH',
+    'Ethereum'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378',
+    18,
+    'ETH',
+    'Ethereum'
+  ),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
     '0x6983D1E6DEf3690C4d616b13597A09e6193EA013',
@@ -55,8 +79,20 @@ export const LINK: { [chainId in ChainId]: Token } = {
   [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, 'LINK', 'ChainLink Token'),
   [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 18, 'LINK', 'ChainLink Token'),
   [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 18, 'LINK', 'ChainLink Token'),
-  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 18, 'LINK', 'ChainLink Token'),
-  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'LINK', 'ChainLink Token'),
+  [ChainId.BSC_MAINNET]: new Token(
+    ChainId.BSC_MAINNET,
+    '0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD',
+    18,
+    'LINK',
+    'ChainLink Token'
+  ),
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    '0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06',
+    18,
+    'LINK',
+    'ChainLink Token'
+  ),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
     '0x218532a12a389a4a92fC0C5Fb22901D1c19198aA',

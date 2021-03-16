@@ -12,6 +12,7 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks'
 import { calculateGasMargin } from '../../utils'
+import { GOVERNANCE_TOKEN } from '../../constants'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -25,7 +26,9 @@ interface StakingModalProps {
 }
 
 export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
-  const { account } = useActiveWeb3React()
+  const { chainId, account } = useActiveWeb3React()
+
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
@@ -52,7 +55,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
         })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Claim accumulated VIPER rewards`
+            summary: `Claim accumulated ${govToken?.symbol} rewards`
           })
           setHash(response.hash)
         })
@@ -84,7 +87,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
               <TYPE.body fontWeight={600} fontSize={36}>
                 {stakingInfo?.earnedAmount?.toSignificant(6)}
               </TYPE.body>
-              <TYPE.body>Unclaimed VIPER</TYPE.body>
+              <TYPE.body>Unclaimed {govToken?.symbol}</TYPE.body>
             </AutoColumn>
           )}
           <TYPE.subHeader style={{ textAlign: 'center' }}>
@@ -98,7 +101,9 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
-            <TYPE.body fontSize={20}>Claiming {stakingInfo?.earnedAmount?.toSignificant(6)} VIPER</TYPE.body>
+            <TYPE.body fontSize={20}>
+              Claiming {stakingInfo?.earnedAmount?.toSignificant(6)} {govToken?.symbol}
+            </TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
@@ -106,7 +111,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
-            <TYPE.body fontSize={20}>Claimed VIPER!</TYPE.body>
+            <TYPE.body fontSize={20}>Claimed {govToken?.symbol}!</TYPE.body>
           </AutoColumn>
         </SubmittedView>
       )}

@@ -14,6 +14,9 @@ import Loader from '../../components/Loader'
 import { useActiveWeb3React } from '../../hooks'
 import useBaseStakingRewardsEmission from '../../hooks/useBaseStakingRewardsEmission'
 import { OutlineCard } from '../../components/Card'
+import { JSBI, BLOCKCHAIN_SETTINGS } from '@venomswap/sdk'
+
+import { GOVERNANCE_TOKEN } from '../../constants'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -56,6 +59,9 @@ flex-direction: column;
 export default function Earn() {
   const { chainId, account } = useActiveWeb3React()
 
+  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const blockchainSettings = chainId ? BLOCKCHAIN_SETTINGS[chainId] : undefined
+
   // staking info for connected account
   const stakingInfos = useStakingInfo()
 
@@ -73,6 +79,10 @@ export default function Earn() {
   const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
 
   const baseEmissions = useBaseStakingRewardsEmission()
+  const blocksPerMinute = blockchainSettings ? 60 / blockchainSettings.defaultBlockTime() : 0
+
+  const emissionsPerMinute =
+    baseEmissions && blockchainSettings ? baseEmissions.multiply(JSBI.BigInt(blocksPerMinute)) : undefined
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -83,11 +93,11 @@ export default function Earn() {
           <CardSection>
             <AutoColumn gap="md">
               <RowBetween>
-                <TYPE.white fontWeight={600}>Viper liquidity mining</TYPE.white>
+                <TYPE.white fontWeight={600}>{govToken?.symbol} liquidity mining</TYPE.white>
               </RowBetween>
               <RowBetween>
                 <TYPE.white fontSize={14}>
-                  Deposit your Liquidity Provider tokens to receive VIPER, the Viper Protocol governance token.
+                  Deposit your Liquidity Provider tokens to receive {govToken?.symbol}, the {govToken?.name} Protocol governance token.
                 </TYPE.white>
               </RowBetween>{' '}
             </AutoColumn>
@@ -126,7 +136,9 @@ export default function Earn() {
             <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
               ☁️
             </span>
-            The base emission rate is currently <b>{baseEmissions.toSignificant(4, { groupSeparator: ',' })}</b> VIPER per block.
+            The base emission rate is currently <b>{baseEmissions.toSignificant(4, { groupSeparator: ',' })}</b> {govToken?.symbol} per block.
+            <br />
+            <b>{emissionsPerMinute?.toSignificant(4, { groupSeparator: ',' })}</b> {govToken?.symbol} will be minted every minute given the current emission schedule.
             <br />
             The base emission rate gets significantly reduced every week.
           </TYPE.main>

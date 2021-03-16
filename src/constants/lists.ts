@@ -17,7 +17,7 @@ const CMC_ALL_LIST = 'defi.cmc.eth'
 const CMC_STABLECOIN = 'stablecoin.cmc.eth'
 const KLEROS_LIST = 't2crtokens.eth'
 const GEMINI_LIST = 'https://www.gemini.com/uniswap/manifest.json'*/
-const VENOMSWAP_DEFAULT_LIST = 'https://d1xrz6ki9z98vb.cloudfront.net/venomswap/lists/venomswap-default.tokenlist.json'
+const VENOMSWAP_DEFAULT_LIST = 'https://d1xrz6ki9z98vb.cloudfront.net/venomswap/lists/venomswap-default.bsc.tokenlist.json'
 const VENOMSWAP_COMMUNITY_LIST = 'https://d1xrz6ki9z98vb.cloudfront.net/venomswap/lists/venomswap-community.tokenlist.json'
 
 // lower index == higher priority for token import

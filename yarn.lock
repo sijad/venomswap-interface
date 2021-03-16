@@ -2806,10 +2806,10 @@
     "@venomswap/core" "1.0.0"
     "@venomswap/lib" "1.0.0"
 
-"@venomswap/sdk@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@venomswap/sdk/-/sdk-1.0.2.tgz#af1e569460c1ed0689d09dc6f08f44201a0dce8c"
-  integrity sha512-/VGB/CRYMB/tGti+su3Twqf7oTIBfceFsqJwgttRusp9rJXv1/S8fEa2sFhbSX0sTrsvrQ53FSC2hSOXchwjfg==
+"@venomswap/sdk@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@venomswap/sdk/-/sdk-1.0.4.tgz#7b7d8500f6cdce883f4375566756aa8c078fc129"
+  integrity sha512-G/8IRA/RLlIRDGVoNK60FiHmQ26VuKJL2gb4RxzmNGyWoXP7a3H9ODtogOSd1OrsJWJJ+q4wEROTaXU4ZtzapA==
   dependencies:
     "@venomswap/core" "^1.0.0"
     big.js "^5.2.2"

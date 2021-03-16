@@ -2,7 +2,7 @@ import { TokenAmount } from '@venomswap/sdk'
 import React, { useEffect } from 'react'
 import { X } from 'react-feather'
 import styled, { keyframes } from 'styled-components'
-import tokenLogo from '../../assets/images/token-logo.png'
+import getTokenLogo from '../../utils/getTokenLogo'
 import { ButtonPrimary } from '../../components/Button'
 import { useActiveWeb3React } from '../../hooks'
 import { ApplicationModal } from '../../state/application/actions'
@@ -84,7 +84,7 @@ export default function ClaimPopup() {
           <CardNoise />
           <StyledClose stroke="white" onClick={toggleShowClaimPopup} />
           <AutoColumn style={{ padding: '2rem 0', zIndex: 10 }} justify="center">
-            <UniToken width="48px" src={tokenLogo} />{' '}
+            <UniToken width="48px" src={getTokenLogo()} />{' '}
             <TYPE.white style={{ marginTop: '1rem' }} fontSize={36} fontWeight={600}>
               {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} UNI
             </TYPE.white>
