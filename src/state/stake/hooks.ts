@@ -11,6 +11,7 @@ import { useMultipleContractSingleData } from '../../state/multicall/hooks'
 import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
 import { Interface } from '@ethersproject/abi'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
+
 //import { useTotalSupply } from '../../data/TotalSupply'
 //import { useBlockNumber } from '../application/hooks'
 
@@ -25,7 +26,7 @@ export interface StakingInfo {
   // the tokens involved in this pair
   tokens: [Token, Token]
   // the allocation point for the given pool
-  allocPoint: number | undefined
+  allocPoint: JSBI
   // start block for all the rewards pools
   startBlock: number
   // base rewards per block
@@ -183,7 +184,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
 
         // poolInfo: lpToken address, allocPoint uint256, lastRewardBlock uint256, accGovTokenPerShare uint256
         const poolInfoResult = poolInfo.result
-        const allocPoint = poolInfoResult && poolInfoResult[1]
+        const allocPoint = JSBI.BigInt(poolInfoResult && poolInfoResult[1])
         const active = poolInfoResult && JSBI.GT(JSBI.BigInt(allocPoint), 0) ? true : false
 
         const stakingInfo = {

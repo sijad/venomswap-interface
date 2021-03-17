@@ -71,7 +71,9 @@ export default function Earn() {
    */
   //const stakingInfosWithBalance = stakingInfos?.filter(s => JSBI.greaterThan(s.stakedAmount.raw, BIG_INT_ZERO))
 
-  const activeStakingInfos = stakingInfos?.filter(s => s.active)
+  const filteredStakingInfos = stakingInfos
+    ?.filter(s => s.active)
+    ?.sort((a, b) => (JSBI.GT(a?.allocPoint, b?.allocPoint) ? 1 : -1))
 
   // toggle copy if rewards are inactive
   //const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
@@ -119,12 +121,12 @@ export default function Earn() {
           <Loader style={{ margin: 'auto' }} />
         ) : account && !stakingRewardsExist ? (
           <OutlineCard>No active pools</OutlineCard>
-        ) : account && stakingInfos?.length !== 0 && !activeStakingInfos ? (
+        ) : account && stakingInfos?.length !== 0 && !filteredStakingInfos ? (
           <OutlineCard>No active pools</OutlineCard>
         ) : !account ? (
           <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
         ) : (
-          activeStakingInfos?.map(stakingInfo => {
+          filteredStakingInfos?.map(stakingInfo => {
             // need to sort by added liquidity here
             return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
           })

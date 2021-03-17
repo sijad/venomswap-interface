@@ -4,7 +4,7 @@ import { RowBetween } from '../Row'
 import styled from 'styled-components'
 import { TYPE, StyledInternalLink } from '../../theme'
 import DoubleCurrencyLogo from '../DoubleLogo'
-import { JSBI, TokenAmount } from '@venomswap/sdk'
+import { JSBI, TokenAmount, Fraction } from '@venomswap/sdk'
 import { ButtonPrimary } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
 import { useColor } from '../../hooks/useColor'
@@ -98,6 +98,10 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
   const WETH = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token0 : token1
   const backgroundColor = useColor(token)
 
+  const poolShare = new Fraction(stakingInfo.poolRewardsPerBlock.raw, stakingInfo.baseRewardsPerBlock.raw).multiply(
+    JSBI.BigInt(100)
+  )
+
   const totalSupplyOfStakingToken = useTotalSupply(stakingInfo.stakedAmount.token)
   const [, stakingTokenPair] = usePair(...stakingInfo.tokens)
 
@@ -147,19 +151,15 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
             <b>
               {valueOfTotalStakedAmountInBUSD
                 ? `$${valueOfTotalStakedAmountInBUSD.toFixed(0, { groupSeparator: ',' })}`
-                : `${valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ONE`}
+                : valueOfTotalStakedAmountInWETH
+                ? `${valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ONE`
+                : '$0'}
             </b>
           </TYPE.white>
         </RowBetween>
         <RowBetween>
-          <TYPE.white> Pool weight </TYPE.white>
-          <TYPE.white>
-            {stakingInfo
-              ? stakingInfo.active
-                ? `${stakingInfo.allocPoint}x`
-                : '1x'
-              : '-'}
-          </TYPE.white>
+          <TYPE.white> Pool reward allocation </TYPE.white>
+          <TYPE.white>{poolShare ? `${poolShare.toSignificant(4)}%` : '-'}</TYPE.white>
         </RowBetween>
         <RowBetween>
           <TYPE.white> Emission rate </TYPE.white>

@@ -69,11 +69,6 @@ export function calculateGasMargin(value: BigNumber): BigNumber {
   return value.mul(BigNumber.from(10000).add(BigNumber.from(1000))).div(BigNumber.from(10000))
 }
 
-export function calculateGasPrice(value: BigNumber): BigNumber {
-  console.log({ value })
-  return value
-}
-
 // converts a basis points value to a sdk percent
 export function basisPointsToPercent(num: number): Percent {
   return new Percent(JSBI.BigInt(num), JSBI.BigInt(10000))
