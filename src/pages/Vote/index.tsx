@@ -14,13 +14,14 @@ import { useAllProposalData, ProposalData, useUserVotes, useUserDelegatee } from
 import DelegateModal from '../../components/vote/DelegateModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
-import { GOVERNANCE_TOKEN, ZERO_ADDRESS } from '../../constants'
+import { ZERO_ADDRESS } from '../../constants'
 import { JSBI, TokenAmount, ChainId } from '@venomswap/sdk'
 import { shortenAddress, getEtherscanLink } from '../../utils'
 import Loader from '../../components/Loader'
 import FormattedCurrencyAmount from '../../components/FormattedCurrencyAmount'
 import { useModalOpen, useToggleDelegateModal } from '../../state/application/hooks'
 import { ApplicationModal } from '../../state/application/actions'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const PageWrapper = styled(AutoColumn)``
 
@@ -103,7 +104,9 @@ const EmptyProposals = styled.div`
 `
 
 export default function Vote() {
-  const { account, chainId } = useActiveWeb3React()
+  const { account } = useActiveWeb3React()
+
+  const govToken = useGovernanceToken()
 
   // toggle for showing delegation modal
   const showDelegateModal = useModalOpen(ApplicationModal.DELEGATE)
@@ -114,7 +117,7 @@ export default function Vote() {
 
   // user data
   const availableVotes: TokenAmount | undefined = useUserVotes()
-  const govTokenBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, chainId ? GOVERNANCE_TOKEN[chainId] : undefined)
+  const govTokenBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, useGovernanceToken())
   const userDelegatee: string | undefined = useUserDelegatee()
 
   // show delegation option if they have have a balance, but have not delegated
@@ -140,8 +143,8 @@ export default function Vote() {
               </RowBetween>
               <RowBetween>
                 <TYPE.white fontSize={14}>
-                  VIPER tokens represent voting shares in Viper governance. You can vote on each proposal yourself or
-                  delegate your votes to a third party.
+                  {govToken?.symbol} tokens represent voting shares in {govToken?.symbol} governance. You can vote on
+                  each proposal yourself or delegate your votes to a third party.
                 </TYPE.white>
               </RowBetween>
               <ExternalLink
@@ -149,7 +152,7 @@ export default function Vote() {
                 href="https://uniswap.org/blog/uni"
                 target="_blank"
               >
-                <TYPE.white fontSize={14}>Read more about Viper governance</TYPE.white>
+                <TYPE.white fontSize={14}>Read more about {govToken?.symbol} governance</TYPE.white>
               </ExternalLink>
             </AutoColumn>
           </CardSection>
@@ -229,7 +232,7 @@ export default function Vote() {
         })}
       </TopSection>
       <TYPE.subHeader color="text3">
-        A minimum threshhold of 1% of the total VIPER supply is required to submit proposals
+        A minimum threshhold of 1% of the total {govToken?.symbol} supply is required to submit proposals
       </TYPE.subHeader>
     </PageWrapper>
   )

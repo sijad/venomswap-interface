@@ -16,9 +16,7 @@ import { ButtonPrimary } from '../Button'
 import { AutoColumn, ColumnCenter } from '../Column'
 import Confetti from '../Confetti'
 import { Break, CardBGImage, CardBGImageSmaller, CardNoise, CardSection, DataCard } from '../earn/styled'
-
-import { GOVERNANCE_TOKEN } from '../../constants'
-
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 import useBlockchain from '../../hooks/useBlockchain'
 import getExplorerName from '../../utils/getExplorerName'
 
@@ -56,7 +54,7 @@ export default function ClaimModal() {
 
   const { account, chainId } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const blockchain = useBlockchain()
   const explorerName = getExplorerName(blockchain)
 

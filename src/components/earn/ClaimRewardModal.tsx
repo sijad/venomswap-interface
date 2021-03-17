@@ -12,7 +12,7 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks'
 import { calculateGasMargin } from '../../utils'
-import { GOVERNANCE_TOKEN } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -26,18 +26,20 @@ interface StakingModalProps {
 }
 
 export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
-  const { chainId, account } = useActiveWeb3React()
+  const { account } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
+  const [failed, setFailed] = useState<boolean>(false)
 
   function wrappedOnDismiss() {
     setHash(undefined)
     setAttempting(false)
+    setFailed(false)
     onDismiss()
   }
 
@@ -61,6 +63,9 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
         })
         .catch((error: any) => {
           setAttempting(false)
+          if (error?.code === -32603) {
+            setFailed(true)
+          }
           console.log(error)
         })
     }
@@ -76,7 +81,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
-      {!attempting && !hash && (
+      {!attempting && !hash && !failed && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader>Claim</TYPE.mediumHeader>
@@ -98,7 +103,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
           </ButtonError>
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attempting && !hash && !failed && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>
@@ -107,13 +112,31 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
           </AutoColumn>
         </LoadingView>
       )}
-      {hash && (
+      {hash && !failed && (
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
             <TYPE.body fontSize={20}>Claimed {govToken?.symbol}!</TYPE.body>
           </AutoColumn>
         </SubmittedView>
+      )}
+      {!attempting && !hash && failed && (
+        <ContentWrapper gap="sm">
+          <RowBetween>
+            <TYPE.mediumHeader>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚠️
+              </span>
+              Error!
+            </TYPE.mediumHeader>
+            <CloseIcon onClick={wrappedOnDismiss} />
+          </RowBetween>
+          <TYPE.subHeader style={{ textAlign: 'center' }}>
+            Your transaction couldn&apos;t be submitted.
+            <br />
+            You may have to increase your Gas Price (GWEI) settings!
+          </TYPE.subHeader>
+        </ContentWrapper>
       )}
     </Modal>
   )

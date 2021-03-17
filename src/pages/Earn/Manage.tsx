@@ -30,8 +30,9 @@ import { currencyId } from '../../utils/currencyId'
 import { usePair } from '../../data/Reserves'
 import usePrevious from '../../hooks/usePrevious'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
-import { BIG_INT_ZERO, GOVERNANCE_TOKEN } from '../../constants'
+import { BIG_INT_ZERO } from '../../constants'
 //import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -97,7 +98,7 @@ export default function Manage({
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
 
   // get currencies and pair
   const [currencyA, currencyB] = [useCurrency(currencyIdA), useCurrency(currencyIdB)]

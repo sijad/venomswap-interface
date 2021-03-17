@@ -59,9 +59,11 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
   const addTransaction = useTransactionAdder()
   const [attempting, setAttempting] = useState<boolean>(false)
   const [hash, setHash] = useState<string | undefined>()
+  const [failed, setFailed] = useState<boolean>(false)
   const wrappedOnDismiss = useCallback(() => {
     setHash(undefined)
     setAttempting(false)
+    setFailed(false)
     onDismiss()
   }, [onDismiss])
 
@@ -91,6 +93,9 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
         })
         .catch((error: any) => {
           setAttempting(false)
+          if (error?.code === -32603) {
+            setFailed(true)
+          }
           console.log(error)
         })
     }
@@ -111,7 +116,7 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
-      {!attempting && !hash && (
+      {!attempting && !hash && !failed && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader>Withdraw</TYPE.mediumHeader>
@@ -166,7 +171,7 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
           </RowBetween>
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attempting && !hash && !failed && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Withdrawing Liquidity</TYPE.largeHeader>
@@ -174,13 +179,31 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
           </AutoColumn>
         </LoadingView>
       )}
-      {attempting && hash && (
+      {attempting && hash && !failed && (
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
             <TYPE.body fontSize={20}>Withdraw {parsedAmount?.toSignificant(4)} VENOM-LP</TYPE.body>
           </AutoColumn>
         </SubmittedView>
+      )}
+      {!attempting && !hash && failed && (
+        <ContentWrapper gap="sm">
+          <RowBetween>
+            <TYPE.mediumHeader>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚠️
+              </span>
+              Error!
+            </TYPE.mediumHeader>
+            <CloseIcon onClick={wrappedOnDismiss} />
+          </RowBetween>
+          <TYPE.subHeader style={{ textAlign: 'center' }}>
+            Your transaction couldn&apos;t be submitted.
+            <br />
+            You may have to increase your Gas Price (GWEI) settings!
+          </TYPE.subHeader>
+        </ContentWrapper>
       )}
     </Modal>
   )

@@ -33,7 +33,8 @@ import Modal from '../Modal'
 import GovTokenBalanceContent from './GovTokenBalanceContent'
 import usePrevious from '../../hooks/usePrevious'
 import { BASE_CURRENCY, BLOCKCHAIN } from '../../connectors'
-import { GOVERNANCE_TOKEN, PIT_SETTINGS } from '../../constants'
+import { PIT_SETTINGS } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const HeaderFrame = styled.div`
   display: grid;
@@ -306,7 +307,7 @@ export default function Header() {
   const { account, chainId } = useActiveWeb3React()
   const { t } = useTranslation()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 
   let logoDark: string
@@ -393,7 +394,7 @@ export default function Header() {
             <UNIWrapper onClick={toggleClaimModal}>
               <UNIAmount active={!!account && !availableClaim} style={{ pointerEvents: 'auto' }}>
                 <TYPE.white padding="0 2px">
-                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming VIPER</Dots> : 'Claim VIPER'}
+                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming {govToken?.symbol}</Dots> : `Claim ${govToken?.symbol}`}
                 </TYPE.white>
               </UNIAmount>
               <CardNoise />

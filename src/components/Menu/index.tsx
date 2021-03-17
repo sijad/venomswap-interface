@@ -10,6 +10,7 @@ import { useModalOpen, useToggleModal } from '../../state/application/hooks'
 import { ExternalLink } from '../../theme'
 import { ButtonPrimary } from '../Button'
 
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 import useBlockchain from '../../hooks/useBlockchain'
 import { Blockchain } from '@venomswap/sdk'
 
@@ -93,6 +94,7 @@ const CODE_LINK = 'https://github.com/VenomProtocol'
 export default function Menu() {
   const { account } = useActiveWeb3React()
   const blockchain = useBlockchain()
+  const govToken = useGovernanceToken()
 
   const node = useRef<HTMLDivElement>()
   const open = useModalOpen(ApplicationModal.MENU)
@@ -119,7 +121,7 @@ export default function Menu() {
           </MenuItem>
           {account && blockchain === Blockchain.ETHEREUM && (
             <ButtonPrimary onClick={openClaimModal} padding="8px 16px" width="100%" borderRadius="12px" mt="0.5rem">
-              Claim VIPER
+              Claim {govToken?.symbol}
             </ButtonPrimary>
           )}
         </MenuFlyout>

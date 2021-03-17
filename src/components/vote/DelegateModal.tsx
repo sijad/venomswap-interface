@@ -4,7 +4,7 @@ import Modal from '../Modal'
 import { AutoColumn } from '../Column'
 import styled from 'styled-components'
 import { RowBetween } from '../Row'
-import { TYPE } from '../../theme'
+import { TYPE, CloseIcon } from '../../theme'
 import { X } from 'react-feather'
 import { ButtonPrimary } from '../Button'
 import { useActiveWeb3React } from '../../hooks'
@@ -13,7 +13,7 @@ import { isAddress } from 'ethers/lib/utils'
 import useENS from '../../hooks/useENS'
 import { useDelegateCallback } from '../../state/governance/hooks'
 import { useTokenBalance } from '../../state/wallet/hooks'
-import { GOVERNANCE_TOKEN } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 import { LoadingView, SubmittedView } from '../ModalViews'
 
 const ContentWrapper = styled(AutoColumn)`
@@ -40,7 +40,7 @@ interface VoteModalProps {
 }
 
 export default function DelegateModal({ isOpen, onDismiss, title }: VoteModalProps) {
-  const { account, chainId } = useActiveWeb3React()
+  const { account } = useActiveWeb3React()
 
   // state for delegate input
   const [usingDelegate, setUsingDelegate] = useState(false)
@@ -54,19 +54,23 @@ export default function DelegateModal({ isOpen, onDismiss, title }: VoteModalPro
   const activeDelegate = usingDelegate ? typed : account
   const { address: parsedAddress } = useENS(activeDelegate)
 
+  const govToken = useGovernanceToken()
+
   // get the number of votes available to delegate
-  const govTokenBalance = useTokenBalance(account ?? undefined, chainId ? GOVERNANCE_TOKEN[chainId] : undefined)
+  const govTokenBalance = useTokenBalance(account ?? undefined, govToken)
 
   const delegateCallback = useDelegateCallback()
 
   // monitor call to help UI loading state
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
+  const [failed, setFailed] = useState<boolean>(false)
 
   // wrapper to reset state on modal close
-  function wrappedOndismiss() {
+  function wrappedOnDismiss() {
     setHash(undefined)
     setAttempting(false)
+    setFailed(false)
     onDismiss()
   }
 
@@ -79,6 +83,9 @@ export default function DelegateModal({ isOpen, onDismiss, title }: VoteModalPro
     // try delegation and store hash
     const hash = await delegateCallback(parsedAddress ?? undefined)?.catch(error => {
       setAttempting(false)
+      if (error?.code === -32603) {
+        setFailed(true)
+      }
       console.log(error)
     })
 
@@ -88,13 +95,13 @@ export default function DelegateModal({ isOpen, onDismiss, title }: VoteModalPro
   }
 
   return (
-    <Modal isOpen={isOpen} onDismiss={wrappedOndismiss} maxHeight={90}>
-      {!attempting && !hash && (
+    <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
+      {!attempting && !hash && !failed && (
         <ContentWrapper gap="lg">
           <AutoColumn gap="lg" justify="center">
             <RowBetween>
               <TYPE.mediumHeader fontWeight={500}>{title}</TYPE.mediumHeader>
-              <StyledClosed stroke="black" onClick={wrappedOndismiss} />
+              <StyledClosed stroke="black" onClick={wrappedOnDismiss} />
             </RowBetween>
             <TYPE.body>Earned UNI tokens represent voting shares in Viperswap governance.</TYPE.body>
             <TYPE.body>
@@ -112,21 +119,39 @@ export default function DelegateModal({ isOpen, onDismiss, title }: VoteModalPro
           </AutoColumn>
         </ContentWrapper>
       )}
-      {attempting && !hash && (
-        <LoadingView onDismiss={wrappedOndismiss}>
+      {attempting && !hash && !failed && (
+        <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>{usingDelegate ? 'Delegating votes' : 'Unlocking Votes'}</TYPE.largeHeader>
             <TYPE.main fontSize={36}>{govTokenBalance?.toSignificant(4)}</TYPE.main>
           </AutoColumn>
         </LoadingView>
       )}
-      {hash && (
-        <SubmittedView onDismiss={wrappedOndismiss} hash={hash}>
+      {hash && !failed && (
+        <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
             <TYPE.main fontSize={36}>{govTokenBalance?.toSignificant(4)}</TYPE.main>
           </AutoColumn>
         </SubmittedView>
+      )}
+      {!attempting && !hash && failed && (
+        <ContentWrapper gap="sm">
+          <RowBetween>
+            <TYPE.mediumHeader>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚠️
+              </span>
+              Error!
+            </TYPE.mediumHeader>
+            <CloseIcon onClick={wrappedOnDismiss} />
+          </RowBetween>
+          <TYPE.subHeader style={{ textAlign: 'center' }}>
+            Your transaction couldn&apos;t be submitted.
+            <br />
+            You may have to increase your Gas Price (GWEI) settings!
+          </TYPE.subHeader>
+        </ContentWrapper>
       )}
     </Modal>
   )

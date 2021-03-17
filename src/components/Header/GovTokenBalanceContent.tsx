@@ -4,7 +4,6 @@ import React from 'react'
 import { X } from 'react-feather'
 import styled from 'styled-components'
 import getTokenLogo from '../../utils/getTokenLogo'
-import { GOVERNANCE_TOKEN } from '../../constants'
 import { useGovTokenSupply } from '../../data/TotalSupply'
 import { useActiveWeb3React } from '../../hooks'
 //import { useMerkleDistributorContract } from '../../hooks/useContract'
@@ -17,6 +16,7 @@ import useBUSDPrice from '../../utils/useBUSDPrice'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
 import { Break, CardBGImage, CardNoise, CardSection, DataCard } from '../earn/styled'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
 import { MouseoverTooltip } from '../Tooltip'
 import useBlockchain from '../../hooks/useBlockchain'
@@ -27,7 +27,11 @@ const ContentWrapper = styled(AutoColumn)`
 
 const ModalUpper = styled(DataCard)`
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, ${({ theme }) => theme.tokenButtonGradientStart} 0%, #000 100%);
+  background: radial-gradient(
+    76.02% 75.41% at 1.84% 0%,
+    ${({ theme }) => theme.tokenButtonGradientStart} 0%,
+    #000 100%
+  );
   padding: 0.5rem;
 `
 
@@ -45,11 +49,9 @@ const StyledClose = styled(X)`
  * Content for balance stats modal
  */
 export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { setShowUniBalanceModal: any }) {
-  const { account, chainId } = useActiveWeb3React()
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
-
+  const { account } = useActiveWeb3React()
+  const govToken = useGovernanceToken()
   const blockchain = useBlockchain()
-
   const total = useAggregateGovTokenBalance()
   const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,

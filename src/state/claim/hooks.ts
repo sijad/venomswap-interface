@@ -1,4 +1,3 @@
-import { GOVERNANCE_TOKEN } from './../../constants/index'
 import { TokenAmount, JSBI } from '@venomswap/sdk'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useEffect, useState } from 'react'
@@ -7,6 +6,7 @@ import { useMerkleDistributorContract } from '../../hooks/useContract'
 import { useSingleCallResult } from '../multicall/hooks'
 import { calculateGasMargin } from '../../utils'
 import { useTransactionAdder } from '../transactions/hooks'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 interface UserClaimData {
   index: number
@@ -77,11 +77,10 @@ export function useUserHasAvailableClaim(account: string | null | undefined): bo
 }
 
 export function useUserUnclaimedAmount(account: string | null | undefined): TokenAmount | undefined {
-  const { chainId } = useActiveWeb3React()
   const userClaimData = useUserClaimData(account)
   const canClaim = useUserHasAvailableClaim(account)
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   if (!govToken) return undefined
   if (!canClaim || !userClaimData) {
     return new TokenAmount(govToken, JSBI.BigInt(0))
@@ -96,6 +95,7 @@ export function useClaimCallback(
 } {
   // get claim data for this account
   const { library, chainId } = useActiveWeb3React()
+  const govToken = useGovernanceToken()
   const claimData = useUserClaimData(account)
 
   // used for popup summary
@@ -113,7 +113,7 @@ export function useClaimCallback(
         .claim(...args, { value: null, gasLimit: calculateGasMargin(estimatedGasLimit) })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Claimed ${unClaimedAmount?.toSignificant(4)} VIPER`,
+            summary: `Claimed ${unClaimedAmount?.toSignificant(4)} ${govToken?.symbol}`,
             claim: { recipient: account }
           })
           return response.hash

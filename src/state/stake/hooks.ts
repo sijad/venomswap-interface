@@ -1,6 +1,5 @@
 import { CurrencyAmount, JSBI, Token, TokenAmount, Pair } from '@venomswap/sdk'
 import { useMemo } from 'react'
-import { GOVERNANCE_TOKEN } from '../../constants'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
 import { useActiveWeb3React } from '../../hooks'
 //import { NEVER_RELOAD, useMultipleContractSingleData } from '../multicall/hooks'
@@ -11,9 +10,11 @@ import { useMasterBreederContract } from '../../hooks/useContract'
 import { useMultipleContractSingleData } from '../../state/multicall/hooks'
 import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
 import { Interface } from '@ethersproject/abi'
-const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 //import { useTotalSupply } from '../../data/TotalSupply'
 //import { useBlockNumber } from '../application/hooks'
+
+const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
 export const STAKING_GENESIS = 6502000
 
@@ -69,7 +70,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     [chainId, pairToFilterBy]
   )
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
 
   const pids = useMemo(() => masterInfo.map(({ pid }) => pid), [masterInfo])
 
@@ -222,8 +223,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
 }
 
 export function useTotalGovTokensEarned(): TokenAmount | undefined {
-  const { chainId } = useActiveWeb3React()
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const stakingInfos = useStakingInfo()
 
   return useMemo(() => {
@@ -238,8 +238,7 @@ export function useTotalGovTokensEarned(): TokenAmount | undefined {
 }
 
 export function useTotalLockedGovTokensEarned(): TokenAmount | undefined {
-  const { chainId } = useActiveWeb3React()
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const stakingInfos = useStakingInfo()
 
   return useMemo(() => {
@@ -254,8 +253,7 @@ export function useTotalLockedGovTokensEarned(): TokenAmount | undefined {
 }
 
 export function useTotalUnlockedGovTokensEarned(): TokenAmount | undefined {
-  const { chainId } = useActiveWeb3React()
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const stakingInfos = useStakingInfo()
 
   return useMemo(() => {

@@ -8,19 +8,17 @@ import { useMasterBreederContract } from '../../hooks/useContract'
 import useBlockchain from '../../hooks/useBlockchain'
 import getBlockchainBlockTime from '../../utils/getBlockchainBlockTime'
 import { BlueCard } from '../../components/Card'
-import { GOVERNANCE_TOKEN } from '../../constants'
-import { useActiveWeb3React } from '../../hooks'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const MINUTE = 60
 const HOUR = MINUTE * 60
 const DAY = HOUR * 24
 
 export default function AwaitingRewards() {
-  const { chainId } = useActiveWeb3React()
   const blockchain = useBlockchain()
   const blockTime = getBlockchainBlockTime(blockchain)
   const masterBreederContract = useMasterBreederContract()
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
 
   const rewardsStartBlock = useSingleCallResult(masterBreederContract, 'START_BLOCK').result?.[0]
   const currentBlock = useBlockNumber()

@@ -15,7 +15,7 @@ import ReactMarkdown from 'react-markdown'
 import VoteModal from '../../components/vote/VoteModal'
 import { TokenAmount, JSBI } from '@venomswap/sdk'
 import { useActiveWeb3React } from '../../hooks'
-import { AVERAGE_BLOCK_TIME_IN_SECS, COMMON_CONTRACT_NAMES, GOVERNANCE_TOKEN, ZERO_ADDRESS } from '../../constants'
+import { AVERAGE_BLOCK_TIME_IN_SECS, COMMON_CONTRACT_NAMES, ZERO_ADDRESS } from '../../constants'
 import { isAddress, getEtherscanLink } from '../../utils'
 import { ApplicationModal } from '../../state/application/actions'
 import { useModalOpen, useToggleDelegateModal, useToggleVoteModal, useBlockNumber } from '../../state/application/hooks'
@@ -23,6 +23,7 @@ import DelegateModal from '../../components/vote/DelegateModal'
 import { GreyCard } from '../../components/Card'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 import { BigNumber } from 'ethers'
 
 const PageWrapper = styled(AutoColumn)`
@@ -154,7 +155,7 @@ export default function VotePage({
     proposalData &&
     proposalData.status === 'active'
 
-  const govTokenBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, chainId ? GOVERNANCE_TOKEN[chainId] : undefined)
+  const govTokenBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, useGovernanceToken())
   const userDelegatee: string | undefined = useUserDelegatee()
 
   // in blurb link to home page if they are able to unlock

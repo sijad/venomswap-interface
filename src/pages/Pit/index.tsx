@@ -24,9 +24,10 @@ import { BlueCard } from '../../components/Card'
 
 import usePrevious from '../../hooks/usePrevious'
 
-import { GOVERNANCE_TOKEN, PIT, PIT_SETTINGS } from '../../constants'
+import { PIT, PIT_SETTINGS } from '../../constants'
 import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
 import { PIT_INTERFACE } from '../../constants/abis/pit'
+import useGovernanceToken from 'hooks/useGovernanceToken'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -106,7 +107,7 @@ export default function ViperPit({
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const pit = chainId ? PIT[chainId] : undefined
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 

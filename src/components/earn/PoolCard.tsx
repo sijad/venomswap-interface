@@ -17,6 +17,7 @@ import useBUSDPrice from '../../utils/useBUSDPrice'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
 //import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
 import { DEFAULT_CURRENCIES } from '@venomswap/sdk'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const StatContainer = styled.div`
   display: flex;
@@ -89,6 +90,8 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
   const currency1 = unwrappedToken(token1)
 
   const isStaking = Boolean(stakingInfo.stakedAmount.greaterThan('0'))
+
+  const govToken = useGovernanceToken()
 
   // get the color of the token
   const token = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token1 : token0
@@ -163,8 +166,9 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           <TYPE.white>
             {stakingInfo
               ? stakingInfo.active
-                ? `${stakingInfo.poolRewardsPerBlock.toSignificant(4, { groupSeparator: ',' })} VIPER / block`
-                : '0 VIPER / block'
+                ? `${stakingInfo.poolRewardsPerBlock.toSignificant(4, { groupSeparator: ',' })} 
+                ${govToken?.symbol} / block`
+                : `0 ${govToken?.symbol} / block`
               : '-'}
           </TYPE.white>
         </RowBetween>
@@ -182,8 +186,8 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
                 </span>
                 {stakingInfo
                   ? stakingInfo.active
-                    ? `${stakingInfo.unlockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} VIPER`
-                    : '0 VIPER'
+                    ? `${stakingInfo.unlockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} ${govToken?.symbol}`
+                    : `0 ${govToken?.symbol}`
                   : '-'}
               </TYPE.white>
             </RowBetween>
@@ -195,8 +199,8 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
                 </span>
                 {stakingInfo
                   ? stakingInfo.active
-                    ? `${stakingInfo.lockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} VIPER`
-                    : '0 VIPER'
+                    ? `${stakingInfo.lockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} ${govToken?.symbol}`
+                    : `0 ${govToken?.symbol}`
                   : '-'}
               </TYPE.white>
             </RowBetween>
@@ -213,8 +217,8 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
               </span>
               {stakingInfo
                 ? stakingInfo.active
-                  ? `${stakingInfo.earnedAmount.toSignificant(4, { groupSeparator: ',' })} VIPER`
-                  : '0 VIPER'
+                  ? `${stakingInfo.earnedAmount.toSignificant(4, { groupSeparator: ',' })} ${govToken?.symbol}`
+                  : `0 ${govToken?.symbol}`
                 : '-'}
             </TYPE.black>
           </BottomSection>

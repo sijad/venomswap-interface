@@ -23,7 +23,7 @@ import { ZERO_ADDRESS } from '../../constants'
 import { BlueCard } from '../Card'
 import { ColumnCenter } from '../Column'
 import { calculateGasMargin } from '../../utils'
-import { GOVERNANCE_TOKEN } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -47,7 +47,7 @@ interface StakingModalProps {
 }
 
 export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
-  const { library, chainId } = useActiveWeb3React()
+  const { library } = useActiveWeb3React()
 
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
@@ -67,13 +67,15 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   const addTransaction = useTransactionAdder()
   const [attempting, setAttempting] = useState<boolean>(false)
   const [hash, setHash] = useState<string | undefined>()
+  const [failed, setFailed] = useState<boolean>(false)
   const wrappedOnDismiss = useCallback(() => {
     setHash(undefined)
     setAttempting(false)
+    setFailed(false)
     onDismiss()
   }, [onDismiss])
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const masterBreeder = useMasterBreederContract()
   const referral = ZERO_ADDRESS
 
@@ -106,6 +108,9 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           })
           .catch((error: any) => {
             setAttempting(false)
+            if (error?.code === -32603) {
+              setFailed(true)
+            }
             console.log(error)
           })
       } else {
@@ -138,7 +143,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
-      {!attempting && !hash && (
+      {!attempting && !hash && !failed && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader>Deposit</TYPE.mediumHeader>
@@ -196,7 +201,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           <ProgressCircles steps={[approval === ApprovalState.APPROVED || signatureData !== null]} disabled={true} />
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attempting && !hash && !failed && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Depositing Liquidity</TYPE.largeHeader>
@@ -204,13 +209,31 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           </AutoColumn>
         </LoadingView>
       )}
-      {attempting && hash && (
+      {attempting && hash && !failed && (
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
             <TYPE.body fontSize={20}>Deposited {parsedAmount?.toSignificant(4)} VENOM-LP</TYPE.body>
           </AutoColumn>
         </SubmittedView>
+      )}
+      {!attempting && !hash && failed && (
+        <ContentWrapper gap="sm">
+          <RowBetween>
+            <TYPE.mediumHeader>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚠️
+              </span>
+              Error!
+            </TYPE.mediumHeader>
+            <CloseIcon onClick={wrappedOnDismiss} />
+          </RowBetween>
+          <TYPE.subHeader style={{ textAlign: 'center' }}>
+            Your transaction couldn&apos;t be submitted.
+            <br />
+            You may have to increase your Gas Price (GWEI) settings!
+          </TYPE.subHeader>
+        </ContentWrapper>
       )}
     </Modal>
   )

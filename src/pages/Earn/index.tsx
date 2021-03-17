@@ -16,7 +16,7 @@ import useBaseStakingRewardsEmission from '../../hooks/useBaseStakingRewardsEmis
 import { OutlineCard } from '../../components/Card'
 import { JSBI, BLOCKCHAIN_SETTINGS } from '@venomswap/sdk'
 
-import { GOVERNANCE_TOKEN } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -59,7 +59,7 @@ flex-direction: column;
 export default function Earn() {
   const { chainId, account } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const blockchainSettings = chainId ? BLOCKCHAIN_SETTINGS[chainId] : undefined
 
   // staking info for connected account

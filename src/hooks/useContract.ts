@@ -10,14 +10,7 @@ import { abi as MERKLE_DISTRIBUTOR_ABI } from '@uniswap/merkle-distributor/build
 import { ChainId, WETH } from '@venomswap/sdk'
 import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
 import { useMemo } from 'react'
-import {
-  GOVERNANCE_ADDRESS,
-  MERKLE_DISTRIBUTOR_ADDRESS,
-  GOVERNANCE_TOKEN,
-  MASTER_BREEDER,
-  PIT,
-  PIT_BREEDER
-} from '../constants'
+import { GOVERNANCE_ADDRESS, MERKLE_DISTRIBUTOR_ADDRESS, MASTER_BREEDER, PIT, PIT_BREEDER } from '../constants'
 import {
   ARGENT_WALLET_DETECTOR_ABI,
   ARGENT_WALLET_DETECTOR_MAINNET_ADDRESS
@@ -33,6 +26,7 @@ import { MULTICALL_ABI, MULTICALL_NETWORKS } from '../constants/multicall'
 import { V1_EXCHANGE_ABI, V1_FACTORY_ABI, V1_FACTORY_ADDRESSES } from '../constants/v1'
 import { getContract } from '../utils'
 import { useActiveWeb3React } from './index'
+import useGovernanceToken from './useGovernanceToken'
 
 // returns null on errors
 function useContract(address: string | undefined, ABI: any, withSignerIfPossible = true): Contract | null {
@@ -123,13 +117,11 @@ export function useGovernanceContract(): Contract | null {
 }
 
 export function useUniContract(): Contract | null {
-  const { chainId } = useActiveWeb3React()
-  return useContract(chainId ? GOVERNANCE_TOKEN[chainId].address : undefined, UNI_ABI, true)
+  return useContract(useGovernanceToken()?.address, UNI_ABI, true)
 }
 
 export function useGovTokenContract(): Contract | null {
-  const { chainId } = useActiveWeb3React()
-  return useContract(chainId ? GOVERNANCE_TOKEN[chainId].address : undefined, GOVERNANCE_TOKEN_ABI, true)
+  return useContract(useGovernanceToken()?.address, GOVERNANCE_TOKEN_ABI, true)
 }
 
 export function usePitContract(withSignerIfPossible?: boolean): Contract | null {

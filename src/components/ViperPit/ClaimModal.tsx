@@ -17,7 +17,8 @@ import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.j
 import { Interface } from '@ethersproject/abi'
 import { useMultipleContractSingleData } from '../../state/multicall/hooks'
 import { toV2LiquidityToken } from '../../state/user/hooks'
-import { GOVERNANCE_TOKEN, PIT_SETTINGS } from '../../constants'
+import { PIT_SETTINGS } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
@@ -33,17 +34,19 @@ interface ClaimModalProps {
 export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
   const { account, chainId } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
+  const [failed, setFailed] = useState<boolean>(false)
 
   function wrappedOnDismiss() {
     setHash(undefined)
     setAttempting(false)
+    setFailed(false)
     onDismiss()
   }
 
@@ -104,6 +107,9 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
         })
         .catch((error: any) => {
           setAttempting(false)
+          if (error?.code === -32603) {
+            setFailed(true)
+          }
           console.log(error)
         })
     }
@@ -116,7 +122,7 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
-      {!attempting && !hash && (
+      {!attempting && !hash && !failed && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader> Claim</TYPE.mediumHeader>
@@ -150,20 +156,38 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
           )}
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attempting && !hash && !failed && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>Claiming {pitSettings?.name} rewards</TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
-      {hash && (
+      {hash && !failed && (
         <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
             <TYPE.body fontSize={20}>Claimed {govToken?.symbol}!</TYPE.body>
           </AutoColumn>
         </SubmittedView>
+      )}
+      {!attempting && !hash && failed && (
+        <ContentWrapper gap="sm">
+          <RowBetween>
+            <TYPE.mediumHeader>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚠️
+              </span>
+              Error!
+            </TYPE.mediumHeader>
+            <CloseIcon onClick={wrappedOnDismiss} />
+          </RowBetween>
+          <TYPE.subHeader style={{ textAlign: 'center' }}>
+            Your transaction couldn&apos;t be submitted.
+            <br />
+            You may have to increase your Gas Price (GWEI) settings!
+          </TYPE.subHeader>
+        </ContentWrapper>
       )}
     </Modal>
   )
