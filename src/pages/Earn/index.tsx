@@ -117,20 +117,20 @@ export default function Earn() {
         <AwaitingRewards />
 
         <PoolSection>
-        {account && stakingRewardsExist && stakingInfos?.length === 0 ? (
-          <Loader style={{ margin: 'auto' }} />
-        ) : account && !stakingRewardsExist ? (
-          <OutlineCard>No active pools</OutlineCard>
-        ) : account && stakingInfos?.length !== 0 && !filteredStakingInfos ? (
-          <OutlineCard>No active pools</OutlineCard>
-        ) : !account ? (
-          <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
-        ) : (
-          filteredStakingInfos?.map(stakingInfo => {
-            // need to sort by added liquidity here
-            return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
-          })
-        )}
+          {account && stakingRewardsExist && stakingInfos?.length === 0 ? (
+            <Loader style={{ margin: 'auto' }} />
+          ) : account && !stakingRewardsExist ? (
+            <OutlineCard>No active pools</OutlineCard>
+          ) : account && stakingInfos?.length !== 0 && !filteredStakingInfos ? (
+            <OutlineCard>No active pools</OutlineCard>
+          ) : !account ? (
+            <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
+          ) : (
+            filteredStakingInfos?.map(stakingInfo => {
+              // need to sort by added liquidity here
+              return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
+            })
+          )}
         </PoolSection>
 
         {stakingRewardsExist && baseEmissions && (
@@ -143,6 +143,13 @@ export default function Earn() {
             <b>{emissionsPerMinute?.toSignificant(4, { groupSeparator: ',' })}</b> {govToken?.symbol} will be minted every minute given the current emission schedule.
             <br />
             The base emission rate gets significantly reduced every week.
+            <br />
+            <br />
+            <TYPE.small style={{ textAlign: 'center' }} fontSize={10}>
+              * = The APR is calculated using a very simplified formula, it might not represent the true APR
+              <br />
+              when factoring in the dynamic emission schedule and the locked/unlocked vesting system.
+            </TYPE.small>
           </TYPE.main>
         )}
       </AutoColumn>

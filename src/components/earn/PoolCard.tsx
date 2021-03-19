@@ -4,15 +4,13 @@ import { RowBetween } from '../Row'
 import styled from 'styled-components'
 import { TYPE, StyledInternalLink } from '../../theme'
 import DoubleCurrencyLogo from '../DoubleLogo'
-import { JSBI, TokenAmount, Fraction } from '@venomswap/sdk'
+import { JSBI } from '@venomswap/sdk'
 import { ButtonPrimary } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
 import { useColor } from '../../hooks/useColor'
 import { currencyId } from '../../utils/currencyId'
 import { Break, CardNoise, CardBGImage } from './styled'
 import { unwrappedToken } from '../../utils/wrappedCurrency'
-import { useTotalSupply } from '../../data/TotalSupply'
-import { usePair } from '../../data/Reserves'
 import useBUSDPrice from '../../utils/useBUSDPrice'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
 //import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
@@ -93,38 +91,17 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
 
   const govToken = useGovernanceToken()
 
+  const poolSharePercentage = stakingInfo.poolShare.multiply(JSBI.BigInt(100))
+
   // get the color of the token
   const token = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token1 : token0
   const WETH = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token0 : token1
   const backgroundColor = useColor(token)
 
-  const poolShare = new Fraction(stakingInfo.poolRewardsPerBlock.raw, stakingInfo.baseRewardsPerBlock.raw).multiply(
-    JSBI.BigInt(100)
-  )
-
-  const totalSupplyOfStakingToken = useTotalSupply(stakingInfo.stakedAmount.token)
-  const [, stakingTokenPair] = usePair(...stakingInfo.tokens)
-
-  // let returnOverMonth: Percent = new Percent('0')
-  let valueOfTotalStakedAmountInWETH: TokenAmount | undefined
-  if (totalSupplyOfStakingToken && stakingTokenPair) {
-    // take the total amount of LP tokens staked, multiply by ETH value of all LP tokens, divide by all LP tokens
-    valueOfTotalStakedAmountInWETH = new TokenAmount(
-      WETH,
-      JSBI.divide(
-        JSBI.multiply(
-          JSBI.multiply(stakingInfo.totalStakedAmount.raw, stakingTokenPair.reserveOf(WETH).raw),
-          JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
-        ),
-        totalSupplyOfStakingToken.raw
-      )
-    )
-  }
-
   // get the USD value of staked WETH
   const USDPrice = useBUSDPrice(WETH)
   const valueOfTotalStakedAmountInBUSD =
-    valueOfTotalStakedAmountInWETH && USDPrice?.quote(valueOfTotalStakedAmountInWETH)
+    stakingInfo.valueOfTotalStakedAmountInWETH && USDPrice?.quote(stakingInfo.valueOfTotalStakedAmountInWETH)
 
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
@@ -146,20 +123,28 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
 
       <StatContainer>
         <RowBetween>
+          <TYPE.white> APR*</TYPE.white>
+          <TYPE.white fontWeight={500}>
+            <b>
+              {stakingInfo.apr ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%` : ''}
+            </b>
+          </TYPE.white>
+        </RowBetween>
+        <RowBetween>
           <TYPE.white> Total deposited</TYPE.white>
           <TYPE.white fontWeight={500}>
             <b>
               {valueOfTotalStakedAmountInBUSD
                 ? `$${valueOfTotalStakedAmountInBUSD.toFixed(0, { groupSeparator: ',' })}`
-                : valueOfTotalStakedAmountInWETH
-                ? `${valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ONE`
+                : stakingInfo.valueOfTotalStakedAmountInWETH
+                ? `${stakingInfo.valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ONE`
                 : '$0'}
             </b>
           </TYPE.white>
         </RowBetween>
         <RowBetween>
           <TYPE.white> Pool reward allocation </TYPE.white>
-          <TYPE.white>{poolShare ? `${poolShare.toSignificant(4)}%` : '-'}</TYPE.white>
+          <TYPE.white>{poolSharePercentage ? `${poolSharePercentage.toSignificant(4)}%` : '-'}</TYPE.white>
         </RowBetween>
         <RowBetween>
           <TYPE.white> Emission rate </TYPE.white>
