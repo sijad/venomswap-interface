@@ -51,6 +51,8 @@ export interface StakingInfo {
   totalStakedAmount: TokenAmount
   // the amount of token currently staked, or undefined if no account
   stakedAmount: TokenAmount
+  // the ratio of the user's share of the pool
+  stakedRatio: Fraction
   // the amount of reward token earned by the active account, or undefined if no account
   earnedAmount: TokenAmount
   // the amount of reward token earned by the active account, or undefined if no account - which will be locked
@@ -60,7 +62,9 @@ export interface StakingInfo {
   // value of total staked amount, measured in weth (or wone/wbnb)
   valueOfTotalStakedAmountInWETH: TokenAmount | undefined
   // pool APR
-  apr: Fraction | undefined
+  poolApr: Fraction | undefined
+  // staker APR
+  stakerApr: Fraction | undefined
   // if pool is active
   active: boolean
 }
@@ -202,8 +206,11 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         )
 
         const dummyPair = new Pair(new TokenAmount(tokens[0], '0'), new TokenAmount(tokens[1], '0'))
+
         const stakedAmount = new TokenAmount(dummyPair.liquidityToken, JSBI.BigInt(userInfo?.result?.[0] ?? 0))
         const totalStakedAmount = new TokenAmount(dummyPair.liquidityToken, JSBI.BigInt(lpTokenBalance.result?.[0]))
+        const stakedRatio = new Fraction(stakedAmount.raw, totalStakedAmount.raw)
+
         const totalLpTokenSupply = new TokenAmount(
           dummyPair.liquidityToken,
           JSBI.BigInt(lpTokenTotalSupply.result?.[0])
@@ -241,7 +248,8 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         }
 
         let valueOfTotalStakedAmountInWETH: TokenAmount | undefined
-        let apr: Fraction | undefined
+        let poolApr: Fraction | undefined
+        let stakerApr: Fraction | undefined
 
         if (totalLpTokenSupply && stakingTokenPair) {
           // take the total amount of LP tokens staked, multiply by ETH value of all LP tokens, divide by all LP tokens
@@ -256,12 +264,21 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
             )
           )
 
-          apr = calculateApr(
+          poolApr = calculateApr(
             govTokenWethPrice,
             baseBlockRewards,
             blocksPerYear,
             poolShare,
             valueOfTotalStakedAmountInWETH
+          )
+
+          stakerApr = calculateApr(
+            govTokenWethPrice,
+            baseBlockRewards,
+            blocksPerYear,
+            poolShare,
+            valueOfTotalStakedAmountInWETH,
+            stakedRatio
           )
         }
 
@@ -279,11 +296,13 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           totalLpTokenSupply: totalLpTokenSupply,
           totalStakedAmount: totalStakedAmount,
           stakedAmount: stakedAmount,
+          stakedRatio: stakedRatio,
           earnedAmount: totalPendingRewardAmount,
           lockedEarnedAmount: totalPendingLockedRewardAmount,
           unlockedEarnedAmount: totalPendingUnlockedRewardAmount,
           valueOfTotalStakedAmountInWETH: valueOfTotalStakedAmountInWETH,
-          apr: apr,
+          poolApr: poolApr,
+          stakerApr: stakerApr,
           active: active
         }
 

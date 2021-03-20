@@ -126,7 +126,9 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           <TYPE.white> APR*</TYPE.white>
           <TYPE.white fontWeight={500}>
             <b>
-              {stakingInfo.apr ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%` : ''}
+              {stakingInfo.poolApr
+                ? `${stakingInfo.poolApr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
+                : ''}
             </b>
           </TYPE.white>
         </RowBetween>
@@ -163,6 +165,19 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
         <>
           <Break />
           <StatContainerTop>
+            <RowBetween>
+              <TYPE.white> Your APR* </TYPE.white>
+              <TYPE.white>
+                <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                  🚀
+                </span>
+                {stakingInfo && stakingInfo.stakerApr
+                  ? stakingInfo.active
+                    ? `${stakingInfo.stakerApr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
+                    : `0 ${govToken?.symbol}`
+                  : '-'}
+              </TYPE.white>
+            </RowBetween>
             <RowBetween>
               <TYPE.white> Your Unlocked Rewards </TYPE.white>
               <TYPE.white>
