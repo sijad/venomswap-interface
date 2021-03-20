@@ -5,17 +5,11 @@ export default function calculateApr(
   baseBlockRewards: TokenAmount,
   blocksPerYear: JSBI,
   poolShare: Fraction,
-  valueOfTotalStakedAmountInWETH: TokenAmount,
-  userRatio?: Fraction | undefined 
+  valueOfTotalStakedAmountInWETH: TokenAmount
 ): Fraction | undefined {
-  let multiplications = govTokenWethPrice?.raw
+  return govTokenWethPrice?.raw
     .multiply(baseBlockRewards.raw)
     .multiply(blocksPerYear.toString())
     .multiply(poolShare)
-
-  if (userRatio) {
-    multiplications = multiplications?.multiply(userRatio)
-  }
-
-  return multiplications?.divide(valueOfTotalStakedAmountInWETH?.raw)
+    .divide(valueOfTotalStakedAmountInWETH?.raw)
 }
