@@ -20,6 +20,10 @@ export const STAKING_REWARDS_INFO: {
     {
       tokens: [WETH[ChainId.HARMONY_MAINNET], BRIDGED_ETH[ChainId.HARMONY_MAINNET]],
       pid: 2
+    },
+    {
+      tokens: [BUSD[ChainId.HARMONY_MAINNET], GOVERNANCE_TOKEN[ChainId.HARMONY_MAINNET]],
+      pid: 3
     }
   ],
   [ChainId.HARMONY_TESTNET]: [

@@ -126,7 +126,9 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           <TYPE.white> APR*</TYPE.white>
           <TYPE.white fontWeight={500}>
             <b>
-              {stakingInfo.apr ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%` : ''}
+              {stakingInfo.apr && stakingInfo.apr.greaterThan('0')
+                ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
+                : 'To be determined'}
             </b>
           </TYPE.white>
         </RowBetween>
