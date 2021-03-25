@@ -19,6 +19,8 @@ import FormattedPriceImpact from './FormattedPriceImpact'
 import { StyledBalanceMaxMini, SwapCallbackError } from './styleds'
 import useBlockchain from '../../hooks/useBlockchain'
 import getBlockchainAdjustedCurrency from '../../utils/getBlockchainAdjustedCurrency'
+import { useActiveWeb3React } from '../../hooks'
+import { PIT_SETTINGS } from '../../constants'
 
 export default function SwapModalFooter({
   trade,
@@ -33,6 +35,8 @@ export default function SwapModalFooter({
   swapErrorMessage: string | undefined
   disabledConfirm: boolean
 }) {
+  const { chainId } = useActiveWeb3React()
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
   const blockchain = useBlockchain()
 
   const [showInverted, setShowInverted] = useState<boolean>(false)
@@ -105,7 +109,9 @@ export default function SwapModalFooter({
             <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
               Liquidity Provider Fee
             </TYPE.black>
-            <QuestionHelper text="A portion of each trade (0.30%) goes to liquidity providers and ViperPit stakers as a protocol incentive." />
+            <QuestionHelper
+              text={`A portion of each trade (0.30%) goes to liquidity providers and ${pitSettings?.name} stakers as a protocol incentive.`}
+            />
           </RowFixed>
           <TYPE.black fontSize={14}>
             {realizedLPFee ? realizedLPFee?.toSignificant(6) + ' ' + tradeInputCurrency?.symbol : '-'}

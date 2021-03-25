@@ -18,6 +18,7 @@ import { usePitContract } from '../../hooks/useContract'
 import { calculateGasMargin } from '../../utils'
 import { PIT_SETTINGS } from '../../constants'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
+import usePitToken from '../../hooks/usePitToken'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -67,6 +68,7 @@ export default function ModifiedStakingModal({
   const govToken = useGovernanceToken()
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
   const pit = usePitContract()
+  const pitToken = usePitToken()
 
   async function onWithdraw() {
     if (pit && userLiquidityStaked) {
@@ -81,7 +83,7 @@ export default function ModifiedStakingModal({
         })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Withdraw ${govToken?.symbol} from ${pitSettings?.name}`
+            summary: `Withdraw x${govToken?.symbol} from ${pitSettings?.name}`
           })
           setHash(response.hash)
         })
@@ -121,7 +123,7 @@ export default function ModifiedStakingModal({
             onUserInput={onUserInput}
             onMax={handleMax}
             showMaxButton={!atMaxAmount}
-            currency={stakingToken}
+            currency={pitToken}
             label={''}
             disableCurrencySelect={true}
             overrideSelectedCurrencyBalance={userLiquidityStaked}
@@ -143,7 +145,7 @@ export default function ModifiedStakingModal({
               Withdrawing x{govToken?.symbol} from {pitSettings?.name}
             </TYPE.largeHeader>
             <TYPE.body fontSize={20}>
-              {parsedAmount?.toSignificant(4)} {govToken?.symbol}
+              {parsedAmount?.toSignificant(4)} x{govToken?.symbol}
             </TYPE.body>
           </AutoColumn>
         </LoadingView>

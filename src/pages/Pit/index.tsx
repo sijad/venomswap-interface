@@ -12,9 +12,9 @@ import { TYPE } from '../../theme'
 import { RowBetween } from '../../components/Row'
 import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
 import { ButtonPrimary } from '../../components/Button'
-import StakingModal from '../../components/ViperPit/StakingModal'
-import ModifiedUnstakingModal from '../../components/ViperPit/ModifiedUnstakingModal'
-import ClaimModal from '../../components/ViperPit/ClaimModal'
+import StakingModal from '../../components/Pit/StakingModal'
+import ModifiedUnstakingModal from '../../components/Pit/ModifiedUnstakingModal'
+import ClaimModal from '../../components/Pit/ClaimModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
 //import { useColor } from '../../hooks/useColor'
@@ -100,7 +100,7 @@ const DataRow = styled(RowBetween)`
   `};
 `
 
-export default function ViperPit({
+export default function Pit({
   match: {
     params: { currencyIdA, currencyIdB }
   }
@@ -143,7 +143,6 @@ export default function ViperPit({
 
   return (
     <PageWrapper gap="lg" justify="center">
-
       {govToken && (
         <>
           <StakingModal

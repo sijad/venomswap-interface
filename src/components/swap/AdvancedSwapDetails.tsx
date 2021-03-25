@@ -12,6 +12,8 @@ import FormattedPriceImpact from './FormattedPriceImpact'
 import SwapRoute from './SwapRoute'
 import useBlockchain from '../../hooks/useBlockchain'
 import getBlockchainAdjustedCurrency from '../../utils/getBlockchainAdjustedCurrency'
+import { useActiveWeb3React } from '../../hooks'
+import { PIT_SETTINGS } from '../../constants'
 
 const InfoLink = styled(ExternalLink)`
   width: 100%;
@@ -24,6 +26,8 @@ const InfoLink = styled(ExternalLink)`
 `
 
 function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippage: number }) {
+  const { chainId } = useActiveWeb3React()
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
   const blockchain = useBlockchain()
 
   const theme = useContext(ThemeContext)
@@ -67,7 +71,9 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
             <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
               Liquidity Provider Fee
             </TYPE.black>
-            <QuestionHelper text="A portion of each trade (0.30%) goes to liquidity providers and ViperPit stakers as a protocol incentive." />
+            <QuestionHelper
+              text={`A portion of each trade (0.30%) goes to liquidity providers and ${pitSettings?.name} stakers as a protocol incentive.`}
+            />
           </RowFixed>
           <TYPE.black fontSize={14} color={theme.text1}>
             {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${tradeInputCurrency?.symbol}` : '-'}

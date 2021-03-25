@@ -101,7 +101,7 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
         })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
-            summary: `Claim ViperPit rewards`
+            summary: `Claim ${pitSettings?.name} rewards`
           })
           setHash(response.hash)
         })
