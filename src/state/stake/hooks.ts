@@ -1,4 +1,4 @@
-import { CurrencyAmount, JSBI, Token, TokenAmount, Pair, Fraction, DEFAULT_CURRENCIES } from '@venomswap/sdk'
+import { WETH, CurrencyAmount, JSBI, Token, TokenAmount, Pair, Fraction, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import { useMemo } from 'react'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
 import { useActiveWeb3React } from '../../hooks'
@@ -12,8 +12,11 @@ import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.j
 import { Interface } from '@ethersproject/abi'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
 import useGovernanceTokenWethPrice from '../../hooks/useGovernanceTokenWethPrice'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
 import { unwrappedToken, wrappedCurrency } from '../../utils/wrappedCurrency'
 import getBlocksPerYear from '../../utils/getBlocksPerYear'
+import calculateTotalStakedAmount from '../../utils/calculateTotalStakedAmount'
+import getPair from '../../utils/getPair'
 import calculateApr from '../../utils/calculateApr'
 
 //import { useTotalSupply } from '../../data/TotalSupply'
@@ -60,7 +63,7 @@ export interface StakingInfo {
   // the amount of reward token earned by the active account, or undefined if no account - which will be unlocked
   unlockedEarnedAmount: TokenAmount
   // value of total staked amount, measured in weth (or wone/wbnb)
-  valueOfTotalStakedAmountInWETH: TokenAmount | undefined
+  valueOfTotalStakedAmountInPairCurrency: TokenAmount | undefined
   // pool APR
   apr: Fraction | undefined
   // if pool is active
@@ -87,8 +90,10 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     [chainId, pairToFilterBy]
   )
 
+  const weth = chainId && WETH[chainId]
   const govToken = useGovernanceToken()
   const govTokenWethPrice = useGovernanceTokenWethPrice()
+  const govTokenBusdPrice = useBUSDPrice(govToken)
   const blocksPerYear = getBlocksPerYear(chainId)
 
   const pids = useMemo(() => masterInfo.map(({ pid }) => pid), [masterInfo])
@@ -141,7 +146,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
   //const rewardPerBlock = useSingleCallResult(masterBreederContract, 'REWARD_PER_BLOCK')
 
   return useMemo(() => {
-    if (!chainId || !govToken) return []
+    if (!chainId || !weth || !govToken) return []
 
     return pids.reduce<StakingInfo[]>((memo, pid, index) => {
       const tokens = masterInfo[index].tokens
@@ -228,45 +233,37 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         const currency0 = unwrappedToken(pairToken0)
         //const currency1 = unwrappedToken(pairToken1)
         //const token = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? pairToken1 : pairToken0
-        const weth = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? pairToken0 : pairToken1
 
-        const tokenA = wrappedCurrency(pairToken0, chainId)
-        const tokenB = wrappedCurrency(pairToken1, chainId)
-
-        let stakingTokenPair: Pair | undefined
+        const baseToken = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? pairToken0 : pairToken1
         const reserves = lpTokenReserve?.result
         const reserve0 = reserves?.reserve0
         const reserve1 = reserves?.reserve1
-        if (tokenA && tokenB && reserve0 && reserve1) {
-          const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
-          stakingTokenPair =
-            token0 && token1
-              ? new Pair(new TokenAmount(token0, reserve0.toString()), new TokenAmount(token1, reserve1.toString()))
-              : undefined
-        }
 
-        let valueOfTotalStakedAmountInWETH: TokenAmount | undefined
+        const stakingTokenPair = getPair(
+          wrappedCurrency(pairToken0, chainId),
+          wrappedCurrency(pairToken1, chainId),
+          reserve0,
+          reserve1
+        )
+
+        let valueOfTotalStakedAmountInPairCurrency: TokenAmount | undefined
         let apr: Fraction | undefined
 
         if (totalLpTokenSupply && stakingTokenPair) {
-          // take the total amount of LP tokens staked, multiply by ETH value of all LP tokens, divide by all LP tokens
-          valueOfTotalStakedAmountInWETH = new TokenAmount(
-            weth,
-            JSBI.divide(
-              JSBI.multiply(
-                JSBI.multiply(totalStakedAmount.raw, stakingTokenPair.reserveOf(weth).raw),
-                JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
-              ),
-              totalLpTokenSupply.raw
-            )
+          valueOfTotalStakedAmountInPairCurrency = calculateTotalStakedAmount(
+            baseToken,
+            stakingTokenPair,
+            totalStakedAmount,
+            totalLpTokenSupply
           )
 
+          const govTokenPrice = baseToken === weth ? govTokenWethPrice : govTokenBusdPrice
           apr = calculateApr(
-            govTokenWethPrice,
+            govTokenPrice,
             baseBlockRewards,
             blocksPerYear,
             poolShare,
-            valueOfTotalStakedAmountInWETH
+            valueOfTotalStakedAmountInPairCurrency
           )
         }
 
@@ -288,7 +285,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           earnedAmount: totalPendingRewardAmount,
           lockedEarnedAmount: totalPendingLockedRewardAmount,
           unlockedEarnedAmount: totalPendingUnlockedRewardAmount,
-          valueOfTotalStakedAmountInWETH: valueOfTotalStakedAmountInWETH,
+          valueOfTotalStakedAmountInPairCurrency: valueOfTotalStakedAmountInPairCurrency,
           apr: apr,
           active: active
         }
@@ -299,8 +296,11 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     }, [])
   }, [
     chainId,
+    govToken,
+    weth,
     masterInfo,
     govTokenWethPrice,
+    govTokenBusdPrice,
     pids,
     poolInfos,
     userInfos,
@@ -311,8 +311,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     blocksPerYear,
     startBlock,
     lockRewardsRatio,
-    poolRewardsPerBlock,
-    govToken
+    poolRewardsPerBlock
   ])
 }
 

@@ -12,7 +12,7 @@ import { useTotalLockedGovTokensEarned, useTotalUnlockedGovTokensEarned } from '
 import { useAggregateGovTokenBalance, useTokenBalance } from '../../state/wallet/hooks'
 import { StyledInternalLink, TYPE, UniTokenAnimated } from '../../theme'
 //import { computeUniCirculation } from '../../utils/computeUniCirculation'
-import useBUSDPrice from '../../utils/useBUSDPrice'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
 import { Break, CardBGImage, CardNoise, CardSection, DataCard } from '../earn/styled'
@@ -111,7 +111,17 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
               <AutoColumn gap="md">
                 <RowBetween>
                   <TYPE.white color="white">Balance:</TYPE.white>
-                  <TYPE.white color="white">{govTokenBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">
+                    <MouseoverTooltip
+                      text={
+                        govTokenPrice && govTokenBalance && govTokenBalance.greaterThan('0')
+                          ? `USD: $${govTokenBalance.multiply(govTokenPrice?.raw).toSignificant(6, { groupSeparator: ',' })}`
+                          : ''
+                      }
+                    >
+                      {govTokenBalance?.toFixed(2, { groupSeparator: ',' })}
+                    </MouseoverTooltip>
+                  </TYPE.white>
                 </RowBetween>
                 <RowBetween>
                   <TYPE.white color="white">
@@ -158,11 +168,35 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
                   <TYPE.white color="white">
                     <MouseoverTooltip text={tooltips.lockedBalance}>Locked Balance:</MouseoverTooltip>
                   </TYPE.white>
-                  <TYPE.white color="white">{govTokenLockedBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">
+                    <MouseoverTooltip
+                      text={
+                        govTokenPrice && govTokenLockedBalance && govTokenLockedBalance.greaterThan('0')
+                          ? `USD: $${govTokenLockedBalance
+                              .multiply(govTokenPrice?.raw)
+                              .toSignificant(6, { groupSeparator: ',' })}`
+                          : ''
+                      }
+                    >
+                      {govTokenLockedBalance?.toFixed(2, { groupSeparator: ',' })}
+                    </MouseoverTooltip>
+                  </TYPE.white>
                 </RowBetween>
                 <RowBetween>
                   <TYPE.white color="white">Total Balance:</TYPE.white>
-                  <TYPE.white color="white">{govTokenTotalBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">
+                  <MouseoverTooltip
+                      text={
+                        govTokenPrice && govTokenTotalBalance && govTokenTotalBalance.greaterThan('0')
+                          ? `USD: $${govTokenTotalBalance
+                              .multiply(govTokenPrice?.raw)
+                              .toSignificant(6, { groupSeparator: ',' })}`
+                          : ''
+                      }
+                      >
+                      {govTokenTotalBalance?.toFixed(2, { groupSeparator: ',' })}
+                    </MouseoverTooltip>
+                  </TYPE.white>
                 </RowBetween>
               </AutoColumn>
             </CardSection>

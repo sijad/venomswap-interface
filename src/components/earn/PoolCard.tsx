@@ -11,7 +11,7 @@ import { useColor } from '../../hooks/useColor'
 import { currencyId } from '../../utils/currencyId'
 import { Break, CardNoise, CardBGImage } from './styled'
 import { unwrappedToken } from '../../utils/wrappedCurrency'
-import useBUSDPrice from '../../utils/useBUSDPrice'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
 //import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
 import { DEFAULT_CURRENCIES } from '@venomswap/sdk'
@@ -90,18 +90,21 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
   const isStaking = Boolean(stakingInfo.stakedAmount.greaterThan('0'))
 
   const govToken = useGovernanceToken()
+  const govTokenPrice = useBUSDPrice(govToken)
 
   const poolSharePercentage = stakingInfo.poolShare.multiply(JSBI.BigInt(100))
 
   // get the color of the token
+  const baseToken = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token0 : token1
   const token = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token1 : token0
-  const WETH = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token0 : token1
   const backgroundColor = useColor(token)
 
-  // get the USD value of staked WETH
-  const USDPrice = useBUSDPrice(WETH)
+  // get the USD value of the staked base token
+  const USDPrice = useBUSDPrice(baseToken)
   const valueOfTotalStakedAmountInBUSD =
-    stakingInfo.valueOfTotalStakedAmountInWETH && USDPrice?.quote(stakingInfo.valueOfTotalStakedAmountInWETH)
+    stakingInfo &&
+    stakingInfo.valueOfTotalStakedAmountInPairCurrency &&
+    USDPrice?.quote(stakingInfo.valueOfTotalStakedAmountInPairCurrency)
 
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
@@ -133,13 +136,13 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           </TYPE.white>
         </RowBetween>
         <RowBetween>
-          <TYPE.white> Total deposited</TYPE.white>
+          <TYPE.white> Total deposited </TYPE.white>
           <TYPE.white fontWeight={500}>
             <b>
-              {valueOfTotalStakedAmountInBUSD
+              {stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency && valueOfTotalStakedAmountInBUSD
                 ? `$${valueOfTotalStakedAmountInBUSD.toFixed(0, { groupSeparator: ',' })}`
-                : stakingInfo.valueOfTotalStakedAmountInWETH
-                ? `${stakingInfo.valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ONE`
+                : stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency
+                ? `${stakingInfo.valueOfTotalStakedAmountInPairCurrency?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ONE`
                 : '$0'}
             </b>
           </TYPE.white>
@@ -173,7 +176,15 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
                 </span>
                 {stakingInfo
                   ? stakingInfo.active
-                    ? `${stakingInfo.unlockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} ${govToken?.symbol}`
+                    ? `${stakingInfo.unlockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} ${
+                        govToken?.symbol
+                      } / $${
+                        govTokenPrice
+                          ? stakingInfo.unlockedEarnedAmount
+                              .multiply(govTokenPrice?.raw)
+                              .toSignificant(2, { groupSeparator: ',' })
+                          : '0'
+                      }`
                     : `0 ${govToken?.symbol}`
                   : '-'}
               </TYPE.white>
@@ -186,7 +197,15 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
                 </span>
                 {stakingInfo
                   ? stakingInfo.active
-                    ? `${stakingInfo.lockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} ${govToken?.symbol}`
+                    ? `${stakingInfo.lockedEarnedAmount.toSignificant(4, { groupSeparator: ',' })} ${
+                        govToken?.symbol
+                      } / $${
+                        govTokenPrice
+                          ? stakingInfo.lockedEarnedAmount
+                              .multiply(govTokenPrice?.raw)
+                              .toSignificant(2, { groupSeparator: ',' })
+                          : '0'
+                      }`
                     : `0 ${govToken?.symbol}`
                   : '-'}
               </TYPE.white>
@@ -204,7 +223,13 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
               </span>
               {stakingInfo
                 ? stakingInfo.active
-                  ? `${stakingInfo.earnedAmount.toSignificant(4, { groupSeparator: ',' })} ${govToken?.symbol}`
+                  ? `${stakingInfo.earnedAmount.toSignificant(4, { groupSeparator: ',' })} ${govToken?.symbol} / $${
+                      govTokenPrice
+                        ? stakingInfo.earnedAmount
+                            .multiply(govTokenPrice?.raw)
+                            .toSignificant(2, { groupSeparator: ',' })
+                        : '0'
+                    }`
                   : `0 ${govToken?.symbol}`
                 : '-'}
             </TYPE.black>

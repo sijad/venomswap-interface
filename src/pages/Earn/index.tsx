@@ -1,4 +1,5 @@
 import React from 'react'
+import { WETH, JSBI, BLOCKCHAIN_SETTINGS } from '@venomswap/sdk'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
@@ -12,11 +13,11 @@ import { CardSection, ExtraDataCard, CardNoise, CardBGImage } from '../../compon
 //import { Countdown } from './Countdown'
 import Loader from '../../components/Loader'
 import { useActiveWeb3React } from '../../hooks'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
+import useTotalTVL from '../../hooks/useTotalTVL'
 import useBaseStakingRewardsEmission from '../../hooks/useBaseStakingRewardsEmission'
 import { OutlineCard } from '../../components/Card'
-import { JSBI, BLOCKCHAIN_SETTINGS } from '@venomswap/sdk'
-
-import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -59,7 +60,12 @@ flex-direction: column;
 export default function Earn() {
   const { chainId, account } = useActiveWeb3React()
 
+  const weth = chainId && WETH[chainId]
   const govToken = useGovernanceToken()
+
+  const wethBusdPrice = useBUSDPrice(weth)
+  const govTokenBusdPrice = useBUSDPrice(govToken)
+
   const blockchainSettings = chainId ? BLOCKCHAIN_SETTINGS[chainId] : undefined
 
   // staking info for connected account
@@ -71,6 +77,13 @@ export default function Earn() {
    */
   //const stakingInfosWithBalance = stakingInfos?.filter(s => JSBI.greaterThan(s.stakedAmount.raw, BIG_INT_ZERO))
 
+  const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
+
+  const baseEmissions = useBaseStakingRewardsEmission()
+  const blocksPerMinute = blockchainSettings ? 60 / blockchainSettings.defaultBlockTime() : 0
+  const emissionsPerMinute =
+    baseEmissions && blockchainSettings ? baseEmissions.multiply(JSBI.BigInt(blocksPerMinute)) : undefined
+
   const filteredStakingInfos = stakingInfos
     ?.filter(s => s.active)
     ?.sort((a, b) => (JSBI.GT(a?.allocPoint, b?.allocPoint) ? 1 : -1))
@@ -78,13 +91,7 @@ export default function Earn() {
   // toggle copy if rewards are inactive
   //const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
 
-  const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
-
-  const baseEmissions = useBaseStakingRewardsEmission()
-  const blocksPerMinute = blockchainSettings ? 60 / blockchainSettings.defaultBlockTime() : 0
-
-  const emissionsPerMinute =
-    baseEmissions && blockchainSettings ? baseEmissions.multiply(JSBI.BigInt(blocksPerMinute)) : undefined
+  const totalTVL = useTotalTVL(filteredStakingInfos, weth, wethBusdPrice, govTokenBusdPrice)
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -112,6 +119,14 @@ export default function Earn() {
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
         <DataRow style={{ alignItems: 'baseline' }}>
           <TYPE.mediumHeader style={{ marginTop: '0.5rem' }}>Pools</TYPE.mediumHeader>
+          {totalTVL && totalTVL.greaterThan('0') && (
+            <TYPE.black style={{ marginTop: '0.5rem' }}>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                🏆
+              </span>
+              TVL: ${totalTVL.toSignificant(8, { groupSeparator: ',' })}
+            </TYPE.black>
+          )}
         </DataRow>
 
         <AwaitingRewards />

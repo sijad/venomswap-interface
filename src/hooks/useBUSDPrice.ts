@@ -2,8 +2,8 @@ import { Currency, currencyEquals, JSBI, Price, WETH } from '@venomswap/sdk'
 import { useMemo } from 'react'
 import { BUSD } from '../constants/tokens'
 import { PairState, usePairs } from '../data/Reserves'
-import { useActiveWeb3React } from '../hooks'
-import { wrappedCurrency } from './wrappedCurrency'
+import { useActiveWeb3React } from '.'
+import { wrappedCurrency } from '../utils/wrappedCurrency'
 
 /**
  * Returns the price in BUSD of the input currency
