@@ -37,6 +37,24 @@ export const BUSD: { [chainId in ChainId]: Token } = {
   )
 }
 
+export const HARMONY_BSC_BRIDGED_BUSD: { [chainId in ChainId]: Token } = {
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD'),
+  [ChainId.HARMONY_MAINNET]: new Token(
+    ChainId.HARMONY_MAINNET,
+    '0x0aB43550A6915F9f67d0c454C2E90385E6497EaA',
+    18,
+    'bscBUSD',
+    'BUSD Token'
+  ),
+  [ChainId.HARMONY_TESTNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ONE_ADDRESS, 18, 'BUSD', 'Binance USD')
+}
+
 export const BRIDGED_ETH: { [chainId in ChainId]: Token } = {
   [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),
   [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, '1ETH', 'Ethereum'),

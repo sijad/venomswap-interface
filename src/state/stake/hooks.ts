@@ -1,6 +1,17 @@
-import { WETH, CurrencyAmount, JSBI, Token, TokenAmount, Pair, Fraction, DEFAULT_CURRENCIES } from '@venomswap/sdk'
+import {
+  WETH,
+  CurrencyAmount,
+  JSBI,
+  Token,
+  TokenAmount,
+  Price,
+  Pair,
+  Fraction,
+  DEFAULT_CURRENCIES
+} from '@venomswap/sdk'
 import { useMemo } from 'react'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
+import { HARMONY_BSC_BRIDGED_BUSD } from '../../constants/tokens'
 import { useActiveWeb3React } from '../../hooks'
 //import { NEVER_RELOAD, useMultipleContractSingleData } from '../multicall/hooks'
 import { useSingleCallResult, useSingleContractMultipleData } from '../multicall/hooks'
@@ -94,6 +105,10 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
   const govToken = useGovernanceToken()
   const govTokenWethPrice = useGovernanceTokenWethPrice()
   const govTokenBusdPrice = useBUSDPrice(govToken)
+
+  const bscBUSD = chainId && HARMONY_BSC_BRIDGED_BUSD[chainId]
+  const bscBUSDPrice = useBUSDPrice(bscBUSD)
+
   const blocksPerYear = getBlocksPerYear(chainId)
 
   const pids = useMemo(() => masterInfo.map(({ pid }) => pid), [masterInfo])
@@ -257,9 +272,24 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
             totalLpTokenSupply
           )
 
-          const govTokenPrice = baseToken === weth ? govTokenWethPrice : govTokenBusdPrice
+          let tokenPrice: Price | undefined
+          switch (baseToken) {
+            case weth:
+              tokenPrice = govTokenWethPrice
+              break
+            case govToken:
+              tokenPrice = govTokenBusdPrice
+              break
+            case bscBUSD:
+              tokenPrice = bscBUSDPrice
+              break
+            default:
+              tokenPrice = govTokenWethPrice
+              break
+          }
+
           apr = calculateApr(
-            govTokenPrice,
+            tokenPrice,
             baseBlockRewards,
             blocksPerYear,
             poolShare,
@@ -301,6 +331,8 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
     masterInfo,
     govTokenWethPrice,
     govTokenBusdPrice,
+    bscBUSD,
+    bscBUSDPrice,
     pids,
     poolInfos,
     userInfos,
