@@ -99,8 +99,8 @@ export const AMPL = new Token(ChainId.MAINNET, '0xD46bA6D942050d489DBd938a2C909A
 export const WBTC = new Token(ChainId.MAINNET, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8, 'WBTC', 'Wrapped BTC')
 // HARMONY ASSETS
 export const BUSD = new Token(ChainId.HARMONY_MAINNET, '0xE176EBE47d621b984a73036B9DA5d834411ef734', 18, 'BUSD', 'Binance USD')
-export const BSCBUSD = new Token(ChainId.HARMONY_MAINNET, '0x0aB43550A6915F9f67d0c454C2E90385E6497EaA', 18, 'bscBUSD', 'BSC bUSD')
-export const VIPER = new Token(ChainId.HARMONY_MAINNET, '0x2baF193459EF3175C29305A5150edDB3e37a3213', 18, 'VIPER', 'Viper'),
+export const BSCBUSD = new Token(ChainId.HARMONY_MAINNET, '0x0aB43550A6915F9f67d0c454C2E90385E6497EaA', 18, 'bscBUSD', 'BSC BUSD')
+export const VIPER = new Token(ChainId.HARMONY_MAINNET, '0x2baF193459EF3175C29305A5150edDB3e37a3213', 18, 'VIPER', 'Viper')
 export const ONE_ETH = new Token(ChainId.HARMONY_MAINNET, '0xbADB6897cf2E35ACA73b6f37361a35EEB6F71637', 18, '1ETH', '1ETH')
 
 // Block time here is slightly higher (~1s) than average in order to avoid ongoing proposals past the displayed time
