@@ -5,7 +5,7 @@ import Modal from '../Modal'
 import { AutoColumn, ColumnCenter } from '../Column'
 import styled, { ThemeContext } from 'styled-components'
 import { RowBetween } from '../Row'
-import { TYPE, CustomLightSpinner } from '../../theme'
+import { TYPE, CustomLightSpinner, CloseIcon } from '../../theme'
 import { X, ArrowUpCircle } from 'react-feather'
 import { ButtonPrimary } from '../Button'
 import Circle from '../../assets/images/blue-loader.svg'
@@ -59,14 +59,16 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
   // monitor call to help UI loading state
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState<boolean>(false)
+  const [failed, setFailed] = useState<boolean>(false)
 
   // get theme for colors
   const theme = useContext(ThemeContext)
 
   // wrapper to reset state on modal close
-  function wrappedOndismiss() {
+  function wrappedOnDismiss() {
     setHash(undefined)
     setAttempting(false)
+    setFailed(false)
     onDismiss()
   }
 
@@ -79,6 +81,9 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
     // try delegation and store hash
     const hash = await voteCallback(proposalId, support)?.catch(error => {
       setAttempting(false)
+      if (error?.code === -32603) {
+        setFailed(true)
+      }
       console.log(error)
     })
 
@@ -88,15 +93,15 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
   }
 
   return (
-    <Modal isOpen={isOpen} onDismiss={wrappedOndismiss} maxHeight={90}>
-      {!attempting && !hash && (
+    <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
+      {!attempting && !hash && !failed && (
         <ContentWrapper gap="lg">
           <AutoColumn gap="lg" justify="center">
             <RowBetween>
               <TYPE.mediumHeader fontWeight={500}>{`Vote ${
                 support ? 'for ' : 'against'
               } proposal ${proposalId}`}</TYPE.mediumHeader>
-              <StyledClosed stroke="black" onClick={wrappedOndismiss} />
+              <StyledClosed stroke="black" onClick={wrappedOnDismiss} />
             </RowBetween>
             <TYPE.largeHeader>{availableVotes?.toSignificant(4)} Votes</TYPE.largeHeader>
             <ButtonPrimary onClick={onVote}>
@@ -107,11 +112,11 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
           </AutoColumn>
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attempting && !hash && !failed && (
         <ConfirmOrLoadingWrapper>
           <RowBetween>
             <div />
-            <StyledClosed onClick={wrappedOndismiss} />
+            <StyledClosed onClick={wrappedOnDismiss} />
           </RowBetween>
           <ConfirmedIcon>
             <CustomLightSpinner src={Circle} alt="loader" size={'90px'} />
@@ -124,11 +129,11 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
           </AutoColumn>
         </ConfirmOrLoadingWrapper>
       )}
-      {hash && (
+      {hash && !failed && (
         <ConfirmOrLoadingWrapper>
           <RowBetween>
             <div />
-            <StyledClosed onClick={wrappedOndismiss} />
+            <StyledClosed onClick={wrappedOnDismiss} />
           </RowBetween>
           <ConfirmedIcon>
             <ArrowUpCircle strokeWidth={0.5} size={90} color={theme.primary1} />
@@ -144,6 +149,24 @@ export default function VoteModal({ isOpen, onDismiss, proposalId, support }: Vo
             )}
           </AutoColumn>
         </ConfirmOrLoadingWrapper>
+      )}
+      {!attempting && !hash && failed && (
+        <ContentWrapper gap="sm">
+          <RowBetween>
+            <TYPE.mediumHeader>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚠️
+              </span>
+              Error!
+            </TYPE.mediumHeader>
+            <CloseIcon onClick={wrappedOnDismiss} />
+          </RowBetween>
+          <TYPE.subHeader style={{ textAlign: 'center' }}>
+            Your transaction couldn&apos;t be submitted.
+            <br />
+            You may have to increase your Gas Price (GWEI) settings!
+          </TYPE.subHeader>
+        </ContentWrapper>
       )}
     </Modal>
   )

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Text } from 'rebass'
 import styled from 'styled-components'
 import Circle from '../../assets/images/blue-loader.svg'
-import tokenLogo from '../../assets/images/token-logo.png'
+import getTokenLogo from '../../utils/getTokenLogo'
 import { useActiveWeb3React } from '../../hooks'
 import { ApplicationModal } from '../../state/application/actions'
 import { useModalOpen, useToggleSelfClaimModal } from '../../state/application/hooks'
@@ -16,7 +16,7 @@ import { ButtonPrimary } from '../Button'
 import { AutoColumn, ColumnCenter } from '../Column'
 import Confetti from '../Confetti'
 import { Break, CardBGImage, CardBGImageSmaller, CardNoise, CardSection, DataCard } from '../earn/styled'
-
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 import useBlockchain from '../../hooks/useBlockchain'
 import getExplorerName from '../../utils/getExplorerName'
 
@@ -54,6 +54,7 @@ export default function ClaimModal() {
 
   const { account, chainId } = useActiveWeb3React()
 
+  const govToken = useGovernanceToken()
   const blockchain = useBlockchain()
   const explorerName = getExplorerName(blockchain)
 
@@ -104,11 +105,11 @@ export default function ClaimModal() {
             <CardNoise />
             <CardSection gap="md">
               <RowBetween>
-                <TYPE.white fontWeight={500}>Claim UNI</TYPE.white>
+                <TYPE.white fontWeight={500}>Claim {govToken?.symbol}</TYPE.white>
                 <CloseIcon onClick={toggleClaimModal} style={{ zIndex: 99 }} color="white" />
               </RowBetween>
               <TYPE.white fontWeight={700} fontSize={36}>
-                {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} UNI
+                {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} {govToken?.symbol}
               </TYPE.white>
             </CardSection>
             <Break />
@@ -116,7 +117,9 @@ export default function ClaimModal() {
               {userClaimData?.flags?.isSOCKS && (
                 <RowBetween>
                   <TYPE.subHeader color="white">SOCKS</TYPE.subHeader>
-                  <TYPE.subHeader color="white">{SOCKS_AMOUNT} UNI</TYPE.subHeader>
+                  <TYPE.subHeader color="white">
+                    {SOCKS_AMOUNT} {govToken?.symbol}
+                  </TYPE.subHeader>
                 </RowBetween>
               )}
               {userClaimData?.flags?.isLP &&
@@ -135,15 +138,17 @@ export default function ClaimModal() {
               {userClaimData?.flags?.isUser && (
                 <RowBetween>
                   <TYPE.subHeader color="white">User</TYPE.subHeader>
-                  <TYPE.subHeader color="white">{USER_AMOUNT} UNI</TYPE.subHeader>
+                  <TYPE.subHeader color="white">
+                    {USER_AMOUNT} {govToken?.symbol}
+                  </TYPE.subHeader>
                 </RowBetween>
               )}
             </CardSection>
           </ModalUpper>
           <AutoColumn gap="md" style={{ padding: '1rem', paddingTop: '0' }} justify="center">
             <TYPE.subHeader fontWeight={500}>
-              As a member of the Viperswap community you may claim VIPER to be used for voting and governance. <br /> <br />
-              <ExternalLink href="https://uniswap.org/blog/uni">Read more about VIPER</ExternalLink>
+              As a member of the Venomswap community you may claim {govToken?.symbol} to be used for voting and governance. <br /> <br />
+              <ExternalLink href="https://uniswap.org/blog/uni">Read more about {govToken?.symbol}</ExternalLink>
             </TYPE.subHeader>
             <ButtonPrimary
               disabled={!isAddress(account ?? '')}
@@ -153,7 +158,7 @@ export default function ClaimModal() {
               mt="1rem"
               onClick={onClaim}
             >
-              Claim VIPER
+              Claim {govToken?.symbol}
             </ButtonPrimary>
           </AutoColumn>
         </ContentWrapper>
@@ -170,7 +175,7 @@ export default function ClaimModal() {
             {!claimConfirmed ? (
               <CustomLightSpinner src={Circle} alt="loader" size={'90px'} />
             ) : (
-              <UniTokenAnimated width="72px" src={tokenLogo} />
+              <UniTokenAnimated width="72px" src={getTokenLogo()} />
             )}
           </ConfirmedIcon>
           <AutoColumn gap="100px" justify={'center'}>
@@ -180,7 +185,7 @@ export default function ClaimModal() {
               </TYPE.largeHeader>
               {!claimConfirmed && (
                 <Text fontSize={36} color={'#ff007a'} fontWeight={800}>
-                  {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} VIPER
+                  {unclaimedAmount?.toFixed(0, { groupSeparator: ',' } ?? '-')} {govToken?.symbol}
                 </Text>
               )}
             </AutoColumn>

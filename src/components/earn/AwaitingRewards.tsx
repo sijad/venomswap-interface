@@ -8,6 +8,7 @@ import { useMasterBreederContract } from '../../hooks/useContract'
 import useBlockchain from '../../hooks/useBlockchain'
 import getBlockchainBlockTime from '../../utils/getBlockchainBlockTime'
 import { BlueCard } from '../../components/Card'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const MINUTE = 60
 const HOUR = MINUTE * 60
@@ -17,6 +18,7 @@ export default function AwaitingRewards() {
   const blockchain = useBlockchain()
   const blockTime = getBlockchainBlockTime(blockchain)
   const masterBreederContract = useMasterBreederContract()
+  const govToken = useGovernanceToken()
 
   const rewardsStartBlock = useSingleCallResult(masterBreederContract, 'START_BLOCK').result?.[0]
   const currentBlock = useBlockNumber()
@@ -50,7 +52,7 @@ export default function AwaitingRewards() {
           <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
             💡
           </span>
-          VIPER rewards haven&apos;t started yet - they will be activated at block <b>{rewardsStartBlock?.toLocaleString()}</b>. There are <b>{blocksLeftUntilRewards}</b> blocks left until the rewards start.
+          <b>{govToken?.symbol}</b> rewards haven&apos;t started yet - they will be activated at block <b>{rewardsStartBlock?.toLocaleString()}</b>. There are <b>{blocksLeftUntilRewards}</b> blocks left until the rewards start.
           <br />
           <br />
           Expected start: <b>

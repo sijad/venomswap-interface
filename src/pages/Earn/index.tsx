@@ -1,4 +1,5 @@
 import React from 'react'
+import { WETH, JSBI, BLOCKCHAIN_SETTINGS } from '@venomswap/sdk'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
@@ -12,6 +13,9 @@ import { CardSection, ExtraDataCard, CardNoise, CardBGImage } from '../../compon
 //import { Countdown } from './Countdown'
 import Loader from '../../components/Loader'
 import { useActiveWeb3React } from '../../hooks'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
+import useTotalTVL from '../../hooks/useTotalTVL'
 import useBaseStakingRewardsEmission from '../../hooks/useBaseStakingRewardsEmission'
 import { OutlineCard } from '../../components/Card'
 
@@ -56,6 +60,14 @@ flex-direction: column;
 export default function Earn() {
   const { chainId, account } = useActiveWeb3React()
 
+  const weth = chainId && WETH[chainId]
+  const govToken = useGovernanceToken()
+
+  const wethBusdPrice = useBUSDPrice(weth)
+  const govTokenBusdPrice = useBUSDPrice(govToken)
+
+  const blockchainSettings = chainId ? BLOCKCHAIN_SETTINGS[chainId] : undefined
+
   // staking info for connected account
   const stakingInfos = useStakingInfo()
 
@@ -65,14 +77,21 @@ export default function Earn() {
    */
   //const stakingInfosWithBalance = stakingInfos?.filter(s => JSBI.greaterThan(s.stakedAmount.raw, BIG_INT_ZERO))
 
-  const activeStakingInfos = stakingInfos?.filter(s => s.active)
+  const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
+
+  const baseEmissions = useBaseStakingRewardsEmission()
+  const blocksPerMinute = blockchainSettings ? 60 / blockchainSettings.defaultBlockTime() : 0
+  const emissionsPerMinute =
+    baseEmissions && blockchainSettings ? baseEmissions.multiply(JSBI.BigInt(blocksPerMinute)) : undefined
+
+  const filteredStakingInfos = stakingInfos
+    ?.filter(s => s.active)
+    ?.sort((a, b) => (JSBI.GT(a?.allocPoint, b?.allocPoint) ? 1 : -1))
 
   // toggle copy if rewards are inactive
   //const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
 
-  const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
-
-  const baseEmissions = useBaseStakingRewardsEmission()
+  const totalTVL = useTotalTVL(filteredStakingInfos, weth, wethBusdPrice, govTokenBusdPrice)
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -83,11 +102,11 @@ export default function Earn() {
           <CardSection>
             <AutoColumn gap="md">
               <RowBetween>
-                <TYPE.white fontWeight={600}>Viper liquidity mining</TYPE.white>
+                <TYPE.white fontWeight={600}>{govToken?.symbol} liquidity mining</TYPE.white>
               </RowBetween>
               <RowBetween>
                 <TYPE.white fontSize={14}>
-                  Deposit your Liquidity Provider tokens to receive VIPER, the Viper Protocol governance token.
+                  Deposit your Liquidity Provider tokens to receive {govToken?.symbol}, the {govToken?.name} Protocol governance token.
                 </TYPE.white>
               </RowBetween>{' '}
             </AutoColumn>
@@ -100,25 +119,33 @@ export default function Earn() {
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
         <DataRow style={{ alignItems: 'baseline' }}>
           <TYPE.mediumHeader style={{ marginTop: '0.5rem' }}>Pools</TYPE.mediumHeader>
+          {totalTVL && totalTVL.greaterThan('0') && (
+            <TYPE.black style={{ marginTop: '0.5rem' }}>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                🏆
+              </span>
+              TVL: ${totalTVL.toSignificant(8, { groupSeparator: ',' })}
+            </TYPE.black>
+          )}
         </DataRow>
 
         <AwaitingRewards />
 
         <PoolSection>
-        {account && stakingRewardsExist && stakingInfos?.length === 0 ? (
-          <Loader style={{ margin: 'auto' }} />
-        ) : account && !stakingRewardsExist ? (
-          <OutlineCard>No active pools</OutlineCard>
-        ) : account && stakingInfos?.length !== 0 && !activeStakingInfos ? (
-          <OutlineCard>No active pools</OutlineCard>
-        ) : !account ? (
-          <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
-        ) : (
-          activeStakingInfos?.map(stakingInfo => {
-            // need to sort by added liquidity here
-            return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
-          })
-        )}
+          {account && stakingRewardsExist && stakingInfos?.length === 0 ? (
+            <Loader style={{ margin: 'auto' }} />
+          ) : account && !stakingRewardsExist ? (
+            <OutlineCard>No active pools</OutlineCard>
+          ) : account && stakingInfos?.length !== 0 && !filteredStakingInfos ? (
+            <OutlineCard>No active pools</OutlineCard>
+          ) : !account ? (
+            <OutlineCard>Please connect your wallet to see available pools</OutlineCard>
+          ) : (
+            filteredStakingInfos?.map(stakingInfo => {
+              // need to sort by added liquidity here
+              return <PoolCard key={stakingInfo.pid} stakingInfo={stakingInfo} />
+            })
+          )}
         </PoolSection>
 
         {stakingRewardsExist && baseEmissions && (
@@ -126,9 +153,18 @@ export default function Earn() {
             <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
               ☁️
             </span>
-            The base emission rate is currently <b>{baseEmissions.toSignificant(4, { groupSeparator: ',' })}</b> VIPER per block.
+            The base emission rate is currently <b>{baseEmissions.toSignificant(4, { groupSeparator: ',' })}</b> {govToken?.symbol} per block.
+            <br />
+            <b>{emissionsPerMinute?.toSignificant(4, { groupSeparator: ',' })}</b> {govToken?.symbol} will be minted every minute given the current emission schedule.
             <br />
             The base emission rate gets significantly reduced every week.
+            <br />
+            <br />
+            <TYPE.small style={{ textAlign: 'center' }} fontSize={10}>
+              * = The APR is calculated using a very simplified formula, it might not fully represent the exact APR
+              <br />
+              when factoring in the dynamic emission schedule and the locked/unlocked rewards vesting system.
+            </TYPE.small>
           </TYPE.main>
         )}
       </AutoColumn>

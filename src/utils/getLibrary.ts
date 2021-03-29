@@ -6,7 +6,7 @@ export default function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider, 'any')
   switch (BLOCKCHAIN) {
     case Blockchain.BINANCE_SMART_CHAIN:
-      library.pollingInterval = 3000
+      library.pollingInterval = 1500
       break
     case Blockchain.HARMONY:
       library.pollingInterval = 500

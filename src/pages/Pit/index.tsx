@@ -12,18 +12,22 @@ import { TYPE } from '../../theme'
 import { RowBetween } from '../../components/Row'
 import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
 import { ButtonPrimary } from '../../components/Button'
-import StakingModal from '../../components/ViperPit/StakingModal'
-import ModifiedUnstakingModal from '../../components/ViperPit/ModifiedUnstakingModal'
+import StakingModal from '../../components/Pit/StakingModal'
+import ModifiedUnstakingModal from '../../components/Pit/ModifiedUnstakingModal'
+import ClaimModal from '../../components/Pit/ClaimModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
 //import { useColor } from '../../hooks/useColor'
 import { CountUp } from 'use-count-up'
 
+import { BlueCard } from '../../components/Card'
+
 import usePrevious from '../../hooks/usePrevious'
 
-import { GOVERNANCE_TOKEN, PIT } from '../../constants'
+import { PIT, PIT_SETTINGS } from '../../constants'
 import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
 import { PIT_INTERFACE } from '../../constants/abis/pit'
+import useGovernanceToken from 'hooks/useGovernanceToken'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -78,7 +82,11 @@ const StyledBottomCard = styled(DataCard)<{ dim: any }>`
 `*/
 
 const CustomCard = styled(DataCard)`
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #00c09c 100%);
+  background: radial-gradient(
+    76.02% 75.41% at 1.84% 0%,
+    ${({ theme }) => theme.customCardGradientStart} 0%,
+    ${({ theme }) => theme.customCardGradientEnd} 100%
+  );
   overflow: hidden;
 `
 
@@ -92,15 +100,16 @@ const DataRow = styled(RowBetween)`
   `};
 `
 
-export default function ViperPit({
+export default function Pit({
   match: {
     params: { currencyIdA, currencyIdB }
   }
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const pit = chainId ? PIT[chainId] : undefined
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 
   const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
@@ -117,6 +126,7 @@ export default function ViperPit({
   // toggle for staking modal and unstaking modal
   const [showStakingModal, setShowStakingModal] = useState(false)
   const [showUnstakingModal, setShowUnstakingModal] = useState(false)
+  const [showClaimModal, setShowClaimModal] = useState(false)
 
   const countUpAmount = pitBalance?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
@@ -133,7 +143,6 @@ export default function ViperPit({
 
   return (
     <PageWrapper gap="lg" justify="center">
-
       {govToken && (
         <>
           <StakingModal
@@ -148,6 +157,7 @@ export default function ViperPit({
             userLiquidityStaked={userLiquidityStaked}
             stakingToken={govToken}
           />
+          <ClaimModal isOpen={showClaimModal} onDismiss={() => setShowClaimModal(false)} />
         </>
       )}
 
@@ -159,11 +169,11 @@ export default function ViperPit({
               <CardNoise />
               <AutoColumn gap="md">
                 <RowBetween>
-                  <TYPE.white fontWeight={600}>ViperPit - DEX fee sharing</TYPE.white>
+                  <TYPE.white fontWeight={600}>{pitSettings?.name} - DEX fee sharing</TYPE.white>
                 </RowBetween>
                 <RowBetween style={{ alignItems: 'baseline' }}>
                   <TYPE.white fontSize={14}>
-                    Stake your VIPER tokens and earn 1/3rd of the generated trading fees.
+                    Stake your {govToken?.symbol} tokens and earn 1/3rd of the generated trading fees.
                   </TYPE.white>
                 </RowBetween>
                 <br />
@@ -176,7 +186,7 @@ export default function ViperPit({
             <AutoColumn gap="sm">
               <RowBetween>
                 <div>
-                  <TYPE.black>Your xVIPER Balance</TYPE.black>
+                  <TYPE.black>Your x{govToken?.symbol} Balance</TYPE.black>
                 </div>
               </RowBetween>
               <RowBetween style={{ alignItems: 'baseline' }}>
@@ -196,33 +206,47 @@ export default function ViperPit({
           </StyledBottomCard>
         </BottomSection>
 
-        <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
-          <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
-            ⭐️
-          </span>
-          ViperPit rewards aren&apos;t locked
-          <br />
-          &mdash; when you withdraw you&apos;ll receive 100%
-          <br />
-          of your share of earned VIPER trading fees straight away!
-        </TYPE.main>
+        {account && (
+          <TYPE.main>
+            You have {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} {govToken?.symbol} tokens available to deposit to the {pitSettings?.name}
+          </TYPE.main>
+        )}
 
         {account && (
-          <DataRow style={{ marginBottom: '1rem' }}>
+          <DataRow style={{ marginBottom: '0rem' }}>
             <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={handleDepositClick}>
-              Stake
+              Deposit
+            </ButtonPrimary>
+
+            <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={() => setShowClaimModal(true)}>
+              Claim
             </ButtonPrimary>
 
             <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={() => setShowUnstakingModal(true)}>
               Withdraw
             </ButtonPrimary>
+
           </DataRow>
         )}
-        {account && (
-          <TYPE.main>
-            {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} VIPER tokens available to deposit to the Viper Pit
-          </TYPE.main>
-        )}
+
+        <BlueCard>
+          <AutoColumn gap="10px">
+            <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
+                💡
+              </span>
+              <b>Important:</b> Your {govToken?.symbol} rewards will only be visible
+              <br />
+              after you withdraw your x{govToken?.symbol} tokens from the pool.
+              <br />
+              <br />
+              {pitSettings?.name} does not have any withdrawal fees.
+              <br />
+              Tokens are also 100% unlocked when they are claimed.
+            </TYPE.main>
+          </AutoColumn>
+        </BlueCard>
+
       </TopSection>
     </PageWrapper>
   )

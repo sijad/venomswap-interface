@@ -1,5 +1,5 @@
 import { BLOCKED_PRICE_IMPACT_NON_EXPERT } from '../constants'
-import { CurrencyAmount, Fraction, JSBI, Percent, TokenAmount, Trade } from '@venomswap/sdk'
+import { CurrencyAmount, Fraction, JSBI, Percent, TokenAmount, Trade, Currency } from '@venomswap/sdk'
 import { ALLOWED_PRICE_IMPACT_HIGH, ALLOWED_PRICE_IMPACT_LOW, ALLOWED_PRICE_IMPACT_MEDIUM } from '../constants'
 import { Field } from '../state/swap/actions'
 import { basisPointsToPercent } from './index'
@@ -73,4 +73,18 @@ export function formatExecutionPrice(trade?: Trade, inverted?: boolean): string 
     : `${trade.executionPrice.toSignificant(6)} ${trade.outputAmount.currency.symbol} / ${
         trade.inputAmount.currency.symbol
       }`
+}
+
+export function formatBlockchainAdjustedExecutionPrice(
+  trade?: Trade,
+  tradeInputCurrency?: Currency | undefined,
+  tradeOutputCurrency?: Currency | undefined,
+  inverted?: boolean
+): string {
+  if (!trade || !tradeInputCurrency || !tradeOutputCurrency) {
+    return ''
+  }
+  return inverted
+    ? `${trade.executionPrice.invert().toSignificant(6)} ${tradeInputCurrency.symbol} / ${tradeOutputCurrency.symbol}`
+    : `${trade.executionPrice.toSignificant(6)} ${tradeOutputCurrency.symbol} / ${tradeInputCurrency.symbol}`
 }

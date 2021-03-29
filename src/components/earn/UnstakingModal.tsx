@@ -13,6 +13,7 @@ import { useTransactionAdder } from '../../state/transactions/hooks'
 import FormattedCurrencyAmount from '../FormattedCurrencyAmount'
 import { useActiveWeb3React } from '../../hooks'
 import { ZERO_ADDRESS } from '../../constants'
+import useGovernanceToken from 'hooks/useGovernanceToken'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -28,16 +29,20 @@ interface StakingModalProps {
 export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
   const { account } = useActiveWeb3React()
 
+  const govToken = useGovernanceToken()
+
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
   const [hash, setHash] = useState<string | undefined>()
   const [attempting, setAttempting] = useState(false)
+  const [failed, setFailed] = useState<boolean>(false)
 
   const referral = ZERO_ADDRESS
 
-  function wrappedOndismiss() {
+  function wrappedOnDismiss() {
     setHash(undefined)
     setAttempting(false)
+    setFailed(false)
     onDismiss()
   }
 
@@ -56,6 +61,9 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
         })
         .catch((error: any) => {
           setAttempting(false)
+          if (error?.code === -32603) {
+            setFailed(true)
+          }
           console.log(error)
         })
     }
@@ -70,12 +78,12 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
   }
 
   return (
-    <Modal isOpen={isOpen} onDismiss={wrappedOndismiss} maxHeight={90}>
-      {!attempting && !hash && (
+    <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
+      {!attempting && !hash && !failed && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader>Withdraw</TYPE.mediumHeader>
-            <CloseIcon onClick={wrappedOndismiss} />
+            <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
           {stakingInfo?.stakedAmount && (
             <AutoColumn justify="center" gap="md">
@@ -90,33 +98,53 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
               <TYPE.body fontWeight={600} fontSize={36}>
                 {<FormattedCurrencyAmount currencyAmount={stakingInfo?.earnedAmount} />}
               </TYPE.body>
-              <TYPE.body>Unclaimed VIPER</TYPE.body>
+              <TYPE.body>Unclaimed {govToken?.symbol}</TYPE.body>
             </AutoColumn>
           )}
           <TYPE.subHeader style={{ textAlign: 'center' }}>
-            When you withdraw, your VIPER is claimed and your liquidity is removed from the mining pool.
+            When you withdraw, your {govToken?.symbol} is claimed and your liquidity is removed from the mining pool.
           </TYPE.subHeader>
           <ButtonError disabled={!!error} error={!!error && !!stakingInfo?.stakedAmount} onClick={onWithdraw}>
             {error ?? 'Withdraw & Claim'}
           </ButtonError>
         </ContentWrapper>
       )}
-      {attempting && !hash && (
-        <LoadingView onDismiss={wrappedOndismiss}>
+      {attempting && !hash && !failed && (
+        <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>Withdrawing {stakingInfo?.stakedAmount?.toSignificant(4)} VENOM-LP</TYPE.body>
-            <TYPE.body fontSize={20}>Claiming {stakingInfo?.earnedAmount?.toSignificant(4)} VIPER</TYPE.body>
+            <TYPE.body fontSize={20}>
+              Claiming {stakingInfo?.earnedAmount?.toSignificant(4)} {govToken?.symbol}
+            </TYPE.body>
           </AutoColumn>
         </LoadingView>
       )}
-      {hash && (
-        <SubmittedView onDismiss={wrappedOndismiss} hash={hash}>
+      {hash && !failed && (
+        <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>Transaction Submitted</TYPE.largeHeader>
             <TYPE.body fontSize={20}>Withdrew VENOM-LP!</TYPE.body>
-            <TYPE.body fontSize={20}>Claimed VIPER!</TYPE.body>
+            <TYPE.body fontSize={20}>Claimed {govToken?.symbol}!</TYPE.body>
           </AutoColumn>
         </SubmittedView>
+      )}
+      {!attempting && !hash && failed && (
+        <ContentWrapper gap="sm">
+          <RowBetween>
+            <TYPE.mediumHeader>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                ⚠️
+              </span>
+              Error!
+            </TYPE.mediumHeader>
+            <CloseIcon onClick={wrappedOnDismiss} />
+          </RowBetween>
+          <TYPE.subHeader style={{ textAlign: 'center' }}>
+            Your transaction couldn&apos;t be submitted.
+            <br />
+            You may have to increase your Gas Price (GWEI) settings!
+          </TYPE.subHeader>
+        </ContentWrapper>
       )}
     </Modal>
   )

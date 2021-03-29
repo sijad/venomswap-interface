@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Describe an issue in the Viperswap Interface
+about: Describe an issue in the Venomswap Interface
 title: ''
 labels: bug
 assignees: ''

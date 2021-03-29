@@ -1,4 +1,4 @@
-import { Blockchain, ChainId, TokenAmount } from '@venomswap/sdk'
+import { ChainId, TokenAmount, Blockchain } from '@venomswap/sdk'
 import React, { useState } from 'react'
 import { Text } from 'rebass'
 import { NavLink } from 'react-router-dom'
@@ -7,14 +7,16 @@ import { useTranslation } from 'react-i18next'
 
 import styled from 'styled-components'
 
-import Logo from '../../assets/svg/viperswap/black.svg'
-import LogoDark from '../../assets/svg/viperswap/white.svg'
+import ViperLogo from '../../assets/svg/viperswap/black.svg'
+import ViperLogoDark from '../../assets/svg/viperswap/white.svg'
+import CobraLogo from '../../assets/svg/cobraswap/black.svg'
+import CobraLogoDark from '../../assets/svg/cobraswap/white.svg'
 import { useActiveWeb3React } from '../../hooks'
 import { useDarkModeManager } from '../../state/user/hooks'
 import { useETHBalances, useAggregateGovTokenBalance } from '../../state/wallet/hooks'
 import { CardNoise } from '../earn/styled'
 import { CountUp } from 'use-count-up'
-import { TYPE, ExternalLink } from '../../theme'
+import { TYPE } from '../../theme'
 
 import { YellowCard } from '../Card'
 import { Moon, Sun } from 'react-feather'
@@ -30,8 +32,9 @@ import { Dots } from '../swap/styleds'
 import Modal from '../Modal'
 import GovTokenBalanceContent from './GovTokenBalanceContent'
 import usePrevious from '../../hooks/usePrevious'
-import { BASE_CURRENCY } from '../../connectors'
-import useBlockchain from '../../hooks/useBlockchain'
+import { BASE_CURRENCY, BLOCKCHAIN } from '../../connectors'
+import { PIT_SETTINGS } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const HeaderFrame = styled.div`
   display: grid;
@@ -137,7 +140,11 @@ const UNIAmount = styled(AccountElement)`
   height: 36px;
   font-weight: 500;
   background-color: ${({ theme }) => theme.bg3};
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #005224 100%);
+  background: radial-gradient(
+    76.02% 75.41% at 1.84% 0%,
+    ${({ theme }) => theme.tokenButtonGradientStart} 0%,
+    ${({ theme }) => theme.tokenButtonGradientEnd} 100%
+  );
 `
 
 const UNIWrapper = styled.span`
@@ -229,7 +236,7 @@ const StyledNavLink = styled(NavLink).attrs({
   }
 `
 
-const StyledExternalLink = styled(ExternalLink).attrs({
+/*const StyledExternalLink = styled(ExternalLink).attrs({
   activeClassName
 })<{ isActive?: boolean }>`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -258,7 +265,7 @@ const StyledExternalLink = styled(ExternalLink).attrs({
   ${({ theme }) => theme.mediaWidth.upToExtraSmall`
       display: none;
 `}
-`
+`*/
 
 export const StyledMenuButton = styled.button`
   position: relative;
@@ -298,8 +305,28 @@ const NETWORK_LABELS: { [chainId in ChainId]?: string } = {
 
 export default function Header() {
   const { account, chainId } = useActiveWeb3React()
-  const blockchain = useBlockchain()
   const { t } = useTranslation()
+
+  const govToken = useGovernanceToken()
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
+
+  let logoDark: string
+  let logo: string
+
+  switch (BLOCKCHAIN) {
+    case Blockchain.BINANCE_SMART_CHAIN:
+      logoDark = CobraLogoDark
+      logo = CobraLogo
+      break
+    case Blockchain.HARMONY:
+      logoDark = ViperLogoDark
+      logo = ViperLogo
+      break
+    default:
+      logoDark = ViperLogoDark
+      logo = ViperLogo
+      break
+  }
 
   const userEthBalance = useETHBalances(account ? [account] : [])?.[account ?? '']
   // const [isDark] = useDarkModeManager()
@@ -328,7 +355,7 @@ export default function Header() {
       <HeaderRow>
         <Title href=".">
           <UniIcon>
-            <img width={'48px'} src={darkMode ? LogoDark : Logo} alt="logo" />
+            <img width={'48px'} src={darkMode ? logoDark : logo} alt="logo" />
           </UniIcon>
         </Title>
         <HeaderLinks>
@@ -351,19 +378,9 @@ export default function Header() {
           <StyledNavLink id={`stake-nav-link`} to={'/staking'}>
             Staking
           </StyledNavLink>
-          <StyledNavLink id={`stake-nav-link`} to={'/viperPit'}>
-            ViperPit
+          <StyledNavLink id={`stake-nav-link`} to={`${pitSettings?.path}`}>
+            {pitSettings?.name}
           </StyledNavLink>
-          {blockchain === Blockchain.ETHEREUM && (
-            <StyledNavLink id={`stake-nav-link`} to={'/vote'}>
-              Vote
-            </StyledNavLink>
-          )}
-          {blockchain === Blockchain.ETHEREUM && (
-            <StyledExternalLink id={`stake-nav-link`} href={'https://uniswap.info'}>
-              Charts <span style={{ fontSize: '11px' }}>↗</span>
-            </StyledExternalLink>
-          )}
         </HeaderLinks>
       </HeaderRow>
       <HeaderControls>
@@ -377,7 +394,7 @@ export default function Header() {
             <UNIWrapper onClick={toggleClaimModal}>
               <UNIAmount active={!!account && !availableClaim} style={{ pointerEvents: 'auto' }}>
                 <TYPE.white padding="0 2px">
-                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming VIPER</Dots> : 'Claim VIPER'}
+                  {claimTxn && !claimTxn?.receipt ? <Dots>Claiming {govToken?.symbol}</Dots> : `Claim ${govToken?.symbol}`}
                 </TYPE.white>
               </UNIAmount>
               <CardNoise />
@@ -404,7 +421,7 @@ export default function Header() {
                     </TYPE.white>
                   </HideSmall>
                 )}
-                VIPER
+                {govToken?.symbol}
               </UNIAmount>
               <CardNoise />
             </UNIWrapper>

@@ -19,6 +19,8 @@ import useToggledVersion from '../../hooks/useToggledVersion'
 import { useUserSlippageTolerance } from '../user/hooks'
 import { computeSlippageAdjustedAmounts } from '../../utils/prices'
 import { BASE_CURRENCY } from '../../connectors'
+import useBlockchain from '../../hooks/useBlockchain'
+import getBlockchainAdjustedCurrency from '../../utils/getBlockchainAdjustedCurrency'
 
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>(state => state.swap)
@@ -120,6 +122,8 @@ export function useDerivedSwapInfo(): {
 } {
   const { account } = useActiveWeb3React()
 
+  const blockchain = useBlockchain()
+
   const toggledVersion = useToggledVersion()
 
   const {
@@ -207,7 +211,8 @@ export function useDerivedSwapInfo(): {
   ]
 
   if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
-    inputError = 'Insufficient ' + amountIn.currency.symbol + ' balance'
+    const amountInCurrency = getBlockchainAdjustedCurrency(blockchain, amountIn?.currency)
+    inputError = 'Insufficient ' + amountInCurrency?.symbol + ' balance'
   }
 
   return {

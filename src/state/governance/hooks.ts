@@ -1,4 +1,4 @@
-import { GOVERNANCE_TOKEN, PRELOADED_PROPOSALS } from './../../constants/index'
+import { PRELOADED_PROPOSALS } from './../../constants/index'
 import { TokenAmount } from '@venomswap/sdk'
 import { isAddress } from 'ethers/lib/utils'
 import { useGovernanceContract, useUniContract } from '../../hooks/useContract'
@@ -10,6 +10,7 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../transactions/hooks'
 import { useState, useEffect, useCallback } from 'react'
 import { abi as GOV_ABI } from '@uniswap/governance/build/GovernorAlpha.json'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 interface ProposalDetail {
   target: string
@@ -156,22 +157,22 @@ export function useUserDelegatee(): string {
 
 // gets the users current votes
 export function useUserVotes(): TokenAmount | undefined {
-  const { account, chainId } = useActiveWeb3React()
+  const { account } = useActiveWeb3React()
   const uniContract = useUniContract()
 
   // check for available votes
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const votes = useSingleCallResult(uniContract, 'getCurrentVotes', [account ?? undefined])?.result?.[0]
   return votes && govToken ? new TokenAmount(govToken, votes) : undefined
 }
 
 // fetch available votes as of block (usually proposal start block)
 export function useUserVotesAsOfBlock(block: number | undefined): TokenAmount | undefined {
-  const { account, chainId } = useActiveWeb3React()
+  const { account } = useActiveWeb3React()
   const uniContract = useUniContract()
 
   // check for available votes
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
   const votes = useSingleCallResult(uniContract, 'getPriorVotes', [account ?? undefined, block ?? undefined])
     ?.result?.[0]
   return votes && govToken ? new TokenAmount(govToken, votes) : undefined
@@ -187,7 +188,7 @@ export function useDelegateCallback(): (delegatee: string | undefined) => undefi
     (delegatee: string | undefined) => {
       if (!library || !chainId || !account || !isAddress(delegatee ?? '')) return undefined
       const args = [delegatee]
-      if (!uniContract) throw new Error('No VIPER Contract!')
+      if (!uniContract) throw new Error('No governance token contract!')
       return uniContract.estimateGas.delegate(...args, {}).then(estimatedGasLimit => {
         return uniContract
           .delegate(...args, { value: null, gasLimit: calculateGasMargin(estimatedGasLimit) })

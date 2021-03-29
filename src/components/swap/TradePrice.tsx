@@ -5,6 +5,8 @@ import { Repeat } from 'react-feather'
 import { Text } from 'rebass'
 import { ThemeContext } from 'styled-components'
 import { StyledBalanceMaxMini } from './styleds'
+import useBlockchain from '../../hooks/useBlockchain'
+import getBlockchainAdjustedCurrency from '../../utils/getBlockchainAdjustedCurrency'
 
 interface TradePriceProps {
   price?: Price
@@ -14,13 +16,18 @@ interface TradePriceProps {
 
 export default function TradePrice({ price, showInverted, setShowInverted }: TradePriceProps) {
   const theme = useContext(ThemeContext)
+  const blockchain = useBlockchain()
 
   const formattedPrice = showInverted ? price?.toSignificant(6) : price?.invert()?.toSignificant(6)
 
   const show = Boolean(price?.baseCurrency && price?.quoteCurrency)
+
+  const quoteCurrency = getBlockchainAdjustedCurrency(blockchain, price?.quoteCurrency)
+  const baseCurrency = getBlockchainAdjustedCurrency(blockchain, price?.baseCurrency)
+
   const label = showInverted
-    ? `${price?.quoteCurrency?.symbol} per ${price?.baseCurrency?.symbol}`
-    : `${price?.baseCurrency?.symbol} per ${price?.quoteCurrency?.symbol}`
+    ? `${quoteCurrency?.symbol} per ${baseCurrency?.symbol}`
+    : `${baseCurrency?.symbol} per ${quoteCurrency?.symbol}`
 
   return (
     <Text

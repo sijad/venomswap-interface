@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for improving the UX of the Viperswap Interface
+about: Suggest an idea for improving the UX of the Venomswap Interface
 title: ''
 labels: 'improvement'
 assignees: ''

@@ -3,7 +3,7 @@ import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import { JSBI, ETHER } from '@venomswap/sdk'
+import { JSBI, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 //import { JSBI, TokenAmount, ETHER } from '@venomswap/sdk'
 import { RouteComponentProps } from 'react-router-dom'
 import DoubleCurrencyLogo from '../../components/DoubleLogo'
@@ -32,6 +32,8 @@ import usePrevious from '../../hooks/usePrevious'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
 import { BIG_INT_ZERO } from '../../constants'
 //import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -68,12 +70,12 @@ const StyledBottomCard = styled(DataCard)<{ dim: any }>`
   z-index: 1;
 `
 
-/*const PoolData = styled(DataCard)`
+const PoolData = styled(DataCard)`
   background: none;
   border: 1px solid ${({ theme }) => theme.bg4};
   padding: 1rem;
   z-index: 1;
-`*/
+`
 
 const VoteCard = styled(DataCard)`
   background: radial-gradient(76.02% 75.41% at 1.84% 0%, #27ae60 0%, #000000 100%);
@@ -96,6 +98,8 @@ export default function Manage({
   }
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
+
+  const govToken = useGovernanceToken()
 
   // get currencies and pair
   const [currencyA, currencyB] = [useCurrency(currencyIdA), useCurrency(currencyIdB)]
@@ -132,34 +136,19 @@ export default function Manage({
   // fade cards if nothing staked or nothing earned yet
   const disableTop = !stakingInfo?.stakedAmount || stakingInfo.stakedAmount.equalTo(JSBI.BigInt(0))
 
-  const token = currencyA === ETHER ? tokenB : tokenA
-  //const WETH = currencyA === ETHER ? tokenA : tokenB
+  const baseToken = currencyA && DEFAULT_CURRENCIES.includes(currencyA) ? tokenA : tokenB
+  const token = currencyA && DEFAULT_CURRENCIES.includes(currencyA) ? tokenB : tokenA
   const backgroundColor = useColor(token)
 
-  // get WETH value of staked LP tokens
-  /*const totalSupplyOfStakingToken = useTotalSupply(stakingInfo?.stakedAmount?.token)
-  let valueOfTotalStakedAmountInWETH: TokenAmount | undefined
-  if (totalSupplyOfStakingToken && stakingTokenPair && stakingInfo && WETH) {
-    // take the total amount of LP tokens staked, multiply by ETH value of all LP tokens, divide by all LP tokens
-    valueOfTotalStakedAmountInWETH = new TokenAmount(
-      WETH,
-      JSBI.divide(
-        JSBI.multiply(
-          JSBI.multiply(stakingInfo.totalStakedAmount.raw, stakingTokenPair.reserveOf(WETH).raw),
-          JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
-        ),
-        totalSupplyOfStakingToken.raw
-      )
-    )
-  }*/
+  // get the USD value of the staked base token
+  const USDPrice = useBUSDPrice(baseToken)
+  const valueOfTotalStakedAmountInBUSD =
+    stakingInfo &&
+    stakingInfo.valueOfTotalStakedAmountInPairCurrency &&
+    USDPrice?.quote(stakingInfo.valueOfTotalStakedAmountInPairCurrency)
 
   const countUpAmount = stakingInfo?.earnedAmount?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
-
-  // get the USD value of staked WETH
-  /*const USDPrice = useUSDCPrice(WETH)
-  const valueOfTotalStakedAmountInUSDC =
-    valueOfTotalStakedAmountInWETH && USDPrice?.quote(valueOfTotalStakedAmountInWETH)*/
 
   const toggleWalletModal = useWalletModalToggle()
 
@@ -179,6 +168,34 @@ export default function Manage({
         </TYPE.mediumHeader>
         <DoubleCurrencyLogo currency0={currencyA ?? undefined} currency1={currencyB ?? undefined} size={24} />
       </RowBetween>
+
+      <DataRow style={{ gap: '24px' }}>
+        <PoolData>
+          <AutoColumn gap="sm">
+            <TYPE.body style={{ margin: 0 }}>Total Deposits</TYPE.body>
+            <TYPE.body fontSize={24} fontWeight={500}>
+              {stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency && valueOfTotalStakedAmountInBUSD
+                ? `$${valueOfTotalStakedAmountInBUSD.toFixed(0, { groupSeparator: ',' })}`
+                : stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency
+                ? `${stakingInfo.valueOfTotalStakedAmountInPairCurrency?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ONE`
+                : '$0'}
+            </TYPE.body>
+          </AutoColumn>
+        </PoolData>
+        <PoolData>
+          <AutoColumn gap="sm">
+            <TYPE.body style={{ margin: 0 }}>Emission Rate</TYPE.body>
+            <TYPE.body fontSize={24} fontWeight={500}>
+              {stakingInfo
+                ? stakingInfo.active
+                  ? `${stakingInfo.poolRewardsPerBlock.toSignificant(4, { groupSeparator: ',' })} 
+                  ${govToken?.symbol} / block`
+                  : `0 ${govToken?.symbol} / block`
+                : '-'}
+            </TYPE.body>
+          </AutoColumn>
+        </PoolData>
+      </DataRow>
 
       {showAddLiquidityButton && (
         <VoteCard>
@@ -258,7 +275,7 @@ export default function Manage({
             <AutoColumn gap="sm">
               <RowBetween>
                 <div>
-                  <TYPE.black>Your unclaimed VIPER</TYPE.black>
+                  <TYPE.black>Your unclaimed {govToken?.symbol}</TYPE.black>
                 </div>
                 {stakingInfo?.earnedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.earnedAmount?.raw) && (
                   <ButtonEmpty
@@ -294,7 +311,14 @@ export default function Manage({
               <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
                 ⭐️
               </span>
-              When you withdraw, the contract will automagically claim VIPER on your behalf!
+              When you deposit or withdraw the contract will automatically claim {govToken?.symbol} on your behalf.
+              <br />
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
+                💡
+              </span>
+              The unclaimed {govToken?.symbol} amount listed above is your total rewards -
+              <br />
+              when claiming 95% will be locked and 5% will be immediately accessible.
             </TYPE.main>
           )}
         </>
@@ -333,7 +357,7 @@ export default function Manage({
           </DataRow>
         )}
         {!userLiquidityUnstaked ? null : userLiquidityUnstaked.equalTo('0') ? null : !stakingInfo?.active ? null : (
-          <TYPE.main>{userLiquidityUnstaked.toSignificant(6)} VENOM-LP tokens available to deposit</TYPE.main>
+          <TYPE.main>You have {userLiquidityUnstaked.toSignificant(6)} VENOM-LP tokens available to deposit</TYPE.main>
         )}
       </PositionInfo>
     </PageWrapper>

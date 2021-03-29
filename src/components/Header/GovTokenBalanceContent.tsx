@@ -1,23 +1,25 @@
-import { ChainId, TokenAmount } from '@venomswap/sdk'
+import { TokenAmount, Blockchain } from '@venomswap/sdk'
 import React from 'react'
 //import React, { useMemo } from 'react'
 import { X } from 'react-feather'
 import styled from 'styled-components'
-import tokenLogo from '../../assets/images/token-logo.png'
-import { GOVERNANCE_TOKEN } from '../../constants'
+import getTokenLogo from '../../utils/getTokenLogo'
 import { useGovTokenSupply } from '../../data/TotalSupply'
 import { useActiveWeb3React } from '../../hooks'
 //import { useMerkleDistributorContract } from '../../hooks/useContract'
 //import useCurrentBlockTimestamp from '../../hooks/useCurrentBlockTimestamp'
 import { useTotalLockedGovTokensEarned, useTotalUnlockedGovTokensEarned } from '../../state/stake/hooks'
 import { useAggregateGovTokenBalance, useTokenBalance } from '../../state/wallet/hooks'
-import { ExternalLink, StyledInternalLink, TYPE, UniTokenAnimated } from '../../theme'
+import { StyledInternalLink, TYPE, UniTokenAnimated } from '../../theme'
 //import { computeUniCirculation } from '../../utils/computeUniCirculation'
-import useUSDCPrice from '../../utils/useUSDCPrice'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
 import { Break, CardBGImage, CardNoise, CardSection, DataCard } from '../earn/styled'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
+import { MouseoverTooltip } from '../Tooltip'
+import useBlockchain from '../../hooks/useBlockchain'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -25,7 +27,11 @@ const ContentWrapper = styled(AutoColumn)`
 
 const ModalUpper = styled(DataCard)`
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #008c6b 0%, #000 100%);
+  background: radial-gradient(
+    76.02% 75.41% at 1.84% 0%,
+    ${({ theme }) => theme.tokenButtonGradientStart} 0%,
+    #000 100%
+  );
   padding: 0.5rem;
 `
 
@@ -43,9 +49,9 @@ const StyledClose = styled(X)`
  * Content for balance stats modal
  */
 export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { setShowUniBalanceModal: any }) {
-  const { account, chainId } = useActiveWeb3React()
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
-
+  const { account } = useActiveWeb3React()
+  const govToken = useGovernanceToken()
+  const blockchain = useBlockchain()
   const total = useAggregateGovTokenBalance()
   const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
@@ -69,16 +75,17 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
   const unlockedGovTokensToClaim: TokenAmount | undefined = useTotalUnlockedGovTokensEarned()
   const totalSupply: TokenAmount | undefined = useGovTokenSupply()
   const totalUnlockedSupply: TokenAmount | undefined = useGovTokenSupply('unlockedSupply')
-  const govTokenPrice = useUSDCPrice(govToken)
-  /*const blockTimestamp = useCurrentBlockTimestamp()
-  const unclaimedUni = useTokenBalance(useMerkleDistributorContract()?.address, viper)
-  const circulation: TokenAmount | undefined = useMemo(
-    () =>
-      blockTimestamp && viper && chainId === ChainId.MAINNET
-        ? computeUniCirculation(viper, blockTimestamp, unclaimedUni)
-        : totalSupply,
-    [blockTimestamp, chainId, totalSupply, unclaimedUni, viper]
-  )*/
+  const govTokenPrice = useBUSDPrice(govToken)
+  const circulatingMarketCap = govTokenPrice ? totalUnlockedSupply?.multiply(govTokenPrice.raw) : undefined
+  const totalMarketCap = govTokenPrice ? totalSupply?.multiply(govTokenPrice.raw) : undefined
+  const tooltips: Record<string, string> = {
+    unlockedRewards:
+      'Unlocked pending rewards - 5% of your claimable rewards will be directly accessible upon claiming.',
+    lockedRewards:
+      'Locked pending rewards - 95% of your claimable rewards will be locked until 00:00:00 December 25th, 2021 (UTC). They will thereafter gradually unlock until December 25th, 2022.',
+    lockedBalance:
+      'Locked balance - Your locked balance will remain locked until 00:00:00 December 25th, 2021 (UTC). Your locked tokens will thereafter gradually unlock until December 25th, 2022.'
+  }
 
   return (
     <ContentWrapper gap="lg">
@@ -87,7 +94,7 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
         <CardNoise />
         <CardSection gap="md">
           <RowBetween>
-            <TYPE.white color="white">Your VIPER Breakdown</TYPE.white>
+            <TYPE.white color="white">Your {govToken?.symbol} Breakdown</TYPE.white>
             <StyledClose stroke="white" onClick={() => setShowUniBalanceModal(false)} />
           </RowBetween>
         </CardSection>
@@ -96,7 +103,7 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
           <>
             <CardSection gap="sm">
               <AutoColumn gap="md" justify="center">
-                <UniTokenAnimated width="48px" src={tokenLogo} />{' '}
+                <UniTokenAnimated width="48px" src={getTokenLogo()} />{' '}
                 <TYPE.white fontSize={48} fontWeight={600} color="white">
                   {total?.toFixed(2, { groupSeparator: ',' })}
                 </TYPE.white>
@@ -104,10 +111,27 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
               <AutoColumn gap="md">
                 <RowBetween>
                   <TYPE.white color="white">Balance:</TYPE.white>
-                  <TYPE.white color="white">{govTokenBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">
+                    <MouseoverTooltip
+                      text={
+                        govTokenPrice && govTokenBalance && govTokenBalance.greaterThan('0')
+                          ? `USD: $${govTokenBalance.multiply(govTokenPrice?.raw).toSignificant(6, { groupSeparator: ',' })}`
+                          : ''
+                      }
+                    >
+                      {govTokenBalance?.toFixed(2, { groupSeparator: ',' })}
+                    </MouseoverTooltip>
+                  </TYPE.white>
                 </RowBetween>
                 <RowBetween>
-                  <TYPE.white color="white">Unlocked rewards:</TYPE.white>
+                  <TYPE.white color="white">
+                    <MouseoverTooltip text={tooltips.unlockedRewards}>
+                      <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                        🔓
+                      </span>
+                      Pending Rewards:
+                    </MouseoverTooltip>
+                  </TYPE.white>
                   <TYPE.white color="white">
                     {unlockedGovTokensToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
                     {unlockedGovTokensToClaim && unlockedGovTokensToClaim.greaterThan('0') && (
@@ -118,7 +142,14 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
                   </TYPE.white>
                 </RowBetween>
                 <RowBetween>
-                  <TYPE.white color="white">Locked rewards:</TYPE.white>
+                  <TYPE.white color="white">
+                    <MouseoverTooltip text={tooltips.lockedRewards}>
+                      <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                        🔒
+                      </span>
+                      Pending Rewards:
+                    </MouseoverTooltip>
+                  </TYPE.white>
                   <TYPE.white color="white">
                     {lockedGovTokensToClaim?.toFixed(2, { groupSeparator: ',' })}{' '}
                     {lockedGovTokensToClaim && lockedGovTokensToClaim.greaterThan('0') && (
@@ -128,13 +159,44 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
                     )}
                   </TYPE.white>
                 </RowBetween>
+              </AutoColumn>
+            </CardSection>
+            <Break />
+            <CardSection gap="sm">
+              <AutoColumn gap="md">
                 <RowBetween>
-                  <TYPE.white color="white">Locked Balance:</TYPE.white>
-                  <TYPE.white color="white">{govTokenLockedBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">
+                    <MouseoverTooltip text={tooltips.lockedBalance}>Locked Balance:</MouseoverTooltip>
+                  </TYPE.white>
+                  <TYPE.white color="white">
+                    <MouseoverTooltip
+                      text={
+                        govTokenPrice && govTokenLockedBalance && govTokenLockedBalance.greaterThan('0')
+                          ? `USD: $${govTokenLockedBalance
+                              .multiply(govTokenPrice?.raw)
+                              .toSignificant(6, { groupSeparator: ',' })}`
+                          : ''
+                      }
+                    >
+                      {govTokenLockedBalance?.toFixed(2, { groupSeparator: ',' })}
+                    </MouseoverTooltip>
+                  </TYPE.white>
                 </RowBetween>
                 <RowBetween>
                   <TYPE.white color="white">Total Balance:</TYPE.white>
-                  <TYPE.white color="white">{govTokenTotalBalance?.toFixed(2, { groupSeparator: ',' })}</TYPE.white>
+                  <TYPE.white color="white">
+                  <MouseoverTooltip
+                      text={
+                        govTokenPrice && govTokenTotalBalance && govTokenTotalBalance.greaterThan('0')
+                          ? `USD: $${govTokenTotalBalance
+                              .multiply(govTokenPrice?.raw)
+                              .toSignificant(6, { groupSeparator: ',' })}`
+                          : ''
+                      }
+                      >
+                      {govTokenTotalBalance?.toFixed(2, { groupSeparator: ',' })}
+                    </MouseoverTooltip>
+                  </TYPE.white>
                 </RowBetween>
               </AutoColumn>
             </CardSection>
@@ -143,25 +205,41 @@ export default function GovTokenBalanceContent({ setShowUniBalanceModal }: { set
         )}
         <CardSection gap="sm">
           <AutoColumn gap="md">
-            {govToken && govToken.chainId === ChainId.MAINNET ? (
-              <RowBetween>
-                <TYPE.white color="white">VIPER price:</TYPE.white>
-                <TYPE.white color="white">${govTokenPrice?.toFixed(2) ?? '-'}</TYPE.white>
-              </RowBetween>
-            ) : null}
             <RowBetween>
-              <TYPE.white color="white">VIPER in circulation:</TYPE.white>
+              <TYPE.white color="white">{govToken?.symbol} in circulation:</TYPE.white>
               <TYPE.white color="white">{totalUnlockedSupply?.toFixed(0, { groupSeparator: ',' })}</TYPE.white>
             </RowBetween>
             <RowBetween>
-              <TYPE.white color="white">Total Supply</TYPE.white>
+              <TYPE.white color="white">{govToken?.symbol} total supply:</TYPE.white>
               <TYPE.white color="white">{totalSupply?.toFixed(0, { groupSeparator: ',' })}</TYPE.white>
             </RowBetween>
-            {govToken && govToken.chainId === ChainId.MAINNET ? (
-              <ExternalLink href={`https://uniswap.info/token/${govToken.address}`}>View UNI Analytics</ExternalLink>
-            ) : null}
           </AutoColumn>
         </CardSection>
+        {blockchain === Blockchain.HARMONY && govTokenPrice && circulatingMarketCap && totalMarketCap && (
+          <>
+            <Break />
+            <CardSection gap="sm">
+              <AutoColumn gap="md">
+                <RowBetween>
+                  <TYPE.white color="white">{govToken?.symbol} price:</TYPE.white>
+                  <TYPE.white color="white">${govTokenPrice?.toFixed(4) ?? '-'}</TYPE.white>
+                </RowBetween>
+                {circulatingMarketCap && (
+                  <RowBetween>
+                    <TYPE.white color="white">{govToken?.symbol} circ. market cap:</TYPE.white>
+                    <TYPE.white color="white">${circulatingMarketCap?.toFixed(0, { groupSeparator: ',' })}</TYPE.white>
+                  </RowBetween>
+                )}
+                {totalMarketCap && (
+                  <RowBetween>
+                    <TYPE.white color="white">{govToken?.symbol} total market cap:</TYPE.white>
+                    <TYPE.white color="white">${totalMarketCap?.toFixed(0, { groupSeparator: ',' })}</TYPE.white>
+                  </RowBetween>
+                )}
+              </AutoColumn>
+            </CardSection>
+          </>
+        )}
       </ModalUpper>
     </ContentWrapper>
   )

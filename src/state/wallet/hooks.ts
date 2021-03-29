@@ -1,4 +1,3 @@
-import { GOVERNANCE_TOKEN } from './../../constants/index'
 import { Currency, CurrencyAmount, JSBI, Token, TokenAmount, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import { useMemo } from 'react'
 import ERC20_INTERFACE from '../../constants/abis/erc20'
@@ -9,6 +8,7 @@ import { isAddress } from '../../utils'
 import { useSingleContractMultipleData, useMultipleContractSingleData } from '../multicall/hooks'
 import { useUserUnclaimedAmount } from '../claim/hooks'
 import { useTotalUnlockedGovTokensEarned } from '../stake/hooks'
+import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 /**
  * Returns a map of the given addresses to their eventually consistent ETH balances.
@@ -148,9 +148,9 @@ export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | u
 
 // get the total owned, unclaimed, and unharvested UNI for account
 export function useAggregateGovTokenBalance(): TokenAmount | undefined {
-  const { account, chainId } = useActiveWeb3React()
+  const { account } = useActiveWeb3React()
 
-  const govToken = chainId ? GOVERNANCE_TOKEN[chainId] : undefined
+  const govToken = useGovernanceToken()
 
   const govTokenBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, govToken)
   const govTokenUnclaimed: TokenAmount | undefined = useUserUnclaimedAmount(account)
