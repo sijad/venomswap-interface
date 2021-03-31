@@ -1,6 +1,6 @@
 import { ChainId, Token, WETH } from '@venomswap/sdk'
 import { GOVERNANCE_TOKEN } from './'
-import { BUSD, HARMONY_BSC_BRIDGED_BUSD, BRIDGED_ETH } from './tokens'
+import { BUSD, HARMONY_BSC_BRIDGED_BUSD, BRIDGED_ETH, BRIDGED_USDC, BRIDGED_ROT, BRIDGED_MAGGOT } from './tokens'
 
 export const STAKING_REWARDS_INFO: {
   [chainId in ChainId]?: {
@@ -28,6 +28,18 @@ export const STAKING_REWARDS_INFO: {
     {
       tokens: [BUSD[ChainId.HARMONY_MAINNET], HARMONY_BSC_BRIDGED_BUSD[ChainId.HARMONY_MAINNET]],
       pid: 4
+    },
+    {
+      tokens: [WETH[ChainId.HARMONY_MAINNET], BRIDGED_USDC[ChainId.HARMONY_MAINNET]],
+      pid: 5
+    },
+    {
+      tokens: [BRIDGED_ROT[ChainId.HARMONY_MAINNET], GOVERNANCE_TOKEN[ChainId.HARMONY_MAINNET]],
+      pid: 6
+    },
+    {
+      tokens: [BRIDGED_MAGGOT[ChainId.HARMONY_MAINNET], GOVERNANCE_TOKEN[ChainId.HARMONY_MAINNET]],
+      pid: 7
     }
   ],
   [ChainId.HARMONY_TESTNET]: [
