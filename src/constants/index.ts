@@ -145,6 +145,11 @@ export const COMP = new Token(ChainId.MAINNET, '0xc00e94Cb662C3520282E6f57172140
 export const MKR = new Token(ChainId.MAINNET, '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2', 18, 'MKR', 'Maker')
 export const AMPL = new Token(ChainId.MAINNET, '0xD46bA6D942050d489DBd938a2C909A5d5039A161', 9, 'AMPL', 'Ampleforth')
 export const WBTC = new Token(ChainId.MAINNET, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8, 'WBTC', 'Wrapped BTC')
+// HARMONY ASSETS
+export const BUSD = new Token(ChainId.HARMONY_MAINNET, '0xE176EBE47d621b984a73036B9DA5d834411ef734', 18, 'BUSD', 'Binance USD')
+export const BSCBUSD = new Token(ChainId.HARMONY_MAINNET, '0x0aB43550A6915F9f67d0c454C2E90385E6497EaA', 18, 'bscBUSD', 'BSC BUSD')
+export const VIPER = new Token(ChainId.HARMONY_MAINNET, '0x2baF193459EF3175C29305A5150edDB3e37a3213', 18, 'VIPER', 'Viper')
+export const ONE_ETH = new Token(ChainId.HARMONY_MAINNET, '0xbADB6897cf2E35ACA73b6f37361a35EEB6F71637', 18, '1ETH', '1ETH')
 
 // Block time here is slightly higher (~1s) than average in order to avoid ongoing proposals past the displayed time
 export const AVERAGE_BLOCK_TIME_IN_SECS = 13
@@ -178,7 +183,8 @@ const WETH_ONLY: ChainTokenList = {
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ...WETH_ONLY,
-  [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, COMP, MKR, WBTC]
+  [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, COMP, MKR, WBTC],
+  [ChainId.HARMONY_MAINNET]: [...WETH_ONLY[ChainId.HARMONY_MAINNET], BUSD, BSCBUSD, VIPER, ONE_ETH]
 }
 
 /**
