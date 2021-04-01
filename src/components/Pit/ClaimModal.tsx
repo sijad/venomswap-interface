@@ -21,7 +21,7 @@ import { toV2LiquidityToken } from '../../state/user/hooks'
 import { PIT_SETTINGS } from '../../constants'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
 import useBlockchain from '../../hooks/useBlockchain'
-import { BRIDGED_ROT } from '../../constants/tokens'
+import { BRIDGED_ROT, BRIDGED_MAGGOT } from '../../constants/tokens'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
@@ -40,7 +40,7 @@ function toValidLiquidityTokenAddress(blockchain: Blockchain, chainId: ChainId, 
   }
 
   const liquidityToken = toV2LiquidityToken(item.tokens)
-  const skipTokens = [BRIDGED_ROT[chainId].address]
+  const skipTokens = [BRIDGED_ROT[chainId].address, BRIDGED_MAGGOT[chainId].address]
 
   if (blockchain === Blockchain.HARMONY) {
     if (skipTokens.includes(item.tokens[0].address) || skipTokens.includes(item.tokens[1].address)) {
@@ -88,7 +88,7 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
     pitBreeder?.address
   ])
 
-  const minimumAmountWei = 1000
+  const minimumAmountWei = 10000000000000000 // 0.01
 
   const [claimFrom, claimTo] = useMemo<string[][]>(() => {
     const claimFrom: string[] = []
