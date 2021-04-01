@@ -13,12 +13,15 @@ import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks'
 import { calculateGasMargin } from '../../utils'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
+import { Blockchain, ChainId } from '@venomswap/sdk'
 import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
 import { Interface } from '@ethersproject/abi'
 import { useMultipleContractSingleData } from '../../state/multicall/hooks'
 import { toV2LiquidityToken } from '../../state/user/hooks'
 import { PIT_SETTINGS } from '../../constants'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
+import useBlockchain from '../../hooks/useBlockchain'
+import { BRIDGED_ROT } from '../../constants/tokens'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
@@ -31,9 +34,27 @@ interface ClaimModalProps {
   onDismiss: () => void
 }
 
+function toValidLiquidityTokenAddress(blockchain: Blockchain, chainId: ChainId, item: any): string | undefined {
+  if (item.tokens[0].decimals !== 18 || item.tokens[1].decimals !== 18) {
+    return undefined
+  }
+
+  const liquidityToken = toV2LiquidityToken(item.tokens)
+  const skipTokens = [BRIDGED_ROT[chainId].address]
+
+  if (blockchain === Blockchain.HARMONY) {
+    if (skipTokens.includes(item.tokens[0].address) || skipTokens.includes(item.tokens[1].address)) {
+      return undefined
+    }
+  }
+
+  return liquidityToken.address
+}
+
 export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
   const { account, chainId } = useActiveWeb3React()
 
+  const blockchain = useBlockchain()
   const govToken = useGovernanceToken()
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 
@@ -57,11 +78,11 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
     () =>
       stakingPools
         ? stakingPools.map(item => {
-            return toV2LiquidityToken(item.tokens).address
+            return blockchain && chainId && item ? toValidLiquidityTokenAddress(blockchain, chainId, item) : undefined
           })
         : [],
-    [stakingPools]
-  )
+    [blockchain, chainId, stakingPools]
+  ).filter(address => address !== undefined)
 
   const results = useMultipleContractSingleData(liquidityTokenAddresses, PAIR_INTERFACE, 'balanceOf', [
     pitBreeder?.address

@@ -128,17 +128,17 @@ export const LINK: { [chainId in ChainId]: Token } = {
 }
 
 export const BRIDGED_USDC: { [chainId in ChainId]: Token } = {
-  [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
-  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
-  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
-  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
-  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
-  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
+  [ChainId.MAINNET]: new Token(ChainId.MAINNET, ZERO_ONE_ADDRESS, 6, '1USDC', 'USD Coin'),
+  [ChainId.RINKEBY]: new Token(ChainId.RINKEBY, ZERO_ONE_ADDRESS, 6, '1USDC', 'USD Coin'),
+  [ChainId.ROPSTEN]: new Token(ChainId.ROPSTEN, ZERO_ONE_ADDRESS, 6, '1USDC', 'USD Coin'),
+  [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, ZERO_ONE_ADDRESS, 6, '1USDC', 'USD Coin'),
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, ZERO_ONE_ADDRESS, 6, '1USDC', 'USD Coin'),
+  [ChainId.BSC_MAINNET]: new Token(ChainId.BSC_MAINNET, ZERO_ONE_ADDRESS, 6, '1USDC', 'USD Coin'),
+  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, ZERO_ONE_ADDRESS, 6, '1USDC', 'USD Coin'),
   [ChainId.HARMONY_MAINNET]: new Token(
     ChainId.HARMONY_MAINNET,
     '0x985458E523dB3d53125813eD68c274899e9DfAb4',
-    18,
+    6,
     '1USDC',
     'USD Coin'
   ),
