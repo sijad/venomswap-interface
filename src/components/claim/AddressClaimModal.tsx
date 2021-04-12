@@ -120,7 +120,8 @@ export default function AddressClaimModal({ isOpen, onDismiss }: { isOpen: boole
           </ModalUpper>
           <AutoColumn gap="md" style={{ padding: '1rem', paddingTop: '0' }} justify="center">
             <TYPE.subHeader fontWeight={500}>
-              Enter an address to trigger a {govToken?.symbol} claim. If the address has any claimable {govToken?.symbol}
+              Enter an address to trigger a {govToken?.symbol} claim. If the address has any claimable{' '}
+              {govToken?.symbol}
               it will be sent to them on submission.
             </TYPE.subHeader>
             <AddressInputPanel value={typed} onChange={handleRecipientType} />

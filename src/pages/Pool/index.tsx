@@ -86,7 +86,7 @@ export default function Pool() {
   const theme = useContext(ThemeContext)
   const { account, chainId } = useActiveWeb3React()
   const blockchain = useBlockchain()
-  
+
   const baseCurrency = baseCurrencies(chainId)[0]
   const addLiquidityUrl = `/add/${baseCurrency.symbol}`
   const createPoolUrl = `/create/${baseCurrency.symbol}`

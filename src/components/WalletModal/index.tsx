@@ -364,7 +364,9 @@ export default function WalletModal({
               {blockchain === Blockchain.HARMONY && (
                 <>
                   <span>New to Harmony? &nbsp;</span>{' '}
-                  <ExternalLink href="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/metamask-wallet">Learn more about wallets</ExternalLink>
+                  <ExternalLink href="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/metamask-wallet">
+                    Learn more about wallets
+                  </ExternalLink>
                 </>
               )}
             </Blurb>

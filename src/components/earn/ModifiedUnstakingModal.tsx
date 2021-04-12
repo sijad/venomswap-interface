@@ -128,7 +128,8 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
               <BlueCard>
                 <AutoColumn gap="10px">
                   <TYPE.link fontWeight={400} color={'primaryText1'}>
-                    <b>Important:</b> {platformName} utilizes LP withdrawal fees to disincentivize short term farming and selling.
+                    <b>Important:</b> {platformName} utilizes LP withdrawal fees to disincentivize short term farming
+                    and selling.
                     <br />
                     <br />
                     Standard withdrawal fees range from 0.1% - 0.5%.
@@ -141,7 +142,8 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
                       <li>4% fee if a user withdraws under 24 hours.</li>
                       <li>8% fee if a user withdraws under 1 hour.</li>
                       <li>
-                        25% slashing fee if a user withdraws during the same block (in order to disincentivize the use of flash loans).
+                        25% slashing fee if a user withdraws during the same block (in order to disincentivize the use
+                        of flash loans).
                       </li>
                     </ul>
                   </TYPE.link>

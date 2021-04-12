@@ -158,8 +158,10 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
             <>
               <TYPE.body fontSize={14} style={{ textAlign: 'center' }}>
                 When you claim rewards, collected LP fees will be used to market buy {govToken?.symbol}.
-                <br /><br />
-                The purchased {govToken?.symbol} tokens will then be distributed to the {pitSettings?.name} stakers as a reward.
+                <br />
+                <br />
+                The purchased {govToken?.symbol} tokens will then be distributed to the {pitSettings?.name} stakers as a
+                reward.
               </TYPE.body>
               <ButtonError disabled={!!error} error={!!error} onClick={onClaimRewards}>
                 {error ?? 'Claim'}
@@ -171,7 +173,8 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
               There are no trading fee rewards available
               <br />
               to claim right now.
-              <br /><br />
+              <br />
+              <br />
               Please wait a little bit and then check back here again.
             </TYPE.body>
           )}

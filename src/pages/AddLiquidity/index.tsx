@@ -148,7 +148,10 @@ export default function AddLiquidity({
       method: (...args: any) => Promise<TransactionResponse>,
       args: Array<string | string[] | number>,
       value: BigNumber | null
-    if ((currencyA && DEFAULT_CURRENCIES.includes(currencyA)) || (currencyB && DEFAULT_CURRENCIES.includes(currencyB))) {
+    if (
+      (currencyA && DEFAULT_CURRENCIES.includes(currencyA)) ||
+      (currencyB && DEFAULT_CURRENCIES.includes(currencyB))
+    ) {
       const tokenBIsETH = currencyB && DEFAULT_CURRENCIES.includes(currencyB)
       estimate = router.estimateGas.addLiquidityETH
       method = router.addLiquidityETH

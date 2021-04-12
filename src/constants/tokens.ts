@@ -142,7 +142,7 @@ export const BRIDGED_USDC: { [chainId in ChainId]: Token } = {
     '1USDC',
     'USD Coin'
   ),
-  [ChainId.HARMONY_TESTNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin'),
+  [ChainId.HARMONY_TESTNET]: new Token(ChainId.HARMONY_TESTNET, ZERO_ONE_ADDRESS, 18, '1USDC', 'USD Coin')
 }
 
 export const BRIDGED_ROT: { [chainId in ChainId]: Token } = {
