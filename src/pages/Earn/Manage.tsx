@@ -160,6 +160,8 @@ export default function Manage({
     }
   }, [account, toggleWalletModal])
 
+  const poolSharePercentage = stakingInfo?.poolShare.multiply(JSBI.BigInt(100))
+
   return (
     <PageWrapper gap="lg" justify="center">
       <RowBetween style={{ gap: '24px' }}>
@@ -172,6 +174,18 @@ export default function Manage({
       <DataRow style={{ gap: '24px' }}>
         <PoolData>
           <AutoColumn gap="sm">
+            <TYPE.body style={{ margin: 0 }}>APR*</TYPE.body>
+            <TYPE.body fontSize={24} fontWeight={500}>
+              {stakingInfo?.apr
+                ? stakingInfo.apr.greaterThan('0')
+                  ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
+                  : 'To be determined'
+                : '-'}
+            </TYPE.body>
+          </AutoColumn>
+        </PoolData>
+        <PoolData>
+          <AutoColumn gap="sm">
             <TYPE.body style={{ margin: 0 }}>Total Deposits</TYPE.body>
             <TYPE.body fontSize={24} fontWeight={500}>
               {stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency && valueOfTotalStakedAmountInBUSD
@@ -180,6 +194,17 @@ export default function Manage({
                 ? `${stakingInfo.valueOfTotalStakedAmountInPairCurrency?.toSignificant(4, { groupSeparator: ',' }) ??
                     '-'} ONE`
                 : '$0'}
+            </TYPE.body>
+          </AutoColumn>
+        </PoolData>
+      </DataRow>
+
+      <DataRow style={{ gap: '24px' }}>
+        <PoolData>
+          <AutoColumn gap="sm">
+            <TYPE.body style={{ margin: 0 }}>Pool reward allocation</TYPE.body>
+            <TYPE.body fontSize={24} fontWeight={500}>
+              {poolSharePercentage ? `${poolSharePercentage.toSignificant(4)}%` : '-'}
             </TYPE.body>
           </AutoColumn>
         </PoolData>
@@ -306,9 +331,9 @@ export default function Manage({
             </AutoColumn>
           </StyledBottomCard>
         </BottomSection>
-        <>
+        <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
           {rewardsStarted && (
-            <TYPE.main style={{ textAlign: 'center' }} fontSize={14}>
+            <>
               <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
                 ⭐️
               </span>
@@ -320,9 +345,16 @@ export default function Manage({
               The unclaimed {govToken?.symbol} amount listed above is your total rewards -
               <br />
               when claiming 95% will be locked and 5% will be immediately accessible.
-            </TYPE.main>
+            </>
           )}
-        </>
+          <br />
+          <br />
+          <TYPE.small style={{ textAlign: 'center' }} fontSize={10}>
+            * = The APR is calculated using a very simplified formula, it might not fully represent the exact APR
+            <br />
+            when factoring in the dynamic emission schedule and the locked/unlocked rewards vesting system.
+          </TYPE.small>
+        </TYPE.main>
         <AwaitingRewards />
         {!showAddLiquidityButton && (
           <DataRow style={{ marginBottom: '1rem' }}>
