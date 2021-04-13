@@ -110,6 +110,7 @@ export default function Option({
   active?: boolean
   id: string
 }) {
+  console.log({ link, clickable, size, color, icon, active, id })
   const content = (
     <OptionCardClickable id={id} onClick={onClick} clickable={clickable && !active} active={active}>
       <OptionCardLeft>
