@@ -9,7 +9,7 @@ import CoinbaseWalletIcon from '../../assets/images/coinbaseWalletIcon.svg'
 import FortmaticIcon from '../../assets/images/fortmaticIcon.png'
 import PortisIcon from '../../assets/images/portisIcon.png'
 import WalletConnectIcon from '../../assets/images/walletConnectIcon.svg'
-import { fortmatic, injected, portis, walletconnect, walletlink } from '../../connectors'
+import { fortmatic, injected, portis, walletconnect, walletlink, NETWORK_CHAIN_ID } from '../../connectors'
 import { NetworkContextName } from '../../constants'
 import useENSName from '../../hooks/useENSName'
 import { useHasSocks } from '../../hooks/useSocksBalance'
@@ -17,7 +17,8 @@ import { useWalletModalToggle } from '../../state/application/hooks'
 import { isTransactionRecent, useAllTransactions } from '../../state/transactions/hooks'
 import { TransactionDetails } from '../../state/transactions/reducer'
 import { shortenAddress } from '../../utils'
-import { setupNetwork } from '../../utils/wallet'
+import setupNetwork from '../../utils/setupNetwork'
+import getBlockchainName from '../../utils/getBlockchainName'
 import { ButtonSecondary } from '../Button'
 
 import Identicon from '../Identicon'
@@ -181,6 +182,8 @@ function Web3StatusInner() {
   const hasSocks = useHasSocks()
   const toggleWalletModal = useWalletModalToggle()
 
+  const blockchainName = getBlockchainName(NETWORK_CHAIN_ID)
+
   if (account) {
     return (
       <Web3StatusConnected id="web3-status-connected" onClick={toggleWalletModal} pending={hasPendingTransactions}>
@@ -201,7 +204,7 @@ function Web3StatusInner() {
     return (
       <Web3StatusError onClick={setupNetwork}>
         <NetworkIcon />
-        <Text>{error instanceof UnsupportedChainIdError ? 'Connect to Harmony' : 'Error'}</Text>
+        <Text>{error instanceof UnsupportedChainIdError ? `Connect to ${blockchainName}` : 'Error'}</Text>
       </Web3StatusError>
     )
   } else {

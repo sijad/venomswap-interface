@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
@@ -8,7 +9,7 @@ import styled from 'styled-components'
 import { Blockchain } from '@venomswap/sdk'
 import MetamaskIcon from '../../assets/images/metamask.png'
 import { ReactComponent as Close } from '../../assets/images/x.svg'
-import { fortmatic, injected, portis } from '../../connectors'
+import { fortmatic, injected, portis, NETWORK_CHAIN_ID } from '../../connectors'
 import { OVERLAY_READY } from '../../connectors/Fortmatic'
 import { SUPPORTED_WALLETS } from '../../constants'
 import usePrevious from '../../hooks/usePrevious'
@@ -17,7 +18,8 @@ import { useModalOpen, useWalletModalToggle } from '../../state/application/hook
 import { ExternalLink } from '../../theme'
 import AccountDetails from '../AccountDetails'
 import useBlockchain from '../../hooks/useBlockchain'
-import { setupNetwork } from '../../utils/wallet'
+import setupNetwork from '../../utils/setupNetwork'
+import getBlockchainName from '../../utils/getBlockchainName'
 
 import Modal from '../Modal'
 import Option from './Option'
@@ -144,6 +146,8 @@ export default function WalletModal({
 
   const previousAccount = usePrevious(account)
 
+  const blockchainName = getBlockchainName(NETWORK_CHAIN_ID)
+
   // close on connection, when logged out before
   useEffect(() => {
     if (account && !previousAccount && walletModalOpen) {
@@ -232,7 +236,7 @@ export default function WalletModal({
               link={option.href}
               header={option.name}
               subheader={null}
-              icon={require('../../assets/images/' + option.iconName)}
+              icon={require('../../assets/images/' + option.iconName).default}
             />
           )
         }
@@ -286,7 +290,7 @@ export default function WalletModal({
             link={option.href}
             header={option.name}
             subheader={null} //use option.descriptio to bring back multi-line
-            icon={require('../../assets/images/' + option.iconName)}
+            icon={require('../../assets/images/' + option.iconName).default}
           />
         )
       )
@@ -303,7 +307,7 @@ export default function WalletModal({
           <HeaderRow>{error instanceof UnsupportedChainIdError ? 'Wrong Network' : 'Error connecting'}</HeaderRow>
           <ContentWrapper>
             {error instanceof UnsupportedChainIdError ? (
-              <h5 onClick={setupNetwork}>Click here to connect to Harmony Mainnet.</h5>
+              <h5 onClick={setupNetwork}>Click here to connect to {blockchainName}.</h5>
             ) : (
               'Error connecting. Try refreshing the page.'
             )}
@@ -365,7 +369,9 @@ export default function WalletModal({
               {blockchain === Blockchain.HARMONY && (
                 <>
                   <span>New to Harmony? &nbsp;</span>{' '}
-                  <ExternalLink href="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/metamask-wallet">Learn more about wallets</ExternalLink>
+                  <ExternalLink href="https://docs.harmony.one/home/network/wallets/browser-extensions-wallets/metamask-wallet">
+                    Learn more about wallets
+                  </ExternalLink>
                 </>
               )}
             </Blurb>

@@ -17,6 +17,7 @@ import ModifiedUnstakingModal from '../../components/Pit/ModifiedUnstakingModal'
 import ClaimModal from '../../components/Pit/ClaimModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
 //import { useColor } from '../../hooks/useColor'
 import { CountUp } from 'use-count-up'
 
@@ -100,6 +101,12 @@ const DataRow = styled(RowBetween)`
   `};
 `
 
+const NonCenteredDataRow = styled(RowBetween)`
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+flex-direction: column;
+`};
+`
+
 export default function Pit({
   match: {
     params: { currencyIdA, currencyIdB }
@@ -108,9 +115,7 @@ export default function Pit({
   const { account, chainId } = useActiveWeb3React()
 
   const govToken = useGovernanceToken()
-  const pit = chainId ? PIT[chainId] : undefined
-  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
-
+  const govTokenBusdPrice = useBUSDPrice(govToken)
   const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
     govToken,
@@ -118,6 +123,15 @@ export default function Pit({
     GOVERNANCE_TOKEN_INTERFACE
   )
 
+  const pit = chainId ? PIT[chainId] : undefined
+  const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
+  const pitGovTokenBalance: TokenAmount | undefined = useTokenBalance(
+    pit && pit.address,
+    govToken,
+    'balanceOf',
+    GOVERNANCE_TOKEN_INTERFACE
+  )
+  const pitTVL = govTokenBusdPrice ? pitGovTokenBalance?.multiply(govTokenBusdPrice?.raw) : undefined
   const pitBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, pit, 'balanceOf', PIT_INTERFACE)
 
   const userLiquidityStaked = pitBalance
@@ -162,6 +176,20 @@ export default function Pit({
       )}
 
       <TopSection gap="lg" justify="center">
+        <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
+          <NonCenteredDataRow style={{ alignItems: 'baseline' }}>
+            <TYPE.mediumHeader></TYPE.mediumHeader>
+            {pitTVL && pitTVL.greaterThan('0') && (
+              <TYPE.black>
+                <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
+                  🏆
+                </span>
+                TVL: ${pitTVL.toSignificant(8, { groupSeparator: ',' })}
+              </TYPE.black>
+            )}
+          </NonCenteredDataRow>
+        </AutoColumn>
+
         <BottomSection gap="lg" justify="center">
           <CustomCard>
             <CardSection>
@@ -208,7 +236,8 @@ export default function Pit({
 
         {account && (
           <TYPE.main>
-            You have {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} {govToken?.symbol} tokens available to deposit to the {pitSettings?.name}
+            You have {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} {govToken?.symbol} tokens available to
+            deposit to the {pitSettings?.name}
           </TYPE.main>
         )}
 
@@ -225,7 +254,6 @@ export default function Pit({
             <ButtonPrimary padding="8px" borderRadius="8px" width="160px" onClick={() => setShowUnstakingModal(true)}>
               Withdraw
             </ButtonPrimary>
-
           </DataRow>
         )}
 
@@ -246,7 +274,6 @@ export default function Pit({
             </TYPE.main>
           </AutoColumn>
         </BlueCard>
-
       </TopSection>
     </PageWrapper>
   )

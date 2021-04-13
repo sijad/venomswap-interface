@@ -45,29 +45,36 @@ export default function AwaitingRewards() {
 
   return (
     <>
-    {rewardsStartBlock && blocksLeftUntilRewards && !rewardsStarted && (
-      <BlueCard>
-        <AutoColumn gap="10px">
-          <TYPE.link fontWeight={400} color={'primaryText1'}>
-          <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
-            💡
-          </span>
-          <b>{govToken?.symbol}</b> rewards haven&apos;t started yet - they will be activated at block <b>{rewardsStartBlock?.toLocaleString()}</b>. There are <b>{blocksLeftUntilRewards}</b> blocks left until the rewards start.
-          <br />
-          <br />
-          Expected start: <b>
-          {days ? `${days} ${days === 1 ? 'day' : 'days'}, ` : ''}
-          {hours ? `${hours} ${hours === 1 ? 'hour' : 'hours'}, ` : ''}
-          {minutes ? `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ` : ''}
-          {seconds ? `${minutes && minutes > 0 ? 'and ' : ''}${seconds} ${seconds === 1 ? 'second' : 'seconds'}` : ''}
-          </b> from now.
-          <br />
-          <br />
-          You can deposit your LP tokens now if you want to, and you&apos;ll start earning rewards at block <b>{rewardsStartBlock?.toLocaleString()}</b> and thereafter.
-          </TYPE.link>
-        </AutoColumn>
-      </BlueCard>
-    )}
+      {rewardsStartBlock && blocksLeftUntilRewards && !rewardsStarted && (
+        <BlueCard>
+          <AutoColumn gap="10px">
+            <TYPE.link fontWeight={400} color={'primaryText1'}>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
+                💡
+              </span>
+              <b>{govToken?.symbol}</b> rewards haven&apos;t started yet - they will be activated at block{' '}
+              <b>{rewardsStartBlock?.toLocaleString()}</b>. There are <b>{blocksLeftUntilRewards}</b> blocks left until
+              the rewards start.
+              <br />
+              <br />
+              Expected start:{' '}
+              <b>
+                {days ? `${days} ${days === 1 ? 'day' : 'days'}, ` : ''}
+                {hours ? `${hours} ${hours === 1 ? 'hour' : 'hours'}, ` : ''}
+                {minutes ? `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ` : ''}
+                {seconds
+                  ? `${minutes && minutes > 0 ? 'and ' : ''}${seconds} ${seconds === 1 ? 'second' : 'seconds'}`
+                  : ''}
+              </b>{' '}
+              from now.
+              <br />
+              <br />
+              You can deposit your LP tokens now if you want to, and you&apos;ll start earning rewards at block{' '}
+              <b>{rewardsStartBlock?.toLocaleString()}</b> and thereafter.
+            </TYPE.link>
+          </AutoColumn>
+        </BlueCard>
+      )}
     </>
   )
 }

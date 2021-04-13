@@ -13,12 +13,15 @@ import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks'
 import { calculateGasMargin } from '../../utils'
 import { STAKING_REWARDS_INFO } from '../../constants/staking'
+import { Blockchain, ChainId } from '@venomswap/sdk'
 import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.json'
 import { Interface } from '@ethersproject/abi'
 import { useMultipleContractSingleData } from '../../state/multicall/hooks'
 import { toV2LiquidityToken } from '../../state/user/hooks'
 import { PIT_SETTINGS } from '../../constants'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
+import useBlockchain from '../../hooks/useBlockchain'
+import { BRIDGED_ROT, BRIDGED_MAGGOT } from '../../constants/tokens'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
@@ -31,9 +34,27 @@ interface ClaimModalProps {
   onDismiss: () => void
 }
 
+function toValidLiquidityTokenAddress(blockchain: Blockchain, chainId: ChainId, item: any): string | undefined {
+  if (item.tokens[0].decimals !== 18 || item.tokens[1].decimals !== 18) {
+    return undefined
+  }
+
+  const liquidityToken = toV2LiquidityToken(item.tokens)
+  const skipTokens = [BRIDGED_ROT[chainId].address, BRIDGED_MAGGOT[chainId].address]
+
+  if (blockchain === Blockchain.HARMONY) {
+    if (skipTokens.includes(item.tokens[0].address) || skipTokens.includes(item.tokens[1].address)) {
+      return undefined
+    }
+  }
+
+  return liquidityToken.address
+}
+
 export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
   const { account, chainId } = useActiveWeb3React()
 
+  const blockchain = useBlockchain()
   const govToken = useGovernanceToken()
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
 
@@ -57,17 +78,17 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
     () =>
       stakingPools
         ? stakingPools.map(item => {
-            return toV2LiquidityToken(item.tokens).address
+            return blockchain && chainId && item ? toValidLiquidityTokenAddress(blockchain, chainId, item) : undefined
           })
         : [],
-    [stakingPools]
-  )
+    [blockchain, chainId, stakingPools]
+  ).filter(address => address !== undefined)
 
   const results = useMultipleContractSingleData(liquidityTokenAddresses, PAIR_INTERFACE, 'balanceOf', [
     pitBreeder?.address
   ])
 
-  const minimumAmountWei = 1000
+  const minimumAmountWei = 10000000000000000 // 0.01
 
   const [claimFrom, claimTo] = useMemo<string[][]>(() => {
     const claimFrom: string[] = []
@@ -137,8 +158,10 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
             <>
               <TYPE.body fontSize={14} style={{ textAlign: 'center' }}>
                 When you claim rewards, collected LP fees will be used to market buy {govToken?.symbol}.
-                <br /><br />
-                The purchased {govToken?.symbol} tokens will then be distributed to the {pitSettings?.name} stakers as a reward.
+                <br />
+                <br />
+                The purchased {govToken?.symbol} tokens will then be distributed to the {pitSettings?.name} stakers as a
+                reward.
               </TYPE.body>
               <ButtonError disabled={!!error} error={!!error} onClick={onClaimRewards}>
                 {error ?? 'Claim'}
@@ -150,7 +173,8 @@ export default function ClaimModal({ isOpen, onDismiss }: ClaimModalProps) {
               There are no trading fee rewards available
               <br />
               to claim right now.
-              <br /><br />
+              <br />
+              <br />
               Please wait a little bit and then check back here again.
             </TYPE.body>
           )}

@@ -9,7 +9,9 @@
     }
   },
   "ignorePatterns": [
-    "node_modules/**/*"
+    "node_modules/**/*",
+    "build/**/*",
+    "dist/**/*"
   ],
   "settings": {
     "react": {
@@ -20,12 +22,17 @@
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
-    "prettier/@typescript-eslint",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "prettier"
   ],
   "rules": {
     "@typescript-eslint/explicit-function-return-type": "off",
     "prettier/prettier": "error",
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/ban-ts-ignore": "off",
+    "react-hooks/exhaustive-deps": "off"
   }
 }

@@ -40,7 +40,11 @@ export function useSwapActionHandlers(): {
         selectCurrency({
           field,
           currencyId:
-            currency instanceof Token ? currency.address : currency && DEFAULT_CURRENCIES.includes(currency) ? symbol : ''
+            currency instanceof Token
+              ? currency.address
+              : currency && DEFAULT_CURRENCIES.includes(currency)
+              ? symbol
+              : ''
         })
       )
     },
