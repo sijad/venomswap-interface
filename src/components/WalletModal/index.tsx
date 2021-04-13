@@ -17,6 +17,7 @@ import { useModalOpen, useWalletModalToggle } from '../../state/application/hook
 import { ExternalLink } from '../../theme'
 import AccountDetails from '../AccountDetails'
 import useBlockchain from '../../hooks/useBlockchain'
+import { setupNetwork } from '../../utils/wallet'
 
 import Modal from '../Modal'
 import Option from './Option'
@@ -302,7 +303,7 @@ export default function WalletModal({
           <HeaderRow>{error instanceof UnsupportedChainIdError ? 'Wrong Network' : 'Error connecting'}</HeaderRow>
           <ContentWrapper>
             {error instanceof UnsupportedChainIdError ? (
-              <h5>Please connect to the appropriate Ethereum network.</h5>
+              <h5 onClick={setupNetwork}>Click here to connect to Harmony Mainnet.</h5>
             ) : (
               'Error connecting. Try refreshing the page.'
             )}
