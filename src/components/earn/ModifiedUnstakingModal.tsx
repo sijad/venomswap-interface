@@ -3,22 +3,25 @@ import Modal from '../Modal'
 import { AutoColumn } from '../Column'
 import styled from 'styled-components'
 import { RowBetween } from '../Row'
-import { TYPE, CloseIcon } from '../../theme'
+import { TYPE, CloseIcon, ExternalLink } from '../../theme'
 import { ButtonError } from '../Button'
 import CurrencyInputPanel from '../CurrencyInputPanel'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { TokenAmount, Pair } from '@venomswap/sdk'
+import { TokenAmount, Pair, Blockchain } from '@venomswap/sdk'
+import { useActiveWeb3React } from '../../hooks'
 import { StakingInfo, useDerivedUnstakeInfo } from '../../state/stake/hooks'
 //import { wrappedCurrencyAmount } from '../../utils/wrappedCurrency'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
-import { useMasterBreederContract } from '../../hooks/useContract'
 import { ZERO_ADDRESS } from '../../constants'
 import usePlatformName from '../../hooks/usePlatformName'
 import { BlueCard } from '../Card'
 import { ColumnCenter } from '../Column'
 import { calculateGasMargin } from '../../utils'
+import { useMasterBreederContract } from '../../hooks/useContract'
+import useCalculateWithdrawalFee from '../../hooks/useCalculateWithdrawalFee'
+import useBlockchain from '../../hooks/useBlockchain'
 
 /*const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -34,6 +37,19 @@ const ContentWrapper = styled(AutoColumn)`
   padding: 1rem;
 `
 
+const Separator = styled.div`
+  width: 100%;
+  height: 1px;
+  background-color: ${({ theme }) => theme.bg2};
+  margin: 10px 0px;
+`
+
+const WithdrawalFee = styled.div`
+  margin: 10px 0px 0px 0px;
+  text-align: center;
+  font-size: 40px;
+`
+
 interface StakingModalProps {
   isOpen: boolean
   onDismiss: () => void
@@ -41,6 +57,9 @@ interface StakingModalProps {
 }
 
 export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }: StakingModalProps) {
+  const { account } = useActiveWeb3React()
+  const blockchain = useBlockchain()
+
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
   const { parsedAmount, error } = useDerivedUnstakeInfo(typedValue, stakingInfo.stakedAmount)
@@ -73,6 +92,13 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
 
   // pair contract for this token to be staked
   const dummyPair = new Pair(new TokenAmount(stakingInfo.tokens[0], '0'), new TokenAmount(stakingInfo.tokens[1], '0'))
+
+  const { lastActionBlock, withdrawalFee } = useCalculateWithdrawalFee(stakingInfo.pid, account)
+
+  let feeInfoUrl = ''
+  if (blockchain == Blockchain.HARMONY) {
+    feeInfoUrl = 'https://docs.venomdao.org/viper/fees'
+  }
 
   async function onWithdraw() {
     if (masterBreeder && stakingInfo?.stakedAmount) {
@@ -130,23 +156,29 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
                   <TYPE.link fontWeight={400} color={'primaryText1'}>
                     <b>Important:</b> {platformName} utilizes LP withdrawal fees to disincentivize short term farming
                     and selling.
-                    <br />
-                    <br />
-                    Standard withdrawal fees range from 0.1% - 0.5%.
                   </TYPE.link>
-                  <TYPE.link fontWeight={400} fontSize={12} color={'primaryText1'}>
-                    <b>Extra penalties will apply for the following conditions:</b>
-                    <ul>
-                      <li>1% fee if a user withdraws under 5 days</li>
-                      <li>2% fee if a user withdraws under 3 days.</li>
-                      <li>4% fee if a user withdraws under 24 hours.</li>
-                      <li>8% fee if a user withdraws under 1 hour.</li>
-                      <li>
-                        25% slashing fee if a user withdraws during the same block (in order to disincentivize the use
-                        of flash loans).
-                      </li>
-                    </ul>
-                  </TYPE.link>
+                  {feeInfoUrl && (
+                    <TYPE.link fontWeight={400} fontSize={12} color={'primaryText1'}>
+                      <ExternalLink href={feeInfoUrl}>Read more about the fees here.</ExternalLink>
+                    </TYPE.link>
+                  )}
+                  {withdrawalFee && (
+                    <>
+                      <Separator />
+                      <TYPE.link fontWeight={400} color={'primaryText1'}>
+                        <b>Your current withdrawal fee:</b>
+                        <br />
+                        <WithdrawalFee>{withdrawalFee}%</WithdrawalFee>
+                      </TYPE.link>
+                    </>
+                  )}
+                  {lastActionBlock && (
+                    <TYPE.link fontWeight={400} fontSize={12} color={'primaryText1'}>
+                      <em>
+                        You last deposited or withdrew funds at block <b>{lastActionBlock?.toString()}</b>.
+                      </em>
+                    </TYPE.link>
+                  )}
                 </AutoColumn>
               </BlueCard>
             </ColumnCenter>
