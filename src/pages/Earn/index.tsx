@@ -85,8 +85,13 @@ export default function Earn() {
     baseEmissions && blockchainSettings ? baseEmissions.multiply(JSBI.BigInt(blocksPerMinute)) : undefined
 
   const filteredStakingInfos = stakingInfos
-    ?.filter(s => s.active)
-    ?.sort((a, b) => (JSBI.GT(a?.allocPoint, b?.allocPoint) ? 1 : -1))
+    .filter(s => s.active)
+    .sort((a, b) => {
+      if (a.apr === undefined || b.apr === undefined) {
+        return 0
+      }
+      return b.apr.greaterThan(a.apr) ? 1 : -1
+    })
 
   // toggle copy if rewards are inactive
   //const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
