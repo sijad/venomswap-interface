@@ -168,14 +168,15 @@ export default function ModifiedStakingModal({ isOpen, onDismiss, stakingInfo }:
                       <TYPE.link fontWeight={400} color={'primaryText1'}>
                         <b>Your current withdrawal fee:</b>
                         <br />
-                        <WithdrawalFee>{withdrawalFee}%</WithdrawalFee>
+                        <WithdrawalFee>{withdrawalFee.toSignificant(2)}%</WithdrawalFee>
                       </TYPE.link>
                     </>
                   )}
                   {lastActionBlock && (
-                    <TYPE.link fontWeight={400} fontSize={12} color={'primaryText1'}>
+                    <TYPE.link fontWeight={400} fontSize={10} color={'primaryText1'}>
                       <em>
-                        You last deposited or withdrew funds at block <b>{lastActionBlock?.toString()}</b>.
+                        * You first deposited funds or last withdrew funds at block <b>{lastActionBlock?.toString()}</b>
+                        .
                       </em>
                     </TYPE.link>
                   )}
