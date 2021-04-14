@@ -16,7 +16,7 @@ import { useDarkModeManager } from '../../state/user/hooks'
 import { useETHBalances, useAggregateGovTokenBalance } from '../../state/wallet/hooks'
 import { CardNoise } from '../earn/styled'
 import { CountUp } from 'use-count-up'
-import { TYPE } from '../../theme'
+import { TYPE, ExternalLink } from '../../theme'
 
 import { YellowCard } from '../Card'
 import { Moon, Sun } from 'react-feather'
@@ -35,6 +35,7 @@ import usePrevious from '../../hooks/usePrevious'
 import { BASE_CURRENCY, BLOCKCHAIN } from '../../connectors'
 import { PIT_SETTINGS } from '../../constants'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
+import useBridgeUrl from '../../hooks/useBridgeUrl'
 
 const HeaderFrame = styled.div`
   display: grid;
@@ -236,7 +237,7 @@ const StyledNavLink = styled(NavLink).attrs({
   }
 `
 
-/*const StyledExternalLink = styled(ExternalLink).attrs({
+const StyledExternalLink = styled(ExternalLink).attrs({
   activeClassName
 })<{ isActive?: boolean }>`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -265,7 +266,7 @@ const StyledNavLink = styled(NavLink).attrs({
   ${({ theme }) => theme.mediaWidth.upToExtraSmall`
       display: none;
 `}
-`*/
+`
 
 export const StyledMenuButton = styled.button`
   position: relative;
@@ -346,6 +347,8 @@ export default function Header() {
   const countUpValue = aggregateBalance?.toFixed(0) ?? '0'
   const countUpValuePrevious = usePrevious(countUpValue) ?? '0'
 
+  const bridgeUrl = useBridgeUrl()
+
   return (
     <HeaderFrame>
       <ClaimModal />
@@ -381,6 +384,11 @@ export default function Header() {
           <StyledNavLink id={`stake-nav-link`} to={`${pitSettings?.path}`}>
             {pitSettings?.name}
           </StyledNavLink>
+          {bridgeUrl && (
+            <StyledExternalLink id={`bridge-link`} href={bridgeUrl}>
+              Bridge <span style={{ fontSize: '11px' }}>↗</span>
+            </StyledExternalLink>
+          )}
         </HeaderLinks>
       </HeaderRow>
       <HeaderControls>
