@@ -3143,10 +3143,10 @@
   resolved "https://registry.yarnpkg.com/@venomswap/core/-/core-1.0.0.tgz#f1336702e8ecce6b79b06212220da43a34b3749c"
   integrity sha512-cd4+e5KKH7QmSjMhe50lty35eHuZVTh9YYnkWPdQPe6KG3R5P5JE3LFliwNLpuV4jWEYYRlEa3OaG3ie+BlYrg==
 
-"@venomswap/default-token-list@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@venomswap/default-token-list/-/default-token-list-1.6.0.tgz#6d6b1037e919e2b0694e80c589e8c2071d515922"
-  integrity sha512-MdOjHc44BDgOK0fFT8TGtoLrW71QudLlXTT3LIUH0KSTeRY5KRYhoKjko7kEXKGSYN/Sv1KaWHpYI604uJQRNQ==
+"@venomswap/default-token-list@^1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@venomswap/default-token-list/-/default-token-list-1.7.0.tgz#f626e232dc3f28b416c4d40edd08eb717b659587"
+  integrity sha512-aB8LxrJQnBCuql/tKPojYN+1z634SySFbf+XH29MQj/wH3Q6enWxHKamIhirC7YOLOVQcsXcPugAWVRFtC1gyw==
 
 "@venomswap/lib@1.0.0", "@venomswap/lib@^1.0.0":
   version "1.0.0"
@@ -6849,9 +6849,9 @@ ejs@^2.6.1:
   integrity sha512-7vmuyh5+kuUyJKePhQfRQBhXV5Ce+RnaeeQArKu1EAMpL3WbgMt5WG6uQZpEVvYSSsxMXRKOewtDk9RaTKXRlA==
 
 electron-to-chromium@^1.3.47, electron-to-chromium@^1.3.564, electron-to-chromium@^1.3.712:
-  version "1.3.716"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.716.tgz#cadedb3d07776c56990cedff1a75488afeeac2e0"
-  integrity sha512-yUWKAfpJH5ovgwIlNbBHioedAWolzTVl6tmMaXP1RmCMyYv+U+ukvo9gwA10mLW0eFbyW4n/oC4UIN12gTMn/w==
+  version "1.3.717"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.717.tgz#78d4c857070755fb58ab64bcc173db1d51cbc25f"
+  integrity sha512-OfzVPIqD1MkJ7fX+yTl2nKyOE4FReeVfMCzzxQS+Kp43hZYwHwThlGP+EGIZRXJsxCM7dqo8Y65NOX/HP12iXQ==
 
 elegant-spinner@^1.0.1:
   version "1.0.1"
