@@ -7,7 +7,8 @@ import {
   BRIDGED_USDC,
   BRIDGED_ROT,
   BRIDGED_MAGGOT,
-  BRIDGED_WISE
+  BRIDGED_WISE,
+  BRIDGED_DSLA
 } from './tokens'
 
 export const STAKING_REWARDS_INFO: {
@@ -52,6 +53,10 @@ export const STAKING_REWARDS_INFO: {
     {
       tokens: [BRIDGED_WISE[ChainId.HARMONY_MAINNET], GOVERNANCE_TOKEN[ChainId.HARMONY_MAINNET]],
       pid: 8
+    },
+    {
+      tokens: [BRIDGED_DSLA[ChainId.HARMONY_MAINNET], GOVERNANCE_TOKEN[ChainId.HARMONY_MAINNET]],
+      pid: 9
     }
   ],
   [ChainId.HARMONY_TESTNET]: [
