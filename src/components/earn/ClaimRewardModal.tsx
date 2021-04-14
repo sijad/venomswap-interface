@@ -79,6 +79,12 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
     error = error ?? 'Enter an amount'
   }
 
+  const unlockedCountUpAmount = stakingInfo?.unlockedEarnedAmount?.toFixed(6) ?? '0'
+  const lockedCountUpAmount =
+    (stakingInfo?.unlockedEarnedAmount &&
+      stakingInfo?.earnedAmount?.subtract(stakingInfo.unlockedEarnedAmount).toSignificant(6)) ||
+    '0'
+
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
       {!attempting && !hash && !failed && (
@@ -87,14 +93,18 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
             <TYPE.mediumHeader>Claim</TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
-          {stakingInfo?.earnedAmount && (
-            <AutoColumn justify="center" gap="md">
-              <TYPE.body fontWeight={600} fontSize={36}>
-                {stakingInfo?.earnedAmount?.toSignificant(6)}
-              </TYPE.body>
-              <TYPE.body>Unclaimed {govToken?.symbol}</TYPE.body>
-            </AutoColumn>
-          )}
+          <AutoColumn justify="center" gap="md">
+            <TYPE.body fontWeight={600} fontSize={36}>
+              {unlockedCountUpAmount}
+            </TYPE.body>
+            <TYPE.body>🔓 Unclaimed {govToken?.symbol}</TYPE.body>
+          </AutoColumn>
+          <AutoColumn justify="center" gap="md">
+            <TYPE.body fontWeight={600} fontSize={36}>
+              {lockedCountUpAmount}
+            </TYPE.body>
+            <TYPE.body>🔒 Unclaimed Locked {govToken?.symbol}</TYPE.body>
+          </AutoColumn>
           <TYPE.subHeader style={{ textAlign: 'center' }}>
             When you claim without withdrawing your liquidity remains in the mining pool.
           </TYPE.subHeader>
